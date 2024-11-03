@@ -58,6 +58,11 @@
                     id="RunPitestAction"
                     text="Run Mutation Test">
             </action>
+            <action
+                class="com.github.jaksonlin.pitestintellij.actions.RunProjectPitestAction"
+                id="RunProjectPitestAction"
+                text="Run Mutation Test">
+            </action>
         </group>
     </actions>
 </idea-plugin>

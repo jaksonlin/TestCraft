@@ -17,8 +17,8 @@ import com.intellij.openapi.vfs.VirtualFile
 import java.io.File
 import java.nio.file.Paths
 
-class PrepareEnvironmentCommand(project: Project, context: PitestContext) : PitestCommand(project, context) {
-    private val javaFileProcessor = JavaFileProcessor()
+open class PrepareEnvironmentCommand(project: Project, context: PitestContext) : PitestCommand(project, context) {
+    protected val javaFileProcessor = JavaFileProcessor()
 
     override fun execute() {
         val testVirtualFile = ReadAction.compute<VirtualFile?, Throwable> {
@@ -87,7 +87,7 @@ class PrepareEnvironmentCommand(project: Project, context: PitestContext) : Pite
         context.resourceDirectories = resourceDirectories
     }
 
-    private fun collectTargetClassThatWeTest(sourceRoots:List<String>) {
+    protected open fun collectTargetClassThatWeTest(sourceRoots:List<String>) {
         // The user input dialog and file operations don't need to be in ReadAction
         val targetClass = showInputDialog("Please enter the name of the class that you want to test", "Enter target class")
         // when user input content but cancel, targetClass is not null we should break the process
@@ -131,7 +131,7 @@ class PrepareEnvironmentCommand(project: Project, context: PitestContext) : Pite
 
 
 
-    private fun collectClassPathFileForPitest(reportDirectory:String, targetPackageName:String, resourceDirectories: List<String>?){
+    protected open fun collectClassPathFileForPitest(reportDirectory:String, targetPackageName:String, resourceDirectories: List<String>?){
         val classPathFileContent = ReadAction.compute<String, Throwable> {
             val classpath = GradleUtils.getCompilationOutputPaths(project)
             val testDependencies = GradleUtils.getTestRunDependencies(project)

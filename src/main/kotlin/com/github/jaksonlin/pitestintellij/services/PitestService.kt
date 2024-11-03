@@ -78,4 +78,40 @@ class PitestService {
             Messages.showErrorDialog(scrollPane, errorMessage)
         }
     }
+
+    fun runPitestBatch(targetProject: Project, testFilePaths: List<String>) {
+        for (testFilePath in testFilePaths) {
+            val context = PitestContext(testFilePath = testFilePath, timestamp = System.currentTimeMillis())
+            val testFileName = testFilePath.substringAfterLast("/")
+            val targetClass = testFileName.removePrefix("Test").removeSuffix("Test").removeSuffix(".java")
+
+            val commands = listOf(
+                PrepareEnvironmentBatchCommand(targetProject, context, targetClass),
+                BuildPitestCommandCommand(targetProject, context),
+                RunPitestCommand(targetProject, context),
+                HandlePitestResultCommand(targetProject, context),
+                StoreHistoryCommand(targetProject, context),
+            )
+
+            object : Task.Backgroundable(targetProject, "Running pitest batch mode", true) {
+                override fun run(indicator: ProgressIndicator) {
+                    try {
+                        for (command in commands) {
+                            if (indicator.isCanceled) {
+                                Messages.showInfoMessage("Pitest run was canceled", "Canceled")
+                                break
+                            }
+                            command.execute()
+                        }
+                    } catch (e: CommandCancellationException) {
+                        ApplicationManager.getApplication().invokeLater {
+                            Messages.showInfoMessage("Pitest run was canceled", "Canceled")
+                        }
+                    } catch (e: Exception) {
+                        showErrorDialog(e, context)
+                    }
+                }
+            }.queue()
+        }
+    }
 }
