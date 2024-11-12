@@ -1,6 +1,8 @@
 package com.github.jaksonlin.pitestintellij.annotations
 
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class AnnotationSchema(
     val annotationClassName: String,
     val fields: List<AnnotationFieldConfig>
@@ -9,62 +11,82 @@ data class AnnotationSchema(
         // Default schema matching UnittestCaseInfoContext
         val DEFAULT_SCHEMA = """
         {
-          "annotationClassName": "UnittestCaseInfo",
+          "annotationClassName": "UnitTest",
           "fields": [
             {
               "name": "author",
               "type": "STRING",
-              "required": true
+              "required": false,
+              "defaultValue": {"type": "NullValue"}
             },
             {
               "name": "title",
               "type": "STRING",
-              "required": true
+              "required": true,
+              "defaultValue": {"type": "NullValue"}
             },
             {
               "name": "targetClass",
               "type": "STRING",
-              "required": true
+              "required": true,
+              "defaultValue": {"type": "NullValue"}
             },
             {
               "name": "targetMethod",
               "type": "STRING",
-              "required": true
+              "required": true,
+              "defaultValue": {"type": "NullValue"}
             },
             {
               "name": "testPoints",
               "type": "STRING_LIST",
               "required": false,
-              "defaultValue": []
+              "defaultValue": {
+                "type": "StringListValue",
+                "value": []
+              }
             },
             {
               "name": "status",
               "type": "STATUS",
               "required": false,
-              "defaultValue": "TODO"
+              "defaultValue": {
+                "type": "StringValue",
+                "value": "TODO"
+              }
             },
             {
               "name": "description",
               "type": "STRING",
-              "required": false
+              "required": false,
+              "defaultValue": {"type": "NullValue"}
             },
             {
               "name": "tags",
               "type": "STRING_LIST",
               "required": false,
-              "defaultValue": []
+              "defaultValue": {
+                "type": "StringListValue",
+                "value": []
+              }
             },
             {
               "name": "relatedRequirements",
               "type": "STRING_LIST",
               "required": false,
-              "defaultValue": []
+              "defaultValue": {
+                "type": "StringListValue",
+                "value": []
+              }
             },
             {
               "name": "relatedDefects",
               "type": "STRING_LIST",
               "required": false,
-              "defaultValue": []
+              "defaultValue": {
+                "type": "StringListValue",
+                "value": []
+              }
             }
           ]
         }

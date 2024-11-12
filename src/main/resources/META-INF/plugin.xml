@@ -62,6 +62,10 @@
                     id="RunPitestAction"
                     text="Run Mutation Test">
             </action>
+            <action class="com.github.jaksonlin.pitestintellij.actions.RunCaseAnnoationCheckAction"
+                    id="RunCaseAnnoationCheckAction"
+                    text="Run Case Annotation Check">
+            </action>
         </group>
     </actions>
 </idea-plugin>

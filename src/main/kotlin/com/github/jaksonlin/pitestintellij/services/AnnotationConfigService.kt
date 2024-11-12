@@ -1,11 +1,17 @@
 import com.github.jaksonlin.pitestintellij.annotations.AnnotationSchema
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.Service
+import com.intellij.openapi.components.State
+import com.intellij.openapi.components.Storage
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 @Service(Service.Level.APP)
+@State(
+    name = "AnnotationConfig",
+    storages = [Storage("pitestAnnotationConfig.xml")]
+)
 class AnnotationConfigService : PersistentStateComponent<AnnotationConfigService.State> {
     data class State(
         var schemaJson: String = AnnotationSchema.DEFAULT_SCHEMA

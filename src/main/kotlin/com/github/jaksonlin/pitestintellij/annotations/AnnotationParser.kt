@@ -36,7 +36,13 @@ class AnnotationParser(private val schema: AnnotationSchema) {
     }
 
     private fun convertValue(value: Any?, field: AnnotationFieldConfig): Any? {
-        if (value == null) return field.defaultValue
+        if (value == null) {
+            return when (val defaultValue = field.defaultValue) {
+                is DefaultValue.StringValue -> defaultValue.value
+                is DefaultValue.StringListValue -> defaultValue.value
+                DefaultValue.NullValue -> null
+            }
+        }
 
         return when (field.type) {
             AnnotationFieldType.STRING -> value as? String ?: field.defaultValue
