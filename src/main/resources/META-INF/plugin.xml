@@ -36,6 +36,10 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow factoryClass="com.github.jaksonlin.pitestintellij.toolWindow.MutationToolWindowFactory" id="MutationTestHistory" icon="/pitestHistoryWindowIcon.svg"/>
+        <applicationConfigurable
+            instance="com.github.jaksonlin.pitestintellij.ui.AnnotationConfigurable"
+            id="com.github.jaksonlin.pitestintellij.settings"
+            displayName="Unittest Annotation Configuration"/>
     </extensions>
 
     <applicationListeners>

@@ -1,6 +1,5 @@
-package com.github.jaksonlin.pitestintellij.commands
+package com.github.jaksonlin.pitestintellij.commands.pitest
 
-import PitestCommand
 import com.github.jaksonlin.pitestintellij.context.PitestContext
 import com.github.jaksonlin.pitestintellij.util.ProcessExecutor
 import com.intellij.openapi.diagnostic.thisLogger

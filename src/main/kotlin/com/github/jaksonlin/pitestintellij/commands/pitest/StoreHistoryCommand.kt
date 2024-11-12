@@ -1,8 +1,6 @@
-package com.github.jaksonlin.pitestintellij.commands
+package com.github.jaksonlin.pitestintellij.commands.pitest
 
-import PitestCommand
 import com.github.jaksonlin.pitestintellij.context.PitestContext
-import com.github.jaksonlin.pitestintellij.services.RunHistoryManager
 import com.intellij.openapi.project.Project
 
 class StoreHistoryCommand  (project: Project, context: PitestContext) : PitestCommand(project, context) {

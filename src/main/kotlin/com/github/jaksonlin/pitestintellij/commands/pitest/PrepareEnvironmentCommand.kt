@@ -1,6 +1,6 @@
-package com.github.jaksonlin.pitestintellij.commands
+package com.github.jaksonlin.pitestintellij.commands.pitest
 
-import PitestCommand
+import com.github.jaksonlin.pitestintellij.commands.CommandCancellationException
 import com.github.jaksonlin.pitestintellij.context.PitestContext
 import com.github.jaksonlin.pitestintellij.util.FileUtils
 import com.github.jaksonlin.pitestintellij.util.GradleUtils
