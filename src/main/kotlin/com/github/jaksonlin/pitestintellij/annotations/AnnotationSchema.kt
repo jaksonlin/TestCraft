@@ -11,7 +11,7 @@ data class AnnotationSchema(
         // Default schema matching UnittestCaseInfoContext
         val DEFAULT_SCHEMA = """
         {
-          "annotationClassName": "UnitTest",
+          "annotationClassName": "Unittest",
           "fields": [
             {
               "name": "author",
