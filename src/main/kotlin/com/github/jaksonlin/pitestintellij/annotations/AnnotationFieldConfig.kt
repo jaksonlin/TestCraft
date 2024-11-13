@@ -1,8 +1,10 @@
 package com.github.jaksonlin.pitestintellij.annotations
 
 import kotlinx.serialization.Contextual
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonClassDiscriminator
 
 @Serializable
 sealed class DefaultValue {
@@ -25,5 +27,6 @@ data class AnnotationFieldConfig(
     val name: String,
     val type: AnnotationFieldType,
     val required: Boolean = false,
-    val defaultValue: DefaultValue = DefaultValue.NullValue
+    val defaultValue: DefaultValue = DefaultValue.NullValue,
+    val validation: FieldValidation? = null
 )

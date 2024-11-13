@@ -17,19 +17,17 @@ class CheckAnnotationCommand(project: Project,  context: CaseCheckContext):Unitt
             showNoAnnotationMessage(project, context.schema.annotationClassName)
             return
         }
-        processAnnotation(annotation, context.parser)
+        processAnnotation(annotation)
         return
     }
 
 
 
     private fun processAnnotation(
-        annotation: PsiAnnotation,
-        parser: AnnotationParser
+        annotation: PsiAnnotation
     ) {
         try {
-            val annotationValues = parseAnnotationValues(annotation)
-            val testCase = parser.parseAnnotation(annotationValues)
+            val testCase = parseUnittestCaseFromAnnotations(annotation)
             val message = formatTestCaseMessage(testCase, context.schema)
             showSuccessMessage(project, message)
         } catch (e: Exception) {
@@ -37,15 +35,6 @@ class CheckAnnotationCommand(project: Project,  context: CaseCheckContext):Unitt
         }
     }
 
-    private fun parseAnnotationValues(annotation: PsiAnnotation): Map<String, Any> {
-        return annotation.parameterList.attributes.associate { attr ->
-            attr.attributeName to when (val value = attr.value) {
-                is PsiArrayInitializerMemberValue ->
-                    value.initializers.map { it.text.trim('"') }
-                else -> value?.text?.trim('"') ?: ""
-            }
-        }
-    }
 
     private fun formatTestCaseMessage(
         testCase: UnittestCase,

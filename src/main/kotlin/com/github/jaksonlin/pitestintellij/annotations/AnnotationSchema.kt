@@ -44,6 +44,19 @@ data class AnnotationSchema(
               "defaultValue": {
                 "type": "StringListValue",
                 "value": []
+              },
+              "validation": {
+                "validValues": [
+                  "Boundary Value",
+                  "Equivalence Class",
+                  "Error Handling",
+                  "Performance",
+                  "Security",
+                  "Integration",
+                  "Edge Case"
+                ],
+                "allowCustomValues": true,
+                "minLength": 1
               }
             },
             {
@@ -53,6 +66,16 @@ data class AnnotationSchema(
               "defaultValue": {
                 "type": "StringValue",
                 "value": "TODO"
+              },
+              "validation": {
+                "validValues": [
+                  "TODO",
+                  "IN_PROGRESS",
+                  "DONE",
+                  "DEPRECATED",
+                  "BROKEN"
+                ],
+                "allowCustomValues": false
               }
             },
             {
@@ -68,6 +91,9 @@ data class AnnotationSchema(
               "defaultValue": {
                 "type": "StringListValue",
                 "value": []
+              },
+              "validation": {
+                "minLength": 1
               }
             },
             {
@@ -77,6 +103,9 @@ data class AnnotationSchema(
               "defaultValue": {
                 "type": "StringListValue",
                 "value": []
+              },
+              "validation": {
+                "minLength": 1
               }
             },
             {
@@ -86,6 +115,9 @@ data class AnnotationSchema(
               "defaultValue": {
                 "type": "StringListValue",
                 "value": []
+              },
+              "validation": {
+                "minLength": 1
               }
             }
           ]

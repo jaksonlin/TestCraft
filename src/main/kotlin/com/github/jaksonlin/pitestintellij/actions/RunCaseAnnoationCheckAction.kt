@@ -10,14 +10,12 @@ import com.intellij.psi.PsiMethod
 import com.intellij.psi.util.PsiTreeUtil
 
 class RunCaseAnnoationCheckAction : AnAction() {
-    override fun actionPerformed(e: AnActionEvent) {
 
+    override fun actionPerformed(e: AnActionEvent) {
         val psiMethod = findMethodAtCaret(e) ?: return
-        val context = CaseCheckContext.create(psiMethod) ?: return
+        val context = CaseCheckContext.create(psiMethod)
         CheckAnnotationCommand(e.project!!, context).execute()
     }
-
-
 
     private fun findMethodAtCaret(e: AnActionEvent): PsiMethod? {
         val project = e.project ?: return null

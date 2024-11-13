@@ -10,10 +10,14 @@ import com.intellij.openapi.options.ConfigurationException
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBLabel
+import com.intellij.ui.components.JBPanel
 import com.intellij.ui.components.JBScrollPane
+import com.intellij.ui.components.panels.VerticalLayout
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import java.awt.BorderLayout
+import java.awt.FlowLayout
+import javax.swing.JButton
 import javax.swing.JComponent
 import javax.swing.JPanel
 
@@ -31,7 +35,7 @@ class AnnotationConfigurable : Configurable {
             EditorFactory.getInstance().createDocument(configService.state.schemaJson),
             project,
             JsonFileType.INSTANCE,
-            true,
+            false,
             false
         ).apply {
             setOneLineMode(false)
@@ -40,14 +44,30 @@ class AnnotationConfigurable : Configurable {
                 editor.settings.apply {
                     isLineNumbersShown = true
                     isWhitespacesShown = true
+                    isUseSoftWraps = true
                 }
             }
         }
 
-        return JPanel(BorderLayout()).apply {
-            add(JBScrollPane(editor), BorderLayout.CENTER)
-            add(createHelpPanel(), BorderLayout.SOUTH)
+        val mainPanel = JBPanel<JBPanel<*>>(VerticalLayout(10))
+        
+        // Add editor with scroll pane
+        mainPanel.add(JBScrollPane(editor))
+        
+        // Add buttons panel
+        val buttonsPanel = JPanel(FlowLayout(FlowLayout.LEFT))
+        val restoreDefaultsButton = JButton("Restore Defaults").apply {
+            addActionListener {
+                editor?.text = AnnotationSchema.DEFAULT_SCHEMA
+            }
         }
+        buttonsPanel.add(restoreDefaultsButton)
+        mainPanel.add(buttonsPanel)
+        
+        // Add help panel
+        mainPanel.add(createHelpPanel())
+
+        return mainPanel
     }
 
     private fun createHelpPanel(): JComponent {

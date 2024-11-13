@@ -40,6 +40,16 @@
             instance="com.github.jaksonlin.pitestintellij.ui.AnnotationConfigurable"
             id="com.github.jaksonlin.pitestintellij.settings"
             displayName="Unittest Annotation Configuration"/>
+        <localInspection
+            shortName="UnittestCaseAnnotationInspection"
+            language="JAVA"
+            implementationClass="com.github.jaksonlin.pitestintellij.inspectors.UnittestInspector"
+            displayName="Unittest case management annotation inspection"
+            enabledByDefault="false"
+            groupName="Java"
+            order="LAST"
+        />
+
     </extensions>
 
     <applicationListeners>
@@ -64,7 +74,7 @@
             </action>
             <action class="com.github.jaksonlin.pitestintellij.actions.RunCaseAnnoationCheckAction"
                     id="RunCaseAnnoationCheckAction"
-                    text="Run Case Annotation Check">
+                    text="Run Current Method Annotation Check">
             </action>
         </group>
     </actions>

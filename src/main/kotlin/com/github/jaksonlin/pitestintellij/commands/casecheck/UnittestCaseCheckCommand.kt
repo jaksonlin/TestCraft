@@ -2,6 +2,7 @@ package com.github.jaksonlin.pitestintellij.commands.casecheck
 
 import com.github.jaksonlin.pitestintellij.annotations.AnnotationSchema
 import com.github.jaksonlin.pitestintellij.context.CaseCheckContext
+import com.github.jaksonlin.pitestintellij.context.UnittestCase
 import com.github.jaksonlin.pitestintellij.context.UnittestCaseInfoContext
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
@@ -72,5 +73,20 @@ abstract class UnittestCaseCheckCommand(protected val project: Project, protecte
             "Validation Errors",
             Messages.getErrorIcon()
         )
+    }
+
+    fun parseAnnotationValues(annotation: PsiAnnotation): Map<String, Any> {
+        return annotation.parameterList.attributes.associate { attr ->
+            attr.attributeName to when (val value = attr.value) {
+                is PsiArrayInitializerMemberValue ->
+                    value.initializers.map { it.text.trim('"') }
+                else -> value?.text?.trim('"') ?: ""
+            }
+        }
+    }
+
+    fun parseUnittestCaseFromAnnotations(annotation: PsiAnnotation):UnittestCase{
+        val annotationValues = parseAnnotationValues(annotation)
+        return context.parser.parseAnnotation(annotationValues)
     }
 }

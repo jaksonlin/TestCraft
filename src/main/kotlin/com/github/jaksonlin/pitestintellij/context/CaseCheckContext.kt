@@ -16,7 +16,7 @@ data class CaseCheckContext(
     val parser: AnnotationParser
 ) {
     companion object {
-        fun create(psiMethod: PsiMethod): CaseCheckContext? {
+        fun create(psiMethod: PsiMethod): CaseCheckContext {
             val configService = service<AnnotationConfigService>()
             val schema = configService.getSchema()
             return CaseCheckContext(
