@@ -209,4 +209,119 @@ class AnnotationValidatorTest {
             assertTrue(resultValid is AnnotationValidator.ValidationResult.Valid)
         }
     }
+
+    class StringContainsValidation {
+        @Test
+        fun `should validate string using contains mode`() {
+            val schema = AnnotationSchema(
+                annotationClassName = "Test",
+                fields = listOf(
+                    AnnotationFieldConfig(
+                        name = "status",
+                        type = AnnotationFieldType.STRING,
+                        validation = FieldValidation(
+                            validValues = listOf("TODO", "DONE"),
+                            allowCustomValues = false,
+                            mode = ValidationMode.CONTAINS
+                        )
+                    )
+                )
+            )
+            
+            val validator = AnnotationValidator(schema)
+            
+            // Test valid cases (partial matches)
+            val resultValid1 = validator.validate(mapOf(
+                "status" to "TODO_REVIEW"
+            ))
+            assertTrue(resultValid1 is AnnotationValidator.ValidationResult.Valid)
+
+            val resultValid2 = validator.validate(mapOf(
+                "status" to "DONE_WITH_COMMENTS"
+            ))
+            assertTrue(resultValid2 is AnnotationValidator.ValidationResult.Valid)
+
+            // Test invalid case
+            val resultInvalid = validator.validate(mapOf(
+                "status" to "IN_PROGRESS"
+            ))
+            assertTrue(resultInvalid is AnnotationValidator.ValidationResult.Invalid)
+        }
+    }
+
+    class EmptyValueValidation {
+        @Test
+        fun `should validate non-empty strings when required`() {
+            val schema = AnnotationSchema(
+                annotationClassName = "Test",
+                fields = listOf(
+                    AnnotationFieldConfig(
+                        name = "title",
+                        type = AnnotationFieldType.STRING,
+                        validation = FieldValidation(
+                            allowEmpty = false
+                        )
+                    )
+                )
+            )
+            
+            val validator = AnnotationValidator(schema)
+            
+            // Test empty string
+            val resultEmpty = validator.validate(mapOf(
+                "title" to ""
+            ))
+            assertTrue(resultEmpty is AnnotationValidator.ValidationResult.Invalid)
+            assertEquals(
+                "Field title cannot be empty",
+                (resultEmpty as AnnotationValidator.ValidationResult.Invalid).errors.first()
+            )
+
+            // Test blank string
+            val resultBlank = validator.validate(mapOf(
+                "title" to "   "
+            ))
+            assertTrue(resultBlank is AnnotationValidator.ValidationResult.Invalid)
+
+            // Test valid non-empty string
+            val resultValid = validator.validate(mapOf(
+                "title" to "Valid Title"
+            ))
+            assertTrue(resultValid is AnnotationValidator.ValidationResult.Valid)
+        }
+
+        @Test
+        fun `should validate non-empty lists when required`() {
+            val schema = AnnotationSchema(
+                annotationClassName = "Test",
+                fields = listOf(
+                    AnnotationFieldConfig(
+                        name = "tags",
+                        type = AnnotationFieldType.STRING_LIST,
+                        validation = FieldValidation(
+                            allowEmpty = false
+                        )
+                    )
+                )
+            )
+            
+            val validator = AnnotationValidator(schema)
+            
+            // Test empty list
+            val resultEmpty = validator.validate(mapOf(
+                "tags" to emptyList<String>()
+            ))
+            assertTrue(resultEmpty is AnnotationValidator.ValidationResult.Invalid)
+            assertEquals(
+                "Field tags cannot be empty",
+                (resultEmpty as AnnotationValidator.ValidationResult.Invalid).errors.first()
+            )
+
+            // Test valid non-empty list
+            val resultValid = validator.validate(mapOf(
+                "tags" to listOf("tag1")
+            ))
+            assertTrue(resultValid is AnnotationValidator.ValidationResult.Valid)
+        }
+    }
 }

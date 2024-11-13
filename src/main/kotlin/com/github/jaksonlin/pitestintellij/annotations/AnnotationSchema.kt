@@ -16,8 +16,11 @@ data class AnnotationSchema(
             {
               "name": "author",
               "type": "STRING",
-              "required": false,
-              "defaultValue": {"type": "NullValue"}
+              "required": true,
+              "defaultValue": {"type": "NullValue"},
+              "validation": {
+                "allowEmpty": false
+              }
             },
             {
               "name": "title",
@@ -38,9 +41,27 @@ data class AnnotationSchema(
               "defaultValue": {"type": "NullValue"}
             },
             {
+              "name": "lastUpdateTime",
+              "type": "STRING",
+              "required": true,
+              "defaultValue": {"type": "NullValue"}
+            },
+            {
+              "name": "lastUpdateAuthor",
+              "type": "STRING",
+              "required": true,
+              "defaultValue": {"type": "NullValue"}
+            },
+            {
+              "name": "methodSignature",
+              "type": "STRING",
+              "required": true,
+              "defaultValue": {"type": "NullValue"}
+            },
+            {
               "name": "testPoints",
               "type": "STRING_LIST",
-              "required": false,
+              "required": true,
               "defaultValue": {
                 "type": "StringListValue",
                 "value": []
@@ -56,13 +77,15 @@ data class AnnotationSchema(
                   "Edge Case"
                 ],
                 "allowCustomValues": true,
-                "minLength": 1
+                "minLength": 1,
+                "mode": "CONTAINS",
+                "allowEmpty": false
               }
             },
             {
               "name": "status",
               "type": "STATUS",
-              "required": false,
+              "required": true,
               "defaultValue": {
                 "type": "StringValue",
                 "value": "TODO"
@@ -75,7 +98,9 @@ data class AnnotationSchema(
                   "DEPRECATED",
                   "BROKEN"
                 ],
-                "allowCustomValues": false
+                "allowCustomValues": false,
+                "mode": "CONTAINS",
+                "allowEmpty": false
               }
             },
             {
@@ -98,6 +123,18 @@ data class AnnotationSchema(
             },
             {
               "name": "relatedRequirements",
+              "type": "STRING_LIST",
+              "required": false,
+              "defaultValue": {
+                "type": "StringListValue",
+                "value": []
+              },
+              "validation": {
+                "minLength": 1
+              }
+            },
+            {
+              "name": "relatedTestCases",
               "type": "STRING_LIST",
               "required": false,
               "defaultValue": {

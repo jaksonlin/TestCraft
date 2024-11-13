@@ -37,6 +37,10 @@ class AnnotationValidator(private val schema: AnnotationSchema) {
         val typeError = validateType(field, value)
         if (typeError != null) return typeError
 
+        // Then validate non-empty if required
+        val emptyError = validateNonEmpty(field, value)
+        if (emptyError != null) return emptyError
+
         // Then validate against the validation rules if they exist
         field.validation?.let { validation ->
             when (value) {
@@ -52,11 +56,30 @@ class AnnotationValidator(private val schema: AnnotationSchema) {
                 }
 
                 else -> {
-                    return "Unsupported type for field ${field.name}"
+                    // Should not happen
+                    return "Unsupported field type for ${field.name}: ${value::class.simpleName}"
                 }
             }
         }
 
+        return null
+    }
+
+    private fun validateNonEmpty(field: AnnotationFieldConfig, value: Any): String? {
+        if (!field.validation?.allowEmpty.let { it != null && !it }) {
+            when (value) {
+                is String -> {
+                    if (value.isBlank()) {
+                        return "Field ${field.name} cannot be empty"
+                    }
+                }
+                is List<*> -> {
+                    if (value.isEmpty()) {
+                        return "Field ${field.name} cannot be empty"
+                    }
+                }
+            }
+        }
         return null
     }
 
@@ -88,10 +111,19 @@ class AnnotationValidator(private val schema: AnnotationSchema) {
         value: String,
         validation: FieldValidation
     ): String? {
-        if (validation.validValues.isNotEmpty() && 
-            !validation.allowCustomValues && 
-            !validation.validValues.contains(value)) {
-            return "Invalid value for $fieldName: $value. Valid values are: ${validation.validValues.joinToString()}"
+        if (!validation.allowEmpty && value.isBlank()) {
+            return "Field $fieldName cannot be empty"
+        }
+        if (validation.validValues.isNotEmpty() && !validation.allowCustomValues) {
+            val isValid = when (validation.mode) {
+                ValidationMode.EXACT -> validation.validValues.contains(value)
+                ValidationMode.CONTAINS -> validation.validValues.any { candidate -> 
+                    value.contains(candidate, ignoreCase = true) 
+                }
+            }
+            if (!isValid) {
+                return "Invalid value for $fieldName: $value. Valid values are: ${validation.validValues.joinToString()}"
+            }
         }
         return null
     }
@@ -103,7 +135,14 @@ class AnnotationValidator(private val schema: AnnotationSchema) {
     ): String? {
         if (validation.validValues.isNotEmpty() && !validation.allowCustomValues) {
             val invalidValues = value.filterIsInstance<String>()
-                .filter { !validation.validValues.contains(it) }
+                .filter { item ->
+                    when (validation.mode) {
+                        ValidationMode.EXACT -> !validation.validValues.contains(item)
+                        ValidationMode.CONTAINS -> !validation.validValues.any { candidate -> 
+                            item.contains(candidate, ignoreCase = true) 
+                        }
+                    }
+                }
             if (invalidValues.isNotEmpty()) {
                 return "Invalid values for $fieldName: ${invalidValues.joinToString()}. Valid values are: ${validation.validValues.joinToString()}"
             }
@@ -116,6 +155,11 @@ class AnnotationValidator(private val schema: AnnotationSchema) {
         value: List<*>,
         validation: FieldValidation
     ): String? {
+        validation.allowEmpty.let { allowEmpty ->
+            if (!allowEmpty && value.isEmpty()) {
+                return "Field $fieldName cannot be empty"
+            }
+        }
         validation.minLength?.let { min ->
             if (value.size < min) {
                 return "$fieldName must contain at least $min element${if (min > 1) "s" else ""}"
