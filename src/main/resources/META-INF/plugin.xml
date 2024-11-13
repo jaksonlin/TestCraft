@@ -49,6 +49,9 @@
             groupName="Java"
             order="LAST"
         />
+        <completion.contributor
+                language="JAVA"
+                implementationClass="com.github.jaksonlin.pitestintellij.completion.AnnotationCompletionContributor"/>
 
     </extensions>
 

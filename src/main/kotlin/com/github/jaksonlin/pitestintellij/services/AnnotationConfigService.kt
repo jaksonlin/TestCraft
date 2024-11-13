@@ -1,3 +1,4 @@
+package com.github.jaksonlin.pitestintellij.services
 import com.github.jaksonlin.pitestintellij.annotations.AnnotationSchema
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.Service
@@ -40,5 +41,9 @@ class AnnotationConfigService : PersistentStateComponent<AnnotationConfigService
     fun updateSchema(schema: AnnotationSchema) {
         myState.schemaJson = Json.encodeToString(schema)
         LOG.info("Updated annotation config: ${myState.schemaJson}")
+    }
+
+    fun getBuildInSchema(): AnnotationSchema {
+        return Json.decodeFromString(AnnotationSchema.DEFAULT_SCHEMA)
     }
 }

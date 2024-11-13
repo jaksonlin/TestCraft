@@ -1,6 +1,6 @@
 package com.github.jaksonlin.pitestintellij.context
 
-import AnnotationConfigService
+import com.github.jaksonlin.pitestintellij.services.AnnotationConfigService
 import com.github.jaksonlin.pitestintellij.actions.RunCaseAnnoationCheckAction
 import com.github.jaksonlin.pitestintellij.annotations.AnnotationParser
 import com.github.jaksonlin.pitestintellij.annotations.AnnotationSchema

@@ -1,6 +1,6 @@
 package com.github.jaksonlin.pitestintellij.ui
 
-import AnnotationConfigService
+import com.github.jaksonlin.pitestintellij.services.AnnotationConfigService
 import com.github.jaksonlin.pitestintellij.annotations.AnnotationSchema
 import com.intellij.json.JsonFileType
 import com.intellij.openapi.components.service
