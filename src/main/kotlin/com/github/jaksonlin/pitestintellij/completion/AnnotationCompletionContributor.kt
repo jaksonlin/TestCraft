@@ -1,11 +1,14 @@
 package com.github.jaksonlin.pitestintellij.completion
 
+import com.github.jaksonlin.pitestintellij.annotations.DefaultValue
+import com.github.jaksonlin.pitestintellij.annotations.ValidationMode
 import com.intellij.codeInsight.completion.*
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.patterns.PlatformPatterns
 import com.intellij.psi.*
 import com.intellij.util.ProcessingContext
 import com.github.jaksonlin.pitestintellij.services.AnnotationConfigService
+import com.github.jaksonlin.pitestintellij.ui.CustomAnnotationCompletionLookupElement
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.lang.java.JavaLanguage
 import com.intellij.openapi.components.service
@@ -30,10 +33,17 @@ class AnnotationCompletionContributor : CompletionContributor() {
                     result: CompletionResultSet
                 ) {
                     // Find the containing annotation and name-value pair
-                    val annotation = PsiTreeUtil.getParentOfType(parameters.position, PsiAnnotation::class.java) ?: return
-                    val nameValuePair = PsiTreeUtil.getParentOfType(parameters.position, PsiNameValuePair::class.java) ?: return
-
+                    val annotation = PsiTreeUtil.getParentOfType(parameters.position, PsiAnnotation::class.java)
+                    if (annotation == null){
+                        return
+                    }
                     LOG.info("Found annotation: ${annotation.qualifiedName}")
+                    val nameValuePair = PsiTreeUtil.getParentOfType(parameters.position, PsiNameValuePair::class.java)
+                    if (nameValuePair == null){
+                        return
+                    }
+
+
                     LOG.info("Found attribute: ${nameValuePair.name}")
 
                     // Rest of your completion logic...
@@ -65,14 +75,31 @@ class AnnotationCompletionContributor : CompletionContributor() {
 
                     // Add completion items
                     field.validation?.validValues?.forEach { value ->
-                        LOG.info("Adding completion value: $value")
-                        val element = LookupElementBuilder.create(value)
-                            .withCaseSensitivity(false)
-                            .withTypeText(field.type.toString())
-                        result.addElement(element)
+                        val isDefault = when (field.defaultValue) {
+                            is DefaultValue.StringValue -> field.defaultValue.value == value
+                            is DefaultValue.StringListValue -> value in field.defaultValue.value
+                            else -> false
+                        }
+
+                        val element = CustomAnnotationCompletionLookupElement(
+                            value = value,
+                            fieldType = field.type,
+                            isDefaultValue = isDefault
+                        )
+
+                        val prioritized = when {
+                            isDefault -> PrioritizedLookupElement.withPriority(element, 100.0)
+                            field.validation.mode == ValidationMode.EXACT ->
+                                PrioritizedLookupElement.withPriority(element, 50.0)
+                            else -> PrioritizedLookupElement.withPriority(element, 0.0)
+                        }
+
+                        result.addElement(prioritized)
                     }
 
                 }
+
+
             }
         )
     }
