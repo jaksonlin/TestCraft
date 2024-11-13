@@ -75,7 +75,7 @@ class AnnotationCompletionTest : LightJavaCodeInsightFixtureTestCase(), TestBase
         """.trimIndent())
 
         // Type the opening quote and a character to trigger completion
-        myFixture.type("\"T")
+        myFixture.type("T")
         myFixture.completeBasic()
         
         // Get all lookup elements
