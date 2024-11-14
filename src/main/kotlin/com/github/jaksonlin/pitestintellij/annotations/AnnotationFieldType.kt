@@ -5,6 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 enum class AnnotationFieldType {
     STRING,
-    STRING_LIST,
-    STATUS
+    STRING_LIST
 }

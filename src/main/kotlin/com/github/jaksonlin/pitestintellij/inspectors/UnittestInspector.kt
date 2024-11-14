@@ -1,11 +1,9 @@
 package com.github.jaksonlin.pitestintellij.inspectors
 
-import com.github.jaksonlin.pitestintellij.commands.casecheck.CheckAnnotationCommand
-import com.github.jaksonlin.pitestintellij.commands.casecheck.UnittestFileInspectorCommand
+import com.github.jaksonlin.pitestintellij.commands.unittestannotations.UnittestFileInspectorCommand
 import com.github.jaksonlin.pitestintellij.context.CaseCheckContext
 import com.intellij.codeInspection.*
 import com.intellij.psi.*
-import com.intellij.psi.util.PsiTreeUtil
 import java.util.concurrent.ConcurrentHashMap
 
 class UnittestInspector : AbstractBaseJavaLocalInspectionTool() {

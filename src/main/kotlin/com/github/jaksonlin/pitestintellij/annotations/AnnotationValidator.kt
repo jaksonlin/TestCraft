@@ -66,7 +66,7 @@ class AnnotationValidator(private val schema: AnnotationSchema) {
     }
 
     private fun validateNonEmpty(field: AnnotationFieldConfig, value: Any): String? {
-        if (!field.validation?.allowEmpty.let { it != null && !it }) {
+        if (field.validation?.allowEmpty == false) {
             when (value) {
                 is String -> {
                     if (value.isBlank()) {
@@ -98,10 +98,6 @@ class AnnotationValidator(private val schema: AnnotationSchema) {
                     }
                     else -> "Field ${field.name} must be a List"
                 }
-            }
-            AnnotationFieldType.STATUS -> {
-                if (value !is String) "Field ${field.name} must be a String"
-                else null
             }
         }
     }

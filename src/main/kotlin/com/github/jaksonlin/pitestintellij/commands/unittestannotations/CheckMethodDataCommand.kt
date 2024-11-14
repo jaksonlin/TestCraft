@@ -1,4 +1,4 @@
-package com.github.jaksonlin.pitestintellij.commands.casecheck
+package com.github.jaksonlin.pitestintellij.commands.unittestannotations
 
 import com.github.jaksonlin.pitestintellij.context.CaseCheckContext
 import com.intellij.openapi.project.Project

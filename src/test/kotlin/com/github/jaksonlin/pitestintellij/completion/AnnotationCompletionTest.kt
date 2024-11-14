@@ -35,7 +35,7 @@ class AnnotationCompletionTest : LightJavaCodeInsightFixtureTestCase(), TestBase
             fields = listOf(
                 AnnotationFieldConfig(
                     name = "status",
-                    type = AnnotationFieldType.STATUS,
+                    type = AnnotationFieldType.STRING,
                     validation = FieldValidation(
                         validValues = listOf("TODO", "IN_PROGRESS", "DONE"),
                         allowCustomValues = false,
@@ -144,7 +144,7 @@ class AnnotationCompletionTest : LightJavaCodeInsightFixtureTestCase(), TestBase
         // Verify fields are properly configured
         val statusField = schema.fields.find { it.name == "status" }
         assertNotNull("Status field should exist", statusField)
-        assertEquals(AnnotationFieldType.STATUS, statusField!!.type)
+        assertEquals(AnnotationFieldType.STRING, statusField!!.type)
         
         val testPointsField = schema.fields.find { it.name == "testPoints" }
         assertNotNull("TestPoints field should exist", testPointsField)

@@ -1,9 +1,8 @@
-package com.github.jaksonlin.pitestintellij.commands.casecheck
+package com.github.jaksonlin.pitestintellij.commands.unittestannotations
 
 import com.github.jaksonlin.pitestintellij.annotations.AnnotationSchema
 import com.github.jaksonlin.pitestintellij.context.CaseCheckContext
 import com.github.jaksonlin.pitestintellij.context.UnittestCase
-import com.github.jaksonlin.pitestintellij.context.UnittestCaseInfoContext
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.intellij.psi.PsiAnnotation
@@ -36,6 +35,15 @@ abstract class UnittestCaseCheckCommand(protected val project: Project, protecte
             project,
             "No $annotationName annotation found on this method",
             "Test File Action",
+            Messages.getWarningIcon()
+        )
+    }
+
+    fun showAnnotationAlreadyExistMessage(project: Project, annotationName: String) {
+        Messages.showMessageDialog(
+            project,
+            "$annotationName already exist on this method",
+            "Annotation Generation Action",
             Messages.getWarningIcon()
         )
     }

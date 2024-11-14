@@ -17,46 +17,85 @@ data class AnnotationSchema(
               "name": "author",
               "type": "STRING",
               "required": true,
-              "defaultValue": {"type": "NullValue"},
               "validation": {
                 "allowEmpty": false
+              },
+              "defaultValue": {
+                "type": "StringValue",
+                "value": ""
               }
             },
             {
               "name": "title",
               "type": "STRING",
               "required": true,
-              "defaultValue": {"type": "NullValue"}
+              "validation": {
+                "allowEmpty": false
+              },
+              "defaultValue": {
+                "type": "StringValue",
+                "value": ""
+              }
             },
             {
               "name": "targetClass",
               "type": "STRING",
               "required": true,
-              "defaultValue": {"type": "NullValue"}
+              "validation": {
+                "allowEmpty": false
+              },
+              "defaultValue": {
+                "type": "StringValue",
+                "value": ""
+              }
             },
             {
               "name": "targetMethod",
               "type": "STRING",
               "required": true,
-              "defaultValue": {"type": "NullValue"}
+              "validation": {
+                "allowEmpty": false
+              },
+              "defaultValue": {
+                "type": "StringValue",
+                "value": ""
+              }
             },
             {
               "name": "lastUpdateTime",
               "type": "STRING",
               "required": true,
-              "defaultValue": {"type": "NullValue"}
+              "validation": {
+                "allowEmpty": false
+              },
+              "defaultValue": {
+                "type": "StringValue",
+                "value": ""
+              }
             },
             {
               "name": "lastUpdateAuthor",
               "type": "STRING",
               "required": true,
-              "defaultValue": {"type": "NullValue"}
+              "validation": {
+                "allowEmpty": false
+              },
+              "defaultValue": {
+                "type": "StringValue",
+                "value": ""
+              }
             },
             {
               "name": "methodSignature",
               "type": "STRING",
               "required": true,
-              "defaultValue": {"type": "NullValue"}
+              "validation": {
+                "allowEmpty": false
+              },
+              "defaultValue": {
+                "type": "StringValue",
+                "value": ""
+              }
             },
             {
               "name": "testPoints",
@@ -84,8 +123,8 @@ data class AnnotationSchema(
             },
             {
               "name": "status",
-              "type": "STATUS",
-              "required": true,
+              "type": "STRING",
+              "required": false,
               "defaultValue": {
                 "type": "StringValue",
                 "value": "TODO"
@@ -98,7 +137,7 @@ data class AnnotationSchema(
                   "DEPRECATED",
                   "BROKEN"
                 ],
-                "allowCustomValues": false,
+                "allowCustomValues": true,
                 "mode": "CONTAINS",
                 "allowEmpty": false
               }
@@ -106,8 +145,14 @@ data class AnnotationSchema(
             {
               "name": "description",
               "type": "STRING",
-              "required": false,
-              "defaultValue": {"type": "NullValue"}
+              "required": true,
+              "validation": {
+                "allowEmpty": false
+              },
+              "defaultValue": {
+                "type": "StringValue",
+                "value": ""
+              }
             },
             {
               "name": "tags",

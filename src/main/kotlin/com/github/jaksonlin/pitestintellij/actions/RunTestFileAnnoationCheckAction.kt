@@ -1,15 +1,13 @@
 package com.github.jaksonlin.pitestintellij.actions
 
-import com.github.jaksonlin.pitestintellij.commands.casecheck.CheckAnnotationCommand
+import com.github.jaksonlin.pitestintellij.commands.unittestannotations.CheckAnnotationCommand
 import com.github.jaksonlin.pitestintellij.context.CaseCheckContext
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.psi.JavaRecursiveElementVisitor
-import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiMethod
-import com.intellij.psi.util.PsiTreeUtil
 
 class RunTestFileAnnoationCheckAction: AnAction() {
 

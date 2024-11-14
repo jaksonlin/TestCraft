@@ -20,7 +20,6 @@ class CustomAnnotationCompletionLookupElement(
 
         // Add appropriate icon based on type
         presentation.icon = when (fieldType) {
-            AnnotationFieldType.STATUS -> AllIcons.General.Settings
             AnnotationFieldType.STRING_LIST -> AllIcons.Nodes.EntryPoints
             else -> AllIcons.Nodes.Field
         }

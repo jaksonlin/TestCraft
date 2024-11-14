@@ -47,7 +47,6 @@ class AnnotationParser(private val schema: AnnotationSchema) {
         return when (field.type) {
             AnnotationFieldType.STRING -> value as? String ?: field.defaultValue
             AnnotationFieldType.STRING_LIST -> (value as? List<*>)?.mapNotNull { it as? String } ?: emptyList<String>()
-            AnnotationFieldType.STATUS -> (value as? String)?.uppercase() ?: field.defaultValue
         }
     }
 }

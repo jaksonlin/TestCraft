@@ -79,6 +79,10 @@
                     id="RunCaseAnnoationCheckAction"
                     text="Run Current Method Annotation Check">
             </action>
+            <action class="com.github.jaksonlin.pitestintellij.actions.GenerateAnnotationCommandAction"
+                    id="GenerateAnnotationCommandAction"
+                    text="Generate Annotation Command On Method">
+            </action>
         </group>
     </actions>
 </idea-plugin>
