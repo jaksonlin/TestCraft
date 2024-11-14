@@ -18,7 +18,7 @@ class UnittestFileInspectorCommand(private val holder: ProblemsHolder, project: 
         try {
             val annotation = findTargetAnnotation(psiMethod, context.schema)
             if (annotation == null) {
-                holder.registerProblem(context.psiMethod, "No annotation found", ProblemHighlightType.WARNING)
+                holder.registerProblem(context.psiMethod, "No unittest case management annotation found", ProblemHighlightType.WARNING)
                 return
             }
             val testCase = parseUnittestCaseFromAnnotations(annotation)

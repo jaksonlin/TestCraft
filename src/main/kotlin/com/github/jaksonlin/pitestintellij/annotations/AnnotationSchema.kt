@@ -8,7 +8,7 @@ data class AnnotationSchema(
     val fields: List<AnnotationFieldConfig>
 ) {
     companion object {
-        // Default schema matching UnittestCaseInfoContext
+        // Default schema matching UnittestCaseInfoContextG
         val DEFAULT_SCHEMA = """
         {
           "annotationClassName": "Unittest",
