@@ -18,7 +18,9 @@ class AnnotationConfigService : PersistentStateComponent<AnnotationConfigService
     private val LOG = Logger.getInstance(AnnotationConfigService::class.java)
 
     data class State(
-        var schemaJson: String = AnnotationSchema.DEFAULT_SCHEMA
+        var schemaJson: String = AnnotationSchema.DEFAULT_SCHEMA,
+        var annotationPackage: String = "com.example.unittest.annotations",
+        var autoImport: Boolean = true
     )
 
     private var myState = State()
@@ -45,5 +47,20 @@ class AnnotationConfigService : PersistentStateComponent<AnnotationConfigService
 
     fun getBuildInSchema(): AnnotationSchema {
         return Json.decodeFromString(AnnotationSchema.DEFAULT_SCHEMA)
+    }
+
+    // New methods for import configuration
+    fun getAnnotationPackage(): String = myState.annotationPackage
+    
+    fun setAnnotationPackage(packageName: String) {
+        myState.annotationPackage = packageName
+        LOG.info("Updated annotation package: $packageName")
+    }
+
+    fun isAutoImport(): Boolean = myState.autoImport
+    
+    fun setAutoImport(auto: Boolean) {
+        myState.autoImport = auto
+        LOG.info("Updated auto import setting: $auto")
     }
 }
