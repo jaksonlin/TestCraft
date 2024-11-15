@@ -6,6 +6,9 @@ import com.github.jaksonlin.pitestintellij.context.CaseCheckContext
 import com.github.jaksonlin.pitestintellij.context.UnittestCase
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiAnnotation
+import com.intellij.psi.PsiComment
+import com.intellij.psi.PsiMethod
+import com.intellij.psi.util.PsiTreeUtil
 
 class CheckAnnotationCommand(project: Project,  context: CaseCheckContext):UnittestCaseCheckCommand(project, context) {
     override fun execute() {
@@ -32,6 +35,22 @@ class CheckAnnotationCommand(project: Project,  context: CaseCheckContext):Unitt
         }
     }
 
+    private fun extractMethodBodyComments(psiMethod: PsiMethod): String {
+        val stepComments = mutableListOf<String>()
+        val assertComments = mutableListOf<String>()
+
+        PsiTreeUtil.findChildrenOfType(psiMethod, PsiComment::class.java).forEach {
+            if (it.text.contains("step", ignoreCase = true)) {
+                stepComments.add(it.text)
+            }
+            if (it.text.contains("assert", ignoreCase = true)) {
+                assertComments.add(it.text)
+            }
+        }
+        // format as : test_step_1: step_comment, remove the leading //
+        return stepComments.mapIndexed { index, comment -> "test_step_${index + 1}: ${comment.substring(2)}" }.joinToString("\n") + "\n" + assertComments.mapIndexed { index, comment -> "test_assert_${index + 1}: ${comment.substring(2)}" }.joinToString("\n")
+    }
+
 
     private fun formatTestCaseMessage(
         testCase: UnittestCase,
@@ -48,6 +67,7 @@ class CheckAnnotationCommand(project: Project,  context: CaseCheckContext):Unitt
                     appendLine(testCase.getStringList(field.name).joinToString(", "))
             }
         }
+        appendLine(extractMethodBodyComments(context.psiMethod))
     }
 
 }

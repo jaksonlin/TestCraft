@@ -58,8 +58,8 @@ class AnnotationCompletionContributor : CompletionContributor() {
                     LOG.info("Actual annotation class: ${annotation.qualifiedName}")
 
                     // Check if this is our target annotation
-                    if (annotation.qualifiedName != schema.annotationClassName) {
-                        LOG.info("Annotation mismatch")
+                    if (annotation.qualifiedName?.endsWith(schema.annotationClassName) != true) {
+                        LOG.info("Annotation mismatch: ${annotation.qualifiedName} not the same as ${schema.annotationClassName}")
                         return
                     }
 
@@ -86,13 +86,19 @@ class AnnotationCompletionContributor : CompletionContributor() {
                             fieldType = field.type,
                             isDefaultValue = isDefault
                         )
-
-                        val prioritized = when {
-                            isDefault -> PrioritizedLookupElement.withPriority(element, 100.0)
-                            field.validation.mode == ValidationMode.EXACT ->
-                                PrioritizedLookupElement.withPriority(element, 50.0)
-                            else -> PrioritizedLookupElement.withPriority(element, 0.0)
+                        var properitizedValue = 100.0
+                        when {
+                            // Highest priority for exact matches
+                            result.prefixMatcher.prefixMatches(value) -> properitizedValue = 100.0
+                            // High priority for default values
+                            isDefault -> properitizedValue = 90.0
+                            // Medium priority for validated values
+                            field.validation?.validValues?.contains(value) == true -> properitizedValue = 80.0
+                            // Lower priority for other suggestions
+                            else -> properitizedValue = 70.0
                         }
+                        val prioritized = PrioritizedLookupElement.withPriority(element,properitizedValue)
+                        LOG.info("Adding element: $value with priority ${properitizedValue}")
 
                         result.addElement(prioritized)
                     }
