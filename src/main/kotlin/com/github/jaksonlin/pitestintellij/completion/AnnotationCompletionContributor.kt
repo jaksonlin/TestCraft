@@ -52,7 +52,7 @@ class AnnotationCompletionContributor : CompletionContributor() {
                         return
                     }
                     val project = parameters.position.project
-                    val configService = project.service<AnnotationConfigService>()
+                    val configService = service<AnnotationConfigService>()
                     val schema = configService.getSchema()
                     LOG.info("Schema annotation class: ${schema.annotationClassName}")
                     LOG.info("Actual annotation class: ${annotation.qualifiedName}")
