@@ -107,13 +107,21 @@ data class AnnotationSchema(
               },
               "validation": {
                 "validValues": [
-                  "Boundary Value",
-                  "Equivalence Class",
-                  "Error Handling",
-                  "Performance",
+                  "BoundaryValue",
+                  "NonEmpty",
+                  "ErrorHandling",
+                  "InputValidation",
+                  "PositiveScenario",
+                  "NegativeScenario",
+                  "EdgeCase",
+                  "Functionality",
+                  "BusinessLogicValidation",
+                  "BusinessInputOutput",
+                  "SideEffects",
+                  "StateTransition",
+                  "BusinessCalculation",
                   "Security",
-                  "Integration",
-                  "Edge Case"
+                  "Performance"
                 ],
                 "allowCustomValues": true,
                 "minLength": 1,
