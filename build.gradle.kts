@@ -1,40 +1,31 @@
-import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
 
+fun properties(key: String) = project.findProperty(key).toString()
+
 plugins {
-    id("java") // Java support
-    alias(libs.plugins.kotlin) // Kotlin support
-    alias(libs.plugins.gradleIntelliJPlugin) // IntelliJ Platform Gradle Plugin
-    alias(libs.plugins.changelog) // Gradle Changelog Plugin
-    alias(libs.plugins.qodana) // Gradle Qodana Plugin
-    alias(libs.plugins.kover) // Gradle Kover Plugin
-    alias(libs.plugins.serialize) // Gradle Serializer Plugin
+    // Java support
+    id("java")
+    // Kotlin support
+    id("org.jetbrains.kotlin.jvm") version "1.7.10"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.7.10"  
+    // Gradle IntelliJ Plugin
+    id("org.jetbrains.intellij") version "1.8.0"
+    // Gradle Changelog Plugin
+    id("org.jetbrains.changelog") version "1.3.1"
+    // Gradle Qodana Plugin
+    id("org.jetbrains.qodana") version "0.1.13"
 }
 
-group = providers.gradleProperty("pluginGroup").get()
-version = providers.gradleProperty("pluginVersion").get()
+// Add version catalog for Kotlin
+val kotlinVersion = "1.7.10"
 
-// Set the JVM language level used to build the project.
-kotlin {
-    jvmToolchain(17)
-}
-
-// Configure project's dependencies
-repositories {
-    mavenCentral()
-}
-
-intellij {
-    pluginName.set(providers.gradleProperty("pluginName"))
-    version.set(providers.gradleProperty("platformVersion"))
-    type.set(providers.gradleProperty("platformType"))
-
-    // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file.
-    plugins.set(providers.gradleProperty("platformBundledPlugins").map { it.split(',').map(String::trim).filter(String::isNotEmpty) })
-}
-
-// Dependencies are managed with Gradle version catalog - read more: https://docs.gradle.org/current/userguide/platforms.html#sub:version-catalog
+group = properties("pluginGroup")
+version = properties("pluginVersion")
 dependencies {
+    implementation(platform("org.jetbrains.kotlin:kotlin-bom:$kotlinVersion"))
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
+
     testImplementation(libs.junit)
     // Add Gradle Tooling API dependency
     implementation(fileTree("lib") { include("*.jar") })
@@ -42,67 +33,122 @@ dependencies {
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.18.0")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.18.0")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.18.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2") // Use latest version
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3") 
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.3.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.6.4")  // Add this for Swing Main dispatcher
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.4")   
+     constraints {
+        implementation("org.jetbrains.kotlin:kotlin-stdlib") {
+            version {
+                strictly(kotlinVersion)
+            }
+        }
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7") {
+            version {
+                strictly(kotlinVersion)
+            }
+        }
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8") {
+            version {
+                strictly(kotlinVersion)
+            }
+        }
+        // Add constraints for kotlinx-serialization
+        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json") {
+            version {
+                strictly("1.3.3")
+            }
+        }
+        implementation("org.jetbrains.kotlinx:kotlinx-serialization-core") {
+            version {
+                strictly("1.3.3")
+            }
+        }
+    }
+}
+configurations.all {
+    resolutionStrategy {
+        eachDependency {
+            if (requested.group == "org.jetbrains.kotlin") {
+                useVersion(kotlinVersion)
+            }
+            if (requested.group == "org.jetbrains.kotlinx" && requested.name.startsWith("kotlinx-serialization")) {
+                useVersion("1.3.3")
+            }
+        }
+        force("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
+        force("org.jetbrains.kotlinx:kotlinx-serialization-core:1.3.3")
+        force("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+        force("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.6.4")
+        force("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.4")
+    }
+}
+// Configure project's dependencies
+repositories {
+    mavenCentral()
+}
+
+// Set the JVM language level used to compile sources and generate files - Java 11 is required since 2020.3
+kotlin {
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(11))
+    }
+}
+
+// Configure Gradle IntelliJ Plugin - read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
+intellij {
+    pluginName.set(properties("pluginName"))
+    version.set(properties("platformVersion"))
+    type.set(properties("platformType"))
+
+    // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file.
+    plugins.set(properties("platformPlugins").split(',').map(String::trim).filter(String::isNotEmpty))
 }
 
 // Configure Gradle Changelog Plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
 changelog {
-    groups.empty()
-    repositoryUrl = providers.gradleProperty("pluginRepositoryUrl")
+    version.set(properties("pluginVersion"))
+    groups.set(emptyList())
 }
 
 // Configure Gradle Qodana Plugin - read more: https://github.com/JetBrains/gradle-qodana-plugin
 qodana {
-    cachePath = provider { file(".qodana").canonicalPath }
-    reportPath = provider { file("build/reports/inspections").canonicalPath }
-    saveReport = true
-    showReport = System.getenv("QODANA_SHOW_REPORT")?.toBoolean() ?: false
-}
-
-// Configure Gradle Kover Plugin - read more: https://github.com/Kotlin/kotlinx-kover#configuration
-koverReport {
-    defaults {
-        xml {
-            onCheck = true
-        }
-    }
+    cachePath.set(projectDir.resolve(".qodana").canonicalPath)
+    reportPath.set(projectDir.resolve("build/reports/inspections").canonicalPath)
+    saveReport.set(true)
+    showReport.set(System.getenv("QODANA_SHOW_REPORT")?.toBoolean() ?: false)
 }
 
 tasks {
     wrapper {
-        gradleVersion = providers.gradleProperty("gradleVersion").get()
+        gradleVersion = properties("gradleVersion")
     }
 
     patchPluginXml {
-        version.set(providers.gradleProperty("pluginVersion"))
-        sinceBuild.set(providers.gradleProperty("pluginSinceBuild"))
-        untilBuild.set(providers.gradleProperty("pluginUntilBuild"))
+        version.set(properties("pluginVersion"))
+        sinceBuild.set(properties("pluginSinceBuild"))
+        untilBuild.set(properties("pluginUntilBuild"))
 
         // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest
-        pluginDescription = providers.fileContents(layout.projectDirectory.file("README.md")).asText.map {
-            val start = "<!-- Plugin description -->"
-            val end = "<!-- Plugin description end -->"
+        pluginDescription.set(
+            projectDir.resolve("README.md").readText().lines().run {
+                val start = "<!-- Plugin description -->"
+                val end = "<!-- Plugin description end -->"
 
-            with(it.lines()) {
                 if (!containsAll(listOf(start, end))) {
                     throw GradleException("Plugin description section not found in README.md:\n$start ... $end")
                 }
-                subList(indexOf(start) + 1, indexOf(end)).joinToString("\n").let(::markdownToHTML)
-            }
-        }
+                subList(indexOf(start) + 1, indexOf(end))
+            }.joinToString("\n").run { markdownToHTML(this) }
+        )
 
-        val changelog = project.changelog // local variable for configuration cache compatibility
         // Get the latest available change notes from the changelog file
-        changeNotes = providers.gradleProperty("pluginVersion").map { pluginVersion ->
-            with(changelog) {
-                renderItem(
-                    (getOrNull(pluginVersion) ?: getUnreleased())
-                        .withHeader(false)
-                        .withEmptySections(false),
-                    Changelog.OutputType.HTML,
-                )
-            }
-        }
+        changeNotes.set(provider {
+            changelog.run {
+                getOrNull(properties("pluginVersion")) ?: getLatest()
+            }.toHTML()
+        })
     }
 
     // Configure UI tests plugin
@@ -115,17 +161,19 @@ tasks {
     }
 
     signPlugin {
-        certificateChain = System.getenv("CERTIFICATE_CHAIN")
-        privateKey = System.getenv("PRIVATE_KEY")
-        password = System.getenv("PRIVATE_KEY_PASSWORD")
+        certificateChain.set(System.getenv("CERTIFICATE_CHAIN"))
+        privateKey.set(System.getenv("PRIVATE_KEY"))
+        password.set(System.getenv("PRIVATE_KEY_PASSWORD"))
     }
 
     publishPlugin {
         dependsOn("patchChangelog")
-        token = System.getenv("PUBLISH_TOKEN")
-        // The pluginVersion is based on the SemVer (https://semver.org) and supports pre-release labels, like 2.1.7-alpha.3
+        token.set(System.getenv("PUBLISH_TOKEN"))
+        // pluginVersion is based on the SemVer (https://semver.org) and supports pre-release labels, like 2.1.7-alpha.3
         // Specify pre-release label to publish the plugin in a custom Release Channel automatically. Read more:
         // https://plugins.jetbrains.com/docs/intellij/deployment.html#specifying-a-release-channel
-        channels = providers.gradleProperty("pluginVersion").map { listOf(it.substringAfter('-', "").substringBefore('.').ifEmpty { "default" }) }
+        channels.set(listOf(properties("pluginVersion").split('-').getOrElse(1) { "default" }.split('.').first()))
     }
+
+
 }

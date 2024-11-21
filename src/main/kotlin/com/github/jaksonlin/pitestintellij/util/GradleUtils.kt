@@ -1,24 +1,21 @@
 package com.github.jaksonlin.pitestintellij.util
 
 import com.intellij.openapi.module.Module
+import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.project.modules
 import com.intellij.openapi.project.rootManager
 import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.LibraryOrderEntry
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.OrderRootType
 import com.intellij.openapi.roots.ProjectRootManager
-import com.intellij.openapi.vfs.VfsUtil
-import org.jetbrains.plugins.gradle.settings.GradleSettings
-import org.jetbrains.plugins.gradle.util.GradleUtil
 
 object GradleUtils {
     fun getCompilationOutputPaths(project: Project): List<String> {
         val projectBasePath = project.basePath ?: return emptyList()
         val outputPaths: MutableList<String> = ArrayList()
 
-        for (module in project.modules) {
+        for (module in ModuleManager.getInstance(project).modules) {
             val compilerModuleExtension = CompilerModuleExtension.getInstance(module)
             if (compilerModuleExtension != null) {
                 val outputPath = compilerModuleExtension.compilerOutputUrl
@@ -38,7 +35,7 @@ object GradleUtils {
     fun getUpperModulePath(project:Project, childModule:Module):String{
         var candidateModuleName = ""
         var candidateModule: Module? = null
-        for (module in project.modules) {
+        for (module in ModuleManager.getInstance(project).modules) {
             val moduleName = module.name
             if (childModule.name.contains(moduleName) && childModule.name != moduleName) {
                 if (moduleName.length > candidateModuleName.length){
@@ -53,7 +50,7 @@ object GradleUtils {
     fun getTestRunDependencies(project: Project): List<String> {
         val dependencies: MutableSet<String> = mutableSetOf()
 
-        for (module in project.modules) {
+        for (module in ModuleManager.getInstance(project).modules) {
             val moduleRootManager = ModuleRootManager.getInstance(module)
 
             // Get all dependencies, including libraries

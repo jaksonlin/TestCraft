@@ -18,7 +18,7 @@ sealed class DefaultValue {
     
     @Serializable
     @SerialName("NullValue")
-    data object NullValue : DefaultValue()
+    object NullValue : DefaultValue()
 }
 
 

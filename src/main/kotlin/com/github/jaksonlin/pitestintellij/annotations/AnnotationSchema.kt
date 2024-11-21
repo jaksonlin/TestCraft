@@ -1,6 +1,7 @@
 package com.github.jaksonlin.pitestintellij.annotations
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 
 @Serializable
 data class AnnotationSchema(
@@ -8,6 +9,10 @@ data class AnnotationSchema(
     val fields: List<AnnotationFieldConfig>
 ) {
     companion object {
+        private val json = Json { 
+            ignoreUnknownKeys = true 
+            isLenient = true
+        }
         // Default schema matching UnittestCaseInfoContextG
         val DEFAULT_SCHEMA = """
         {

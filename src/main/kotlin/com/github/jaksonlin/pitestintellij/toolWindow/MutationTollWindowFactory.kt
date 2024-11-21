@@ -14,8 +14,8 @@ import javax.swing.JPanel
 class MutationToolWindowFactory : ToolWindowFactory {
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-        val contentFactory = ContentFactory.getInstance()
-            val content = contentFactory.createContent(createToolWindowPanel(project), "", false)
+        val contentFactory = ContentFactory.SERVICE.getInstance()
+        val content = contentFactory.createContent(createToolWindowPanel(project), "", false)
         toolWindow.contentManager.addContent(content)
     }
 
