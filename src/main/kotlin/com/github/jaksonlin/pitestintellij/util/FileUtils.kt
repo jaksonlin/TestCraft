@@ -36,6 +36,9 @@ object FileUtils {
             if (file.toString().endsWith(targetFileName)) {
                 val directoryParentPath = file.parent
                 val indexToSrcMainJava = directoryParentPath.toString().indexOf("src${File.separator}main${File.separator}java")
+                if (indexToSrcMainJava == -1) {
+                    continue
+                }
                 val sourceRootPath = directoryParentPath.toString().substring(0, indexToSrcMainJava)
                 return TargetClassInfo(file, Paths.get(sourceRootPath))
             }
