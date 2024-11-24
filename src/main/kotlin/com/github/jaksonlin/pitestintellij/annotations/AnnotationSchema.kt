@@ -23,7 +23,7 @@ data class AnnotationSchema(
               "type": "STRING",
               "required": true,
               "valueProvider": {
-                "type": "GIT_AUTHOR"
+                "type": "FIRST_CREATOR_AUTHOR"
               },
               "validation": {
                 "allowEmpty": false

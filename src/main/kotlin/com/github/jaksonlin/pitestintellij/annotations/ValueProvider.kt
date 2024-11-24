@@ -13,6 +13,8 @@ data class ValueProvider(
 @Serializable
 enum class ValueProviderType {
     GIT_AUTHOR,
+    FIRST_CREATOR_AUTHOR,
+    FIRST_CREATOR_TIME,
     LAST_MODIFIER_AUTHOR,
     LAST_MODIFIER_TIME,
     CURRENT_DATE,
