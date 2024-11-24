@@ -6,7 +6,6 @@ import com.github.jaksonlin.pitestintellij.testutil.TestBase
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
 import com.intellij.codeInsight.lookup.LookupElementPresentation
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.diagnostic.LogLevel
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.psi.PsiElement
 
@@ -98,8 +97,8 @@ class AnnotationCompletionTest : LightJavaCodeInsightFixtureTestCase(), TestBase
 
         val completions = myFixture.completeBasic()
         assertNotNull(completions)
-        assertTrue(completions.any { it.lookupString == "Boundary Value" })
-        assertTrue(completions.any { it.lookupString == "Error Handling" })
+        assertTrue(completions.any { it.lookupString == "BoundaryValue" })
+        assertTrue(completions.any { it.lookupString == "ErrorHandling" })
         assertTrue(completions.any { it.lookupString == "Performance" })
         assertTrue(completions.any { it.lookupString == "Security" })
     }
@@ -164,7 +163,7 @@ class AnnotationCompletionTest : LightJavaCodeInsightFixtureTestCase(), TestBase
         """
         )
         // set the log level to debug
-        Logger.getInstance(AnnotationCompletionContributor::class.java).setLevel(LogLevel.DEBUG)
+        Logger.getInstance(AnnotationCompletionContributor::class.java)
 
         positions.forEachIndexed { index, position ->
             println("\nTesting position $index")

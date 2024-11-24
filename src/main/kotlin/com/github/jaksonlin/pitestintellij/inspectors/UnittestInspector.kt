@@ -5,6 +5,7 @@ import com.github.jaksonlin.pitestintellij.commands.unittestannotations.Unittest
 import com.github.jaksonlin.pitestintellij.context.CaseCheckContext
 import com.intellij.codeInspection.*
 import com.intellij.psi.*
+import com.intellij.psi.util.PsiTreeUtil
 import java.util.concurrent.ConcurrentHashMap
 
 class UnittestInspector : AbstractBaseJavaLocalInspectionTool() {
@@ -39,8 +40,9 @@ class UnittestInspector : AbstractBaseJavaLocalInspectionTool() {
                 // Check containing class using cache
                 val containingClass = psiMethod.containingClass ?: return
                 val qualifiedName = containingClass.qualifiedName ?: return
-
-                val context = CaseCheckContext.create(psiMethod)
+                // get the psiclass for the containing class
+                val psiClass = PsiTreeUtil.getParentOfType(psiMethod, PsiClass::class.java) ?: return
+                val context = CaseCheckContext.create(psiMethod, psiClass)
                 UnittestFileInspectorCommand(holder, project, context).execute()
             }
 

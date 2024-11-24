@@ -39,6 +39,33 @@ abstract class UnittestCaseCheckCommand(protected val project: Project, protecte
         )
     }
 
+    fun showNotJunitTestMethodMessage(project: Project) {
+        Messages.showMessageDialog(
+            project,
+            "This method is not a JUnit test method",
+            "Annotation Generation Action",
+            Messages.getWarningIcon()
+        )
+    }
+
+    fun showNoMethodMessage(project: Project) {
+        Messages.showMessageDialog(
+            project,
+            "No methods found in this class",
+            "Annotation Generation Action",
+            Messages.getWarningIcon()
+        )
+    }
+
+    fun showNoTestMethodCanAddMessage(project: Project) {
+        Messages.showMessageDialog(
+            project,
+            "No test methods found in the class that can add annotation.",
+            "No Test Methods Can Add Annotation",
+            Messages.getInformationIcon()
+        )
+    }
+
     fun showAnnotationAlreadyExistMessage(project: Project, annotationName: String) {
         Messages.showMessageDialog(
             project,

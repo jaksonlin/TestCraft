@@ -8,20 +8,182 @@ import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.psi.*
 import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.ui.CheckboxTree
+import com.intellij.ui.CheckboxTreeListener
+import com.intellij.ui.CheckedTreeNode
+import com.intellij.ui.components.JBScrollPane
+import java.awt.BorderLayout
+import java.awt.Dimension
+import java.awt.FlowLayout
+import javax.swing.*
 
 class GenerateAnnotationCommand(project: Project, context: CaseCheckContext):UnittestCaseCheckCommand(project, context) {
     private val psiElementFactory: PsiElementFactory = JavaPsiFacade.getInstance(project).elementFactory
     private val configService = service<AnnotationConfigService>()
 
     override fun execute() {
-        val annotation = findTargetAnnotation(context.psiMethod, context.schema)
-        if (annotation != null) {
-            showAnnotationAlreadyExistMessage(project, context.schema.annotationClassName)
+        if (context.psiClass.methods.isEmpty()) {
+            showNoMethodMessage(project)
             return
         }
-        generateAnnotation(context.psiMethod, context.schema)
+        generateAnnotationForSelectedMethod()
+    }
+
+    private fun generateAnnotationForSelectedMethod() {
+        val psiClass = context.psiClass
+        val testMethods = psiClass.methods.filter { canAddAnnotation(it) }
+        
+        if (testMethods.isEmpty()) {
+            showNoTestMethodCanAddMessage(project)
+            return
+        }
+    
+        val methodNames = testMethods.map { it.name }.toTypedArray()
+        val selected = BooleanArray(methodNames.size) { true }
+        
+        val dialog = object : DialogWrapper(project) {
+            private val tree: CheckboxTree = createMethodSelectionTree(methodNames, selected)
+            private val buttonPanel = JPanel(FlowLayout(FlowLayout.LEFT))
+    
+            init {
+                init()
+                title = "Select Test Methods"
+                createButtons()
+            }
+    
+            private fun createButtons() {
+                val checkAllButton = JButton("Check All").apply {
+                    addActionListener {
+                        setAllNodesChecked(true)
+                    }
+                }
+                
+                val uncheckAllButton = JButton("Uncheck All").apply {
+                    addActionListener {
+                        setAllNodesChecked(false)
+                    }
+                }
+    
+                buttonPanel.add(checkAllButton)
+                buttonPanel.add(uncheckAllButton)
+            }
+    
+            private fun setAllNodesChecked(checked: Boolean) {
+                val root = tree.model.root as CheckedTreeNode
+                setNodeAndChildrenChecked(root, checked)
+                tree.repaint()
+            }
+    
+            private fun setNodeAndChildrenChecked(node: CheckedTreeNode, checked: Boolean) {
+                node.isChecked = checked
+                for (i in 0 until node.childCount) {
+                    val child = node.getChildAt(i) as? CheckedTreeNode ?: continue
+                    setNodeAndChildrenChecked(child, checked)
+                    
+                    // Update the selected array if this is a leaf node (method)
+                    if (child.userObject is String) {
+                        val index = methodNames.indexOf(child.userObject as String)
+                        if (index >= 0) {
+                            selected[index] = checked
+                        }
+                    }
+                }
+            }
+    
+            override fun createCenterPanel(): JComponent {
+                val panel = JPanel(BorderLayout())
+                panel.preferredSize = Dimension(400, 400)
+                
+                // Add the button panel at the top
+                panel.add(buttonPanel, BorderLayout.NORTH)
+                
+                // Add the tree with scroll pane in the center
+                val treePanel = JPanel(BorderLayout())
+                treePanel.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
+                treePanel.add(JBScrollPane(tree), BorderLayout.CENTER)
+                panel.add(treePanel, BorderLayout.CENTER)
+                
+                return panel
+            }
+        }
+    
+        if (dialog.showAndGet()) {
+            // Process selected methods after OK is clicked
+            testMethods.filterIndexed { index, _ -> selected[index] }
+                .forEach { method ->
+                    generateAnnotationForSingleMethod(method)
+                }
+        }
+    }
+    
+    private fun createMethodSelectionTree(methodNames: Array<String>, selected: BooleanArray): CheckboxTree {
+        val root = CheckedTreeNode("Test Methods")
+        
+        methodNames.forEachIndexed { index, name ->
+            val node = CheckedTreeNode(name)
+            node.isChecked = selected[index]
+            root.add(node)
+        }
+    
+        return CheckboxTree(
+            object : CheckboxTree.CheckboxTreeCellRenderer() {
+                override fun customizeRenderer(
+                    tree: JTree,
+                    value: Any,
+                    selected: Boolean,
+                    expanded: Boolean,
+                    leaf: Boolean,
+                    row: Int,
+                    hasFocus: Boolean
+                ) {
+                    if (value is CheckedTreeNode) {
+                        when (value.userObject) {
+                            is String -> textRenderer.append(value.userObject as String)
+                            else -> textRenderer.append(value.userObject.toString())
+                        }
+                    }
+                }
+            },
+            root
+        ).apply {
+            addCheckboxTreeListener(object : CheckboxTreeListener {
+                override fun nodeStateChanged(node: CheckedTreeNode) {
+                    if (node.userObject is String) {
+                        val index = methodNames.indexOf(node.userObject as String)
+                        if (index >= 0) {
+                            selected[index] = node.isChecked
+                        }
+                    }
+                }
+            })
+            isRootVisible = false  // Hide the root node
+            showsRootHandles = true  // Show handles for the root's children
+        }
+    }
+
+
+
+    private fun isMethodJunitTestMethod(psiMethod: PsiMethod): Boolean {
+        val annotations = psiMethod.annotations
+        return annotations.any { it.qualifiedName == "org.junit.Test" || it.qualifiedName == "org.junit.jupiter.api.Test" || it.qualifiedName == "Test"}
+    }
+
+    private fun canAddAnnotation(psiMethod: PsiMethod): Boolean {
+        if (!isMethodJunitTestMethod(psiMethod)) {
+            return false
+        }
+        val annotation = findTargetAnnotation(psiMethod, context.schema)
+        return annotation == null
+    }
+
+    private fun generateAnnotationForSingleMethod(psiMethod: PsiMethod) {
+        if (!canAddAnnotation(psiMethod)) {
+            return
+        }
+        generateAnnotation(psiMethod, context.schema)
     }
 
     protected fun generateAnnotation(psiMethod: PsiMethod, schema: AnnotationSchema) {
