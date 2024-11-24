@@ -98,8 +98,8 @@ class AnnotationCompletionTest : LightJavaCodeInsightFixtureTestCase(), TestBase
 
         val completions = myFixture.completeBasic()
         assertNotNull(completions)
-        assertTrue(completions.any { it.lookupString == "Boundary Value" })
-        assertTrue(completions.any { it.lookupString == "Error Handling" })
+        assertTrue(completions.any { it.lookupString == "BoundaryValue" })
+        assertTrue(completions.any { it.lookupString == "ErrorHandling" })
         assertTrue(completions.any { it.lookupString == "Performance" })
         assertTrue(completions.any { it.lookupString == "Security" })
     }
