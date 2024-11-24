@@ -216,6 +216,12 @@ class GenerateAnnotationCommand(project: Project, context: CaseCheckContext):Uni
 
         // Then use the computed text in the write action
         WriteCommandAction.runWriteCommandAction(project) {
+            // Ensure document is committed before PSI modifications
+            val document = PsiDocumentManager.getInstance(project).getDocument(psiMethod.containingFile)
+            if (document != null) {
+                PsiDocumentManager.getInstance(project).commitDocument(document)
+            }
+
             if (configService.isAutoImport()) {
                 addImportIfNeeded(psiMethod, schema.annotationClassName)
             }

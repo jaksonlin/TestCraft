@@ -1,9 +1,8 @@
-package com.github.jaksonlin.pitestintellij.utils
+package com.github.jaksonlin.pitestintellij.util
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
-import git4idea.GitUtil
 import git4idea.repo.GitRepository
 import git4idea.repo.GitRepositoryManager
 import com.intellij.psi.PsiElement
@@ -12,7 +11,6 @@ import git4idea.commands.Git
 import git4idea.commands.GitCommand
 import git4idea.commands.GitLineHandler
 import git4idea.config.GitConfigUtil
-import git4idea.repo.GitConfig
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.psi.PsiMethod
 
@@ -79,6 +77,72 @@ object GitUtil {
                 )
             } else null
         }
+    }
+
+    fun getFirstCreatorInfo(project: Project, psiMethod: PsiMethod): GitUserInfo? {
+        val file = psiMethod.containingFile?.virtualFile ?: return null
+        val repository = getRepositoryForFile(project, file) ?: return null
+        val git = Git.getInstance()
+    
+        // Get method's line range
+        val document = FileDocumentManager.getInstance().getDocument(file) ?: return null
+        val startOffset = psiMethod.textRange.startOffset
+        val endOffset = psiMethod.textRange.endOffset
+        val startLine = document.getLineNumber(startOffset) + 1
+        val endLine = document.getLineNumber(endOffset) + 1
+    
+        val handler = GitLineHandler(
+            project,
+            repository.root,
+            GitCommand.BLAME
+        ).apply {
+            addParameters(
+                "-L", "$startLine,$endLine",
+                "--porcelain",
+                file.path
+            )
+        }
+    
+        val output = ApplicationManager.getApplication().executeOnPooledThread<List<String>> {
+            git.runCommand(handler).output
+        }.get()
+        
+        // Get only the first commit's information
+        var authorName: String? = null
+        var email: String? = null
+        var timestamp: Long? = null
+    
+        // Only process lines until we find the first complete record
+        for (line in output) {
+            when {
+                line.startsWith("author ") -> authorName = line.substringAfter("author ").trim()
+                line.startsWith("author-mail ") -> email = line.substringAfter("author-mail ").trim().removeSurrounding("<", ">")
+                line.startsWith("author-time ") -> {
+                    timestamp = line.substringAfter("author-time ").trim().toLongOrNull()
+                    if (timestamp != null && authorName != null && email != null) {
+                        break  // Exit as soon as we have all needed information
+                    }
+                }
+            }
+        }
+    
+        // Handle uncommitted changes
+        if (authorName == "Not Committed Yet" || email == "not.committed.yet") {
+            val gitUserInfo = getGitUserInfo(project)
+            return GitUserInfo(
+                name = gitUserInfo.name,
+                email = gitUserInfo.email,
+                timestamp = timestamp ?: System.currentTimeMillis()
+            )
+        }
+    
+        return if (authorName != null && email != null) {
+            GitUserInfo(
+                name = authorName,
+                email = email,
+                timestamp = timestamp ?: System.currentTimeMillis()
+            )
+        } else null
     }
 
     fun getLastModifyInfo(project: Project, psiMethod: PsiMethod): GitUserInfo? {

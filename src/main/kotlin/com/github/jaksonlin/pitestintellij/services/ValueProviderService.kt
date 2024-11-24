@@ -1,11 +1,9 @@
 package com.github.jaksonlin.pitestintellij.services
 
-import com.github.jaksonlin.pitestintellij.annotations.AnnotationFieldType
-import com.github.jaksonlin.pitestintellij.annotations.AnnotationSchema
 import com.github.jaksonlin.pitestintellij.annotations.ValueProvider
 import com.github.jaksonlin.pitestintellij.annotations.ValueProviderType
 import com.github.jaksonlin.pitestintellij.context.CaseCheckContext
-import com.github.jaksonlin.pitestintellij.utils.GitUtil
+import com.github.jaksonlin.pitestintellij.util.GitUtil
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiClass
@@ -26,6 +24,8 @@ class ValueProviderService(private val project: Project) {
             ValueProviderType.CLASS_NAME -> getClassName(context.psiClass)
             ValueProviderType.METHOD_NAME -> getMethodName(context.psiMethod)
             ValueProviderType.METHOD_SIGNATURE -> getMethodSignature(context.psiMethod)
+            ValueProviderType.FIRST_CREATOR_AUTHOR -> getFirstCreatorAuthor(context.psiMethod)
+            ValueProviderType.FIRST_CREATOR_TIME -> getFirstCreatorTime(context.psiMethod)
         }
     }
 
@@ -77,6 +77,18 @@ class ValueProviderService(private val project: Project) {
             append(")")
             psiMethod.returnType?.let { append(": ${it.presentableText}") }
         }
+    }
+
+    private fun getFirstCreatorAuthor(psiMethod: PsiMethod): String {
+        return GitUtil.getFirstCreatorInfo(project, psiMethod)?.toString()
+            ?: getGitAuthor()
+    }
+
+    private fun getFirstCreatorTime(psiMethod: PsiMethod): String {
+        var timestamp = GitUtil.getFirstCreatorInfo(project, psiMethod)?.timestamp
+        timestamp = timestamp?.times(1000)
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        return dateFormat.format(Date((timestamp ?: System.currentTimeMillis())))
     }
 }
 
