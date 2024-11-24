@@ -13,7 +13,7 @@ data class AnnotationSchema(
             ignoreUnknownKeys = true 
             isLenient = true
         }
-        // Default schema matching UnittestCaseInfoContextG
+        
         val DEFAULT_SCHEMA = """
         {
           "annotationClassName": "UnittestCaseInfo",
@@ -22,6 +22,9 @@ data class AnnotationSchema(
               "name": "author",
               "type": "STRING",
               "required": true,
+              "valueProvider": {
+                "type": "GIT_AUTHOR"
+              },
               "validation": {
                 "allowEmpty": false
               },
@@ -34,6 +37,9 @@ data class AnnotationSchema(
               "name": "title",
               "type": "STRING",
               "required": true,
+              "valueProvider": {
+                "type": "METHOD_NAME_BASED"
+              },
               "validation": {
                 "allowEmpty": false
               },
@@ -46,6 +52,9 @@ data class AnnotationSchema(
               "name": "targetClass",
               "type": "STRING",
               "required": true,
+              "valueProvider": {
+                "type": "CLASS_NAME"
+              },
               "validation": {
                 "allowEmpty": false
               },
@@ -58,6 +67,9 @@ data class AnnotationSchema(
               "name": "targetMethod",
               "type": "STRING",
               "required": true,
+              "valueProvider": {
+                "type": "METHOD_NAME"
+              },
               "validation": {
                 "allowEmpty": false
               },
@@ -70,6 +82,10 @@ data class AnnotationSchema(
               "name": "lastUpdateTime",
               "type": "STRING",
               "required": true,
+              "valueProvider": {
+                "type": "LAST_MODIFIER_TIME",
+                "format": "yyyy-MM-dd HH:mm:ss"
+              },
               "validation": {
                 "allowEmpty": false
               },
@@ -82,6 +98,9 @@ data class AnnotationSchema(
               "name": "lastUpdateAuthor",
               "type": "STRING",
               "required": true,
+              "valueProvider": {
+                "type": "LAST_MODIFIER_AUTHOR"
+              },
               "validation": {
                 "allowEmpty": false
               },
@@ -94,6 +113,9 @@ data class AnnotationSchema(
               "name": "methodSignature",
               "type": "STRING",
               "required": true,
+              "valueProvider": {
+                "type": "METHOD_SIGNATURE"
+              },
               "validation": {
                 "allowEmpty": false
               },
@@ -106,6 +128,10 @@ data class AnnotationSchema(
               "name": "testPoints",
               "type": "STRING_LIST",
               "required": true,
+              "valueProvider": {
+                "type": "FIXED_VALUE",
+                "value": ["Functionality"]
+              },
               "defaultValue": {
                 "type": "StringListValue",
                 "value": []
@@ -138,6 +164,10 @@ data class AnnotationSchema(
               "name": "status",
               "type": "STRING",
               "required": false,
+              "valueProvider": {
+                "type": "FIXED_VALUE",
+                "value": "TODO"
+              },
               "defaultValue": {
                 "type": "StringValue",
                 "value": "TODO"
@@ -159,6 +189,9 @@ data class AnnotationSchema(
               "name": "description",
               "type": "STRING",
               "required": true,
+              "valueProvider": {
+                "type": "METHOD_NAME_BASED"
+              },
               "validation": {
                 "allowEmpty": false
               },

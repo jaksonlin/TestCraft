@@ -28,5 +28,6 @@ data class AnnotationFieldConfig(
     val type: AnnotationFieldType,
     val required: Boolean = false,
     val defaultValue: DefaultValue = DefaultValue.NullValue,
-    val validation: FieldValidation? = null
+    val validation: FieldValidation? = null,
+    val valueProvider: ValueProvider? = null
 )
