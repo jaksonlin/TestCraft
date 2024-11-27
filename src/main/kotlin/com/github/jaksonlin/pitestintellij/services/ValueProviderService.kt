@@ -105,6 +105,20 @@ class ValueProviderService(private val project: Project) {
         val classUnderTest = psiFacade.findClass(guessedClassName, GlobalSearchScope.projectScope(project))
             ?: return null
         
+        // Skip if the target class is a test class
+        val hasTestMethods = classUnderTest.methods.any { method ->
+            method.annotations.any { annotation ->
+                val annotationName = annotation.qualifiedName
+                annotationName == "org.junit.jupiter.api.Test" || // JUnit 5
+                annotationName == "org.junit.Test"             ||  // JUnit 4
+                annotationName?.contains("Test") ?: false // Custom test annotation
+            }
+        }
+
+        if (hasTestMethods) {
+            return null
+        }
+            
         // Find matching method in the class under test
         val methodUnderTest = classUnderTest.methods.firstOrNull { method ->
             method.name.lowercase().contains(guessedMethodName.lowercase())
@@ -116,8 +130,11 @@ class ValueProviderService(private val project: Project) {
 
     private fun getMethodSignature(psiMethod: PsiMethod): String {
         return buildString {
-            // Add visibility modifier
-            append(psiMethod.modifierList.text.trim())
+            // Add visibility modifier (excluding annotations)
+            psiMethod.modifierList.text.trim()
+                .split(" ")
+                .filter { it.isNotEmpty() && !it.startsWith("@") }
+                .joinTo(this, " ")
             append(" ")
             
             // Add return type if not constructor
@@ -140,7 +157,7 @@ class ValueProviderService(private val project: Project) {
                 append(" throws ")
                 append(throwsList.joinToString(", ") { it.presentableText })
             }
-        }
+        }.replace("\n", " ").replace(Regex("\\s+"), " ").trim()
     }
 
     private fun getFirstCreatorAuthor(psiMethod: PsiMethod): String {
