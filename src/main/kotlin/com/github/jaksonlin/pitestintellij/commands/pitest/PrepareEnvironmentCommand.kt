@@ -112,21 +112,24 @@ class PrepareEnvironmentCommand(project: Project, context: PitestContext) : Pite
         context.targetClassFilePath = targetClassInfo.file.normalize().toString().replace("\\", "/")
     }
 
-    private fun prepareReportDirectory(testVirtualFile: VirtualFile, className: String){
+    private fun prepareReportDirectory(testVirtualFile: VirtualFile, className: String) {
         // prepare the report directory
         val parentModulePath = ReadAction.compute<String, Throwable> {
-
             val projectModule = ProjectRootManager.getInstance(project).fileIndex.getModuleForFile(testVirtualFile)
-            if (projectModule == null) {
-                showError("Cannot find module for test file")
-                throw IllegalStateException("Cannot find module for test file")
-            }
+                ?: throw IllegalStateException("Cannot find module for test file")
 
-            GradleUtils.getUpperModulePath(project, projectModule)
+            val modulePath = GradleUtils.getUpperModulePath(project, projectModule)
+            if (modulePath.isEmpty()) {
+                // If no parent module found, use the current module's path
+                projectModule.rootManager.contentRoots.firstOrNull()?.path
+                    ?: throw IllegalStateException("Cannot find module root path")
+            } else {
+                modulePath
+            }
         }
+        
         context.reportDirectory = Paths.get(parentModulePath, "build", "reports", "pitest", className).toString()
         File(context.reportDirectory!!).mkdirs()
-
     }
 
 

@@ -44,7 +44,7 @@ object GradleUtils {
                 }
             }
         }
-        return candidateModule?.rootManager?.contentRoots?.get(0)?.path ?: ""
+        return candidateModule?.rootManager?.contentRoots?.firstOrNull()?.path ?: ""
     }
 
     fun getTestRunDependencies(project: Project): List<String> {
