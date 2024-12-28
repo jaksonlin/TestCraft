@@ -17,11 +17,11 @@ class MutationReportParserTest {
         val endTime = System.currentTimeMillis()
         println("Time taken to parse the file: ${endTime - startTime} ms")
 
-        assertFalse(mutations.partial)
+        assertFalse(mutations.isPartial())
         assertEquals(1, mutations.mutation.size)
 
         val mutation = mutations.mutation[0]
-        assertTrue(mutation.detected)
+        assertTrue(mutation.isDetected())
         assertEquals("KILLED", mutation.status)
         assertEquals(5, mutation.numberOfTestsRun)
         assertEquals("Example.java", mutation.sourceFile)
@@ -45,11 +45,11 @@ class MutationReportParserTest {
         val endTime = System.currentTimeMillis()
         println("Time taken to parse the file: ${endTime - startTime} ms")
 
-        assertTrue(mutations.partial)
+        assertTrue(mutations.isPartial())
         assertEquals(14, mutations.mutation.size)
 
         val mutation = mutations.mutation[0]
-        assertTrue(mutation.detected)
+        assertTrue(mutation.isDetected())
         assertEquals("KILLED", mutation.status)
         assertEquals(1, mutation.numberOfTestsRun)
         assertEquals("DiffParser.java", mutation.sourceFile)
