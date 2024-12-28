@@ -67,7 +67,7 @@ public class AnnotationConfigurable implements Configurable {
         Document document = EditorFactory.getInstance().createDocument(schemaJson);
         editor = new EditorTextField(document, project, JsonFileType.INSTANCE, false, false);
         editor.setOneLineMode(false);
-        editor.setPreferredSize(new Dimension(400, editor.getPreferredSize().height));
+        editor.setPreferredWidth(400); // Set a fixed preferred size
         editor.addSettingsProvider(editor -> {
             EditorSettings settings = editor.getSettings();
             settings.setLineNumbersShown(true);
@@ -117,8 +117,7 @@ public class AnnotationConfigurable implements Configurable {
                 packageTextField.setText("com.example.unittest.annotations");
                 autoImportCheckbox.setSelected(true);
             } catch (Exception ex) {
-                // Log or handle the exception
-                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Failed to restore defaults: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
         panel.add(restoreDefaultsButton);
@@ -127,13 +126,21 @@ public class AnnotationConfigurable implements Configurable {
 
     private JComponent createHelpPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.add(new JBLabel("""
-                Define your test annotation schema in JSON format.
-                Available field types: STRING, STRING_LIST, STATUS
-                
-                Package: The base package for your annotations
-                Auto Import: Automatically add import statements when generating annotations
-            """.trim()), BorderLayout.CENTER);
+        JTextArea helpText = new JTextArea("""
+        Define your test annotation schema in JSON format.
+            Available field types: STRING, STRING_LIST
+
+            Package: The base package for your annotations
+            Auto Import: Automatically add import statements when generating annotations
+        """.trim());
+        helpText.setWrapStyleWord(true);
+        helpText.setLineWrap(true);
+        helpText.setOpaque(false);
+        helpText.setEditable(false);
+        helpText.setFocusable(false);
+        helpText.setBackground(UIManager.getColor("Label.background"));
+        helpText.setFont(UIManager.getFont("Label.font"));
+        panel.add(helpText, BorderLayout.CENTER);
         return panel;
     }
 

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.github.jaksonlin.pitestintellij.annotations.AnnotationFieldConfig;
 import com.github.jaksonlin.pitestintellij.annotations.AnnotationFieldType;
 import com.github.jaksonlin.pitestintellij.annotations.AnnotationSchema;
+import com.github.jaksonlin.pitestintellij.annotations.DefaultValue;
 import com.github.jaksonlin.pitestintellij.context.CaseCheckContext;
 import com.github.jaksonlin.pitestintellij.services.AnnotationConfigService;
 import com.github.jaksonlin.pitestintellij.services.ValueProviderService;
@@ -23,12 +24,14 @@ import com.intellij.ui.CheckboxTree;
 import com.intellij.ui.CheckboxTreeListener;
 import com.intellij.ui.CheckedTreeNode;
 import com.intellij.ui.components.JBScrollPane;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 public class GenerateAnnotationCommand extends UnittestCaseCheckCommand {
@@ -55,12 +58,12 @@ public class GenerateAnnotationCommand extends UnittestCaseCheckCommand {
                     ApplicationManager.getApplication().invokeLater(() -> showNoMethodMessage(getProject()));
                     return;
                 }
-                generateAnnotationForSelectedMethod();
+                generateAnnotationForSelectedMethod(indicator);
             }
         });
     }
 
-    private void generateAnnotationForSelectedMethod() {
+    private void generateAnnotationForSelectedMethod(ProgressIndicator indicator) {
         PsiClass psiClass = getContext().getPsiClass();
         PsiMethod[] allMethods = psiClass.getMethods();
         List<PsiMethod> testMethods = Arrays.stream(allMethods)
@@ -139,17 +142,42 @@ public class GenerateAnnotationCommand extends UnittestCaseCheckCommand {
             };
 
             if (dialog.showAndGet()) {
-                ProgressManager.getInstance().run(new Task.Backgroundable(getProject(), "Applying Annotations") {
-                    @Override
-                    public void run(ProgressIndicator indicator) {
-                        indicator.setIndeterminate(true);
-                        for (int i = 0; i < testMethods.size(); i++) {
-                            if (selected[i]) {
-                                generateAnnotationForSingleMethod(testMethods.get(i));
-                            }
-                        }
+                int selectedMethodCount = 0;
+                for (boolean isSelected : selected) {
+                    if (isSelected) {
+                        selectedMethodCount++;
                     }
-                });
+                }
+                if (selectedMethodCount > 0) {
+                    CountDownLatch latch = new CountDownLatch(selectedMethodCount);
+                    ProgressManager.getInstance().run(new Task.Backgroundable(getProject(), "Applying annotations") {
+                        @Override
+                        public void run(@NotNull ProgressIndicator indicator) {
+                            indicator.setIndeterminate(true);
+                            for (int i = 0; i < testMethods.size(); i++) {
+                                if (selected[i]) {
+                                    int finalI = i;
+                                    ApplicationManager.getApplication().executeOnPooledThread(() -> {
+                                        try{
+                                            generateAnnotation(testMethods.get(finalI), getContext().getSchema());
+                                        } catch (Exception e) {
+                                            LOG.error("Failed to generate annotation", e);
+                                        } finally {
+                                            latch.countDown();
+                                        }
+                                    });
+                                }
+                            }
+                            try {
+                                latch.await();
+                            } catch (InterruptedException e) {
+                                LOG.error("Interrupted while waiting for latch", e);
+                            }
+
+                        }
+                    });
+                }
+
             }
         });
     }
@@ -212,9 +240,6 @@ public class GenerateAnnotationCommand extends UnittestCaseCheckCommand {
         return ReadAction.compute(() -> isMethodJunitTestMethod(psiMethod) && findTargetAnnotation(psiMethod, getContext().getSchema()) == null);
     }
 
-    private void generateAnnotationForSingleMethod(PsiMethod psiMethod) {
-        ApplicationManager.getApplication().executeOnPooledThread(() -> generateAnnotation(psiMethod, getContext().getSchema()));
-    }
 
     protected void generateAnnotation(PsiMethod psiMethod, AnnotationSchema schema) {
         String annotationText = ReadAction.compute(() -> {
@@ -286,14 +311,26 @@ public class GenerateAnnotationCommand extends UnittestCaseCheckCommand {
                 annotationText.append("\"").append(value).append("\"");
             } else if (field.getType() == AnnotationFieldType.STRING_LIST) {
                 annotationText.append("{");
-                ArrayNode arrayNode = (ArrayNode) value;
-                if (arrayNode != null) {
-                    for (int j = 0; j < arrayNode.size(); j++) {
-                        String str = arrayNode.get(j).toString();
-                        if (j > 0) annotationText.append(", ");
-                        annotationText.append(str.startsWith("\"") && str.endsWith("\"") ? str : "\"" + str + "\"");
+                if (value instanceof ArrayNode) {
+                    ArrayNode arrayNode = (ArrayNode) value;
+                    if (arrayNode != null) {
+                        for (int j = 0; j < arrayNode.size(); j++) {
+                            String str = arrayNode.get(j).toString();
+                            if (j > 0) annotationText.append(", ");
+                            annotationText.append(str.startsWith("\"") && str.endsWith("\"") ? str : "\"" + str + "\"");
+                        }
+                    }
+                } else {
+                    // comes from DefaultValue, not value provider
+                    if (value instanceof DefaultValue.StringListValue){
+                        List<String> list = ((DefaultValue.StringListValue) value).getValue();
+                        for (int j = 0; j < list.size(); j++) {
+                            if (j > 0) annotationText.append(", ");
+                            annotationText.append("\"").append(list.get(j)).append("\"");
+                        }
                     }
                 }
+
                 annotationText.append("}");
             }
         }
