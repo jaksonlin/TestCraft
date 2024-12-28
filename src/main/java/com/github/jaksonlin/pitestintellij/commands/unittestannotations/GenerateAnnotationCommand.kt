@@ -2,7 +2,6 @@ package com.github.jaksonlin.pitestintellij.commands.unittestannotations
 
 import com.github.jaksonlin.pitestintellij.annotations.AnnotationFieldType
 import com.github.jaksonlin.pitestintellij.annotations.AnnotationSchema
-import com.github.jaksonlin.pitestintellij.annotations.DefaultValue
 import com.github.jaksonlin.pitestintellij.context.CaseCheckContext
 import com.github.jaksonlin.pitestintellij.services.AnnotationConfigService
 import com.github.jaksonlin.pitestintellij.services.ValueProviderService

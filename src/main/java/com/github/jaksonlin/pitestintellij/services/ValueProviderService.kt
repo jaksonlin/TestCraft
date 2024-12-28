@@ -26,7 +26,7 @@ class ValueProviderService(private val project: Project) {
             ValueProviderType.FIXED_VALUE -> provider.value
             ValueProviderType.CLASS_NAME -> guessClassUnderTestClassName(context.psiClass) // return the qualified name for the  class under test
             ValueProviderType.METHOD_NAME -> guessMethodUnderTestMethodName(context.psiMethod) // return the method name for the method under test
-            ValueProviderType.METHOD_SIGNATURE -> tryGetMethodUnderTestSignature(context.psiClass, context.psiMethod) 
+            ValueProviderType.METHOD_SIGNATURE -> tryGetMethodUnderTestSignature(context.psiClass, context.psiMethod)
                 ?: ""
             ValueProviderType.FIRST_CREATOR_AUTHOR -> getFirstCreatorAuthor(context.psiMethod)
             ValueProviderType.FIRST_CREATOR_TIME -> getFirstCreatorTime(context.psiMethod)
@@ -36,7 +36,7 @@ class ValueProviderService(private val project: Project) {
     private fun getGitAuthor(): String {
         return GitUtil.getGitUserInfo(project).toString()
     }
-    
+
     private fun getLastModifierAuthor(psiMethod: PsiMethod): String {
         return GitUtil.getLastModifyInfo(project, psiMethod)?.toString()
             ?: getGitAuthor()
@@ -66,7 +66,7 @@ class ValueProviderService(private val project: Project) {
     private fun guessClassUnderTestClassName(psiClass: PsiClass): String {
         // Get base class name without Test prefix/suffix
         val baseClassName = psiClass.name?.removePrefix("Test")?.removeSuffix("Test") ?: return ""
-        
+
         // Get test class package and normalize it
         val testPackage = psiClass.qualifiedName
             ?.removeSuffix(psiClass.name!!)
@@ -76,7 +76,7 @@ class ValueProviderService(private val project: Project) {
             ?.removeSuffix(".test")
             ?.removeSuffix(".tests")
             ?: return ""
-            
+
         return "$testPackage.$baseClassName"
     }
 
@@ -95,35 +95,35 @@ class ValueProviderService(private val project: Project) {
         val guessedClassName = guessClassUnderTestClassName(psiClass)
         val guessedMethodName = guessMethodUnderTestMethodName(psiMethod)
             .lowercase() // normalize to lowercase for comparison
-        
+
         // Find the class under test using PSI API
         val project = psiClass.project
         val psiManager = PsiManager.getInstance(project)
         val psiFacade = JavaPsiFacade.getInstance(project)
-        
+
         // Try to find the class under test
         val classUnderTest = psiFacade.findClass(guessedClassName, GlobalSearchScope.projectScope(project))
             ?: return null
-        
+
         // Skip if the target class is a test class
         val hasTestMethods = classUnderTest.methods.any { method ->
             method.annotations.any { annotation ->
                 val annotationName = annotation.qualifiedName
                 annotationName == "org.junit.jupiter.api.Test" || // JUnit 5
-                annotationName == "org.junit.Test"             ||  // JUnit 4
-                annotationName?.contains("Test") ?: false // Custom test annotation
+                        annotationName == "org.junit.Test"             ||  // JUnit 4
+                        annotationName?.contains("Test") ?: false // Custom test annotation
             }
         }
-        
+
         if (hasTestMethods) {
             return null
         }
-            
+
         // Find matching method in the class under test
         val methodUnderTest = classUnderTest.methods.firstOrNull { method ->
             method.name.lowercase().contains(guessedMethodName.lowercase())
         } ?: return null
-        
+
         // Return the method signature
         return getMethodSignature(methodUnderTest)
     }
@@ -136,13 +136,13 @@ class ValueProviderService(private val project: Project) {
                 .filter { it.isNotEmpty() && !it.startsWith("@") }
                 .joinTo(this, " ")
             append(" ")
-            
+
             // Add return type if not constructor
             if (!psiMethod.isConstructor) {
                 append(psiMethod.returnType?.presentableText ?: "void")
                 append(" ")
             }
-            
+
             // Add method name and parameters
             append(psiMethod.name)
             append("(")
@@ -150,7 +150,7 @@ class ValueProviderService(private val project: Project) {
                 "${param.type.presentableText} ${param.name}"
             })
             append(")")
-            
+
             // Add throws clause if present
             val throwsList = psiMethod.throwsList.referencedTypes
             if (throwsList.isNotEmpty()) {

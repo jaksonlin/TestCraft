@@ -1,3 +1,5 @@
+package com.github.jaksonlin.pitestintellij.services
+
 import com.intellij.openapi.components.Service
 import java.util.concurrent.ConcurrentHashMap
 
@@ -12,4 +14,4 @@ class TestClassCacheService {
     fun clearCache() {
         testClassCache.clear()
     }
-} 
+}

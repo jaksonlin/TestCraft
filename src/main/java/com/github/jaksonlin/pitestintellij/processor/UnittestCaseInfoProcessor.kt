@@ -1,12 +1,5 @@
 package com.github.jaksonlin.pitestintellij.processor
 
-import com.github.jaksonlin.pitestintellij.context.UnittestCaseInfoContext
-import com.github.jaksonlin.pitestintellij.context.UnittestCaseStatus
-import com.intellij.psi.PsiAnnotation
-import com.intellij.psi.PsiArrayInitializerMemberValue
-import com.intellij.psi.PsiLiteralExpression
-import com.intellij.psi.PsiReferenceExpression
-
 class UnittestCaseInfoProcessor {
 //    companion object {
 //        fun fromPsiAnnotation(annotation: PsiAnnotation): UnittestCaseInfoContext {

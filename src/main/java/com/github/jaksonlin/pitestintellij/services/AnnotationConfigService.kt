@@ -1,4 +1,5 @@
 package com.github.jaksonlin.pitestintellij.services
+
 import com.github.jaksonlin.pitestintellij.annotations.AnnotationSchema
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.Service
@@ -51,14 +52,14 @@ class AnnotationConfigService : PersistentStateComponent<AnnotationConfigService
 
     // New methods for import configuration
     fun getAnnotationPackage(): String = myState.annotationPackage
-    
+
     fun setAnnotationPackage(packageName: String) {
         myState.annotationPackage = packageName
         LOG.info("Updated annotation package: $packageName")
     }
 
     fun isAutoImport(): Boolean = myState.autoImport
-    
+
     fun setAutoImport(auto: Boolean) {
         myState.autoImport = auto
         LOG.info("Updated auto import setting: $auto")

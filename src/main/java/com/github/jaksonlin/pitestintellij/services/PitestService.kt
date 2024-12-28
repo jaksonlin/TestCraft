@@ -1,6 +1,6 @@
 package com.github.jaksonlin.pitestintellij.services
 
-import com.github.jaksonlin.pitestintellij.commands.*
+import com.github.jaksonlin.pitestintellij.commands.CommandCancellationException
 import com.github.jaksonlin.pitestintellij.commands.pitest.*
 import com.github.jaksonlin.pitestintellij.context.PitestContext
 import com.intellij.openapi.application.ApplicationManager
