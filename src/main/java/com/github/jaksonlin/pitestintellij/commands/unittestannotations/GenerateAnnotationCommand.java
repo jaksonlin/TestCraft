@@ -43,7 +43,7 @@ public class GenerateAnnotationCommand extends UnittestCaseCheckCommand {
     public GenerateAnnotationCommand(Project project, CaseCheckContext context) {
         super(project, context);
         this.psiElementFactory = JavaPsiFacade.getInstance(project).getElementFactory();
-        this.configService = ServiceManager.getService(project, AnnotationConfigService.class);
+        this.configService = ServiceManager.getService(AnnotationConfigService.class);
         this.valueProviderService = ServiceManager.getService(project, ValueProviderService.class);
     }
 
