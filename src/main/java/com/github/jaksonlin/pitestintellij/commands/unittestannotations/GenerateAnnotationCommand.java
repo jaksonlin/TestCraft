@@ -1,5 +1,6 @@
 package com.github.jaksonlin.pitestintellij.commands.unittestannotations;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.github.jaksonlin.pitestintellij.annotations.AnnotationFieldConfig;
 import com.github.jaksonlin.pitestintellij.annotations.AnnotationFieldType;
 import com.github.jaksonlin.pitestintellij.annotations.AnnotationSchema;
@@ -25,6 +26,7 @@ import com.intellij.ui.components.JBScrollPane;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -284,10 +286,10 @@ public class GenerateAnnotationCommand extends UnittestCaseCheckCommand {
                 annotationText.append("\"").append(value).append("\"");
             } else if (field.getType() == AnnotationFieldType.STRING_LIST) {
                 annotationText.append("{");
-                List<?> list = (List<?>) value;
-                if (list != null) {
-                    for (int j = 0; j < list.size(); j++) {
-                        String str = list.get(j).toString();
+                ArrayNode arrayNode = (ArrayNode) value;
+                if (arrayNode != null) {
+                    for (int j = 0; j < arrayNode.size(); j++) {
+                        String str = arrayNode.get(j).toString();
                         if (j > 0) annotationText.append(", ");
                         annotationText.append(str.startsWith("\"") && str.endsWith("\"") ? str : "\"" + str + "\"");
                     }
