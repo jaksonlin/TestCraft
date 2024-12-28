@@ -1,6 +1,7 @@
 package com.github.jaksonlin.pitestintellij.util
 
 import com.intellij.openapi.module.Module
+import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.modules
 import com.intellij.openapi.project.rootManager
@@ -34,11 +35,30 @@ object GradleUtils {
         return outputPaths
     }
 
-    // find the direct parent module's base directory of the child module in the project
+//    // find the direct parent module's base directory of the child module in the project
+//    fun getUpperModulePath(project: Project, childModule: Module): String {
+//        var candidateModuleName = ""
+//        var candidateModule: Module? = null
+//        for (module in project.modules) {
+//            val moduleName = module.name
+//            if (childModule.name.contains(moduleName) && childModule.name != moduleName) {
+//                if (moduleName.length > candidateModuleName.length) {
+//                    candidateModuleName = moduleName
+//                    candidateModule = module
+//                }
+//            }
+//        }
+//        val contentRoots = candidateModule?.rootManager?.contentRoots
+//        return if (contentRoots != null && contentRoots.isNotEmpty()) {
+//            contentRoots[0].path
+//        } else {
+//            ""
+//        }
+//    }
     fun getUpperModulePath(project:Project, childModule:Module):String{
         var candidateModuleName = ""
         var candidateModule: Module? = null
-        for (module in project.modules) {
+        for (module in ModuleManager.getInstance(project).modules) {
             val moduleName = module.name
             if (childModule.name.contains(moduleName) && childModule.name != moduleName) {
                 if (moduleName.length > candidateModuleName.length){
@@ -47,7 +67,7 @@ object GradleUtils {
                 }
             }
         }
-        return candidateModule?.rootManager?.contentRoots?.get(0)?.path ?: ""
+        return candidateModule?.rootManager?.contentRoots?.firstOrNull()?.path ?: ""
     }
 
     fun getTestRunDependencies(project: Project): List<String> {

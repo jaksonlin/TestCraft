@@ -133,7 +133,7 @@ class MutationTreeMediatorViewModel(
 
                 override fun hashCode(): Int {
                     var result = icon.hashCode()
-                    result = 31 * result + (tooltipText.hashCode() ?: 0)
+                    result = 31 * result + tooltipText.hashCode()
                     return result
                 }
             }

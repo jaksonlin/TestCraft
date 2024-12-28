@@ -31,11 +31,29 @@
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
+    <depends>Git4Idea</depends>
 
     <resource-bundle>messages.MyBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow factoryClass="com.github.jaksonlin.pitestintellij.toolWindow.MutationToolWindowFactory" id="MutationTestHistory" icon="/pitestHistoryWindowIcon.svg"/>
+        <applicationConfigurable
+            instance="com.github.jaksonlin.pitestintellij.ui.AnnotationConfigurable"
+            id="com.github.jaksonlin.pitestintellij.settings"
+            displayName="Unittest Annotation Configuration"/>
+        <localInspection
+            shortName="UnittestCaseAnnotationInspection"
+            language="JAVA"
+            implementationClass="com.github.jaksonlin.pitestintellij.inspectors.UnittestInspector"
+            displayName="Unittest case management annotation inspection"
+            enabledByDefault="false"
+            groupName="Java"
+            order="LAST"
+        />
+        <completion.contributor
+                language="JAVA"
+                implementationClass="com.github.jaksonlin.pitestintellij.completion.AnnotationCompletionContributor"/>
+
     </extensions>
 
     <applicationListeners>
@@ -57,6 +75,14 @@
                     class="com.github.jaksonlin.pitestintellij.actions.RunPitestAction"
                     id="RunPitestAction"
                     text="Run Mutation Test">
+            </action>
+            <action class="com.github.jaksonlin.pitestintellij.actions.RunCaseAnnoationCheckAction"
+                    id="RunCaseAnnoationCheckAction"
+                    text="Run Current Method Annotation Check">
+            </action>
+            <action class="com.github.jaksonlin.pitestintellij.actions.GenerateAnnotationCommandAction"
+                    id="GenerateAnnotationCommandAction"
+                    text="Generate Annotation Command On Method">
             </action>
         </group>
     </actions>

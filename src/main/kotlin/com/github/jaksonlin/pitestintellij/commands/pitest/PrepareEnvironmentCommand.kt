@@ -1,6 +1,6 @@
-package com.github.jaksonlin.pitestintellij.commands
+package com.github.jaksonlin.pitestintellij.commands.pitest
 
-import PitestCommand
+import com.github.jaksonlin.pitestintellij.commands.CommandCancellationException
 import com.github.jaksonlin.pitestintellij.context.PitestContext
 import com.github.jaksonlin.pitestintellij.util.FileUtils
 import com.github.jaksonlin.pitestintellij.util.GradleUtils
@@ -9,6 +9,7 @@ import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.rootManager
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.ui.Messages
@@ -112,23 +113,25 @@ class PrepareEnvironmentCommand(project: Project, context: PitestContext) : Pite
         context.targetClassFilePath = targetClassInfo.file.normalize().toString().replace("\\", "/")
     }
 
-    private fun prepareReportDirectory(testVirtualFile: VirtualFile, className: String){
+    private fun prepareReportDirectory(testVirtualFile: VirtualFile, className: String) {
         // prepare the report directory
         val parentModulePath = ReadAction.compute<String, Throwable> {
-
             val projectModule = ProjectRootManager.getInstance(project).fileIndex.getModuleForFile(testVirtualFile)
-            if (projectModule == null) {
-                showError("Cannot find module for test file")
-                throw IllegalStateException("Cannot find module for test file")
-            }
+                ?: throw IllegalStateException("Cannot find module for test file")
 
-            GradleUtils.getUpperModulePath(project, projectModule)
+            val modulePath = GradleUtils.getUpperModulePath(project, projectModule)
+            if (modulePath.isEmpty()) {
+                // If no parent module found, use the current module's path
+                projectModule.rootManager.contentRoots.firstOrNull()?.path
+                    ?: throw IllegalStateException("Cannot find module root path")
+            } else {
+                modulePath
+            }
         }
+        
         context.reportDirectory = Paths.get(parentModulePath, "build", "reports", "pitest", className).toString()
         File(context.reportDirectory!!).mkdirs()
-
     }
-
 
 
     private fun collectClassPathFileForPitest(reportDirectory:String, targetPackageName:String, resourceDirectories: List<String>?){
