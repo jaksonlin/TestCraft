@@ -72,8 +72,8 @@ class AnnotationCompletionContributor : CompletionContributor() {
                     // Add completion items
                     field.validation?.validValues?.forEach { value ->
                         val isDefault = when (field.defaultValue) {
-                            is DefaultValue.StringValue -> field.defaultValue.value == value
-                            is DefaultValue.StringListValue -> value in field.defaultValue.value
+                            is DefaultValue.StringValue -> (field.defaultValue as DefaultValue.StringValue).value == value
+                            is DefaultValue.StringListValue -> value in (field.defaultValue as DefaultValue.StringListValue).value
                             else -> false
                         }
 

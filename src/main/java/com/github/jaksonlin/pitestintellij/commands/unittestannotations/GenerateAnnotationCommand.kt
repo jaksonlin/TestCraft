@@ -274,7 +274,7 @@ class GenerateAnnotationCommand(project: Project, context: CaseCheckContext):Uni
     private fun buildAnnotationStr(schema: AnnotationSchema, buildAnnotationContext: CaseCheckContext) : String {
         val annotationText = buildString {
             append("@${schema.annotationClassName}(\n")
-            schema.fields.filter{ it.required }.forEachIndexed { index, field ->
+            schema.fields.filter{ it.isRequired }.forEachIndexed { index, field ->
                 if (index > 0) append(",\n")
                 append("    ${field.name} = ")
 
