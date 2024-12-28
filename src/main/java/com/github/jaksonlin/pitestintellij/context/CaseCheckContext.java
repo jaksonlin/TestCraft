@@ -3,7 +3,7 @@ package com.github.jaksonlin.pitestintellij.context;
 import com.github.jaksonlin.pitestintellij.annotations.AnnotationParser;
 import com.github.jaksonlin.pitestintellij.annotations.AnnotationSchema;
 import com.github.jaksonlin.pitestintellij.services.AnnotationConfigService;
-import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiMethod;
 
@@ -41,7 +41,7 @@ public class CaseCheckContext {
     }
 
     public static CaseCheckContext create(PsiMethod psiMethod, PsiClass psiClass) {
-        AnnotationConfigService configService = ServiceManager.getService(AnnotationConfigService.class);
+        AnnotationConfigService configService = ApplicationManager.getApplication().getService(AnnotationConfigService.class);
         AnnotationSchema schema = configService.getSchema();
         return new CaseCheckContext(
                 psiClass,

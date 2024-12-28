@@ -11,7 +11,6 @@ import com.github.jaksonlin.pitestintellij.services.ValueProviderService;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.command.WriteCommandAction;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
@@ -28,7 +27,6 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -43,8 +41,8 @@ public class GenerateAnnotationCommand extends UnittestCaseCheckCommand {
     public GenerateAnnotationCommand(Project project, CaseCheckContext context) {
         super(project, context);
         this.psiElementFactory = JavaPsiFacade.getInstance(project).getElementFactory();
-        this.configService = ServiceManager.getService(AnnotationConfigService.class);
-        this.valueProviderService = ServiceManager.getService(project, ValueProviderService.class);
+        this.configService = ApplicationManager.getApplication().getService(AnnotationConfigService.class);
+        this.valueProviderService = project.getService(ValueProviderService.class);
     }
 
     @Override

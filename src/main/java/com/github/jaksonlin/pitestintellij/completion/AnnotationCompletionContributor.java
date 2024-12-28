@@ -8,7 +8,7 @@ import com.github.jaksonlin.pitestintellij.ui.CustomAnnotationCompletionLookupEl
 import com.intellij.codeInsight.completion.*;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.lang.java.JavaLanguage;
-import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.patterns.PlatformPatterns;
@@ -47,8 +47,7 @@ public class AnnotationCompletionContributor extends CompletionContributor {
                             LOG.info("Required PSI elements not found");
                             return;
                         }
-                        Project project = parameters.getPosition().getProject();
-                        AnnotationConfigService configService = ServiceManager.getService(project, AnnotationConfigService.class);
+                        AnnotationConfigService configService = ApplicationManager.getApplication().getService(AnnotationConfigService.class);
                         AnnotationSchema schema = configService.getSchema();
                         LOG.info("Schema annotation class: " + schema.getAnnotationClassName());
                         LOG.info("Actual annotation class: " + annotation.getQualifiedName());

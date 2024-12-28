@@ -8,7 +8,6 @@ import com.github.jaksonlin.pitestintellij.util.Pair;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.markup.GutterIconRenderer;
 import com.intellij.openapi.editor.markup.MarkupModel;
@@ -36,12 +35,12 @@ public class MutationTreeMediatorViewModel implements IMutationReportUI {
     private final Project project;
     private final IMutationMediator mediator;
     private final RunHistoryManager runHistoryManager;
-    private final HashMap<String, Integer> annotatedNodes = new HashMap<>();
+    protected final HashMap<String, Integer> annotatedNodes = new HashMap<>();
 
     public MutationTreeMediatorViewModel(@NotNull Project project, @NotNull IMutationMediator mediator) {
         this.project = project;
         this.mediator = mediator;
-        this.runHistoryManager = ServiceManager.getService(project, RunHistoryManager.class);
+        this.runHistoryManager = project.getService(RunHistoryManager.class);
         mediator.register(this);
         registerEditorListener(project);
     }

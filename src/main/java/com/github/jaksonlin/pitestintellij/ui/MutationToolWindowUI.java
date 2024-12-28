@@ -17,7 +17,7 @@ import java.awt.event.MouseEvent;
 public class MutationToolWindowUI {
     private final JButton clearButton = new JButton(MyBundle.message("clear.button"));
     private final JTextField searchInput = new JTextField(20);
-    private final ObservableTree resultTree = new ObservableTree();
+    protected final ObservableTree resultTree = new ObservableTree();
     private final MutationToolWindowViewModel vm;
     private final JPanel toolWindowPanel;
 
@@ -25,7 +25,6 @@ public class MutationToolWindowUI {
         this.vm = new MutationToolWindowViewModel(project, resultTree);
         this.toolWindowPanel = createToolWindowPanel();
         registerListeners();
-        // set the placeholder text
         searchInput.setToolTipText(MyBundle.message("search.placeholder"));
     }
 
@@ -40,7 +39,7 @@ public class MutationToolWindowUI {
                 if (path != null) {
                     resultTree.scrollPathToVisible(path);
                     resultTree.setSelectionPath(path);
-                    resultTree.requestFocusInWindow(); // release focus from searchInput
+                    resultTree.requestFocusInWindow();
                 }
             }
         });
@@ -55,7 +54,6 @@ public class MutationToolWindowUI {
             }
         });
 
-        // handle key enter event
         resultTree.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {

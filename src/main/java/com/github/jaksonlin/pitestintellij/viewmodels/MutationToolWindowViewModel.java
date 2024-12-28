@@ -4,7 +4,6 @@ import com.github.jaksonlin.pitestintellij.components.ObservableTree;
 import com.github.jaksonlin.pitestintellij.mediators.IMutationMediator;
 import com.github.jaksonlin.pitestintellij.mediators.MutationMediatorImpl;
 import com.github.jaksonlin.pitestintellij.services.RunHistoryManager;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,7 +17,7 @@ public class MutationToolWindowViewModel {
     private final MutationTreeMediatorViewModel mutationTreeMediatorVM;
 
     public MutationToolWindowViewModel(Project project, ObservableTree mutationTree) {
-        this.runHistoryManager = ServiceManager.getService(project, RunHistoryManager.class);
+        this.runHistoryManager = project.getService(RunHistoryManager.class);
         this.mutationTreeMediatorVM = new MutationTreeMediatorViewModel(project, mutationReportMediator);
         runHistoryManager.addObserver(mutationTree);
     }

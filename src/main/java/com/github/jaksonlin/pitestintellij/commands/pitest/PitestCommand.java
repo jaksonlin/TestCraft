@@ -6,7 +6,6 @@ import com.github.jaksonlin.pitestintellij.services.RunHistoryManager;
 import com.github.jaksonlin.pitestintellij.ui.PitestOutputDialog;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
@@ -22,7 +21,7 @@ public abstract class PitestCommand {
     public PitestCommand(Project project, PitestContext context) {
         this.project = project;
         this.context = context;
-        this.runHistoryManager = ServiceManager.getService(project, RunHistoryManager.class);
+        this.runHistoryManager = project.getService(RunHistoryManager.class);
     }
 
     public abstract void execute();

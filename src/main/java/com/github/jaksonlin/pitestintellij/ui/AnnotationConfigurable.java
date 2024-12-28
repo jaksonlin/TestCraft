@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.github.jaksonlin.pitestintellij.annotations.AnnotationSchema;
 import com.github.jaksonlin.pitestintellij.services.AnnotationConfigService;
 import com.intellij.json.JsonFileType;
-import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.EditorFactory;
 import com.intellij.openapi.editor.EditorSettings;
@@ -30,7 +30,7 @@ public class AnnotationConfigurable implements Configurable {
     private EditorTextField editor;
     private JTextField packageTextField;
     private JCheckBox autoImportCheckbox;
-    private final AnnotationConfigService configService = ServiceManager.getService(AnnotationConfigService.class);
+    private final AnnotationConfigService configService = ApplicationManager.getApplication().getService(AnnotationConfigService.class);
     private final ObjectMapper jsonMapper = JsonMapper.builder().build();
 
     @Nls(capitalization = Nls.Capitalization.Title)

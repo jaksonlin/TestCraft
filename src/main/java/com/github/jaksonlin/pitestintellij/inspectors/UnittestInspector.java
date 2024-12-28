@@ -32,7 +32,7 @@ public class UnittestInspector extends AbstractBaseJavaLocalInspectionTool {
         return "UnittestCaseAnnotationInspection";
     }
 
-    private final Set<String> testAnnotations = new HashSet<>(Arrays.asList(
+    protected final Set<String> testAnnotations = new HashSet<>(Arrays.asList(
         "org.junit.Test",
         "org.junit.jupiter.api.Test",
         "Test"
@@ -74,10 +74,10 @@ public class UnittestInspector extends AbstractBaseJavaLocalInspectionTool {
 
             private boolean hasTestAnnotation(PsiMethod psiMethod) {
                 for (PsiAnnotation annotation : psiMethod.getAnnotations()) {
-                if (testAnnotations.contains(annotation.getQualifiedName())) {
-                    return true;
+                    if (testAnnotations.contains(annotation.getQualifiedName())) {
+                        return true;
+                    }
                 }
-            }
                 return false;
             }
         };

@@ -59,7 +59,7 @@ public final class PitestService {
         }.queue();
     }
 
-    private void showErrorDialog(Exception e, PitestContext context) {
+    protected void showErrorDialog(Exception e, PitestContext context) {
         StringWriter sw = new StringWriter();
         e.printStackTrace(new PrintWriter(sw));
         String stackTrace = sw.toString();
