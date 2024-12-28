@@ -211,7 +211,7 @@ class GenerateAnnotationCommand(project: Project, context: CaseCheckContext):Uni
     protected fun generateAnnotation(psiMethod: PsiMethod, schema: AnnotationSchema) {
         // First compute the annotation text in a read action
         val annotationText = ReadAction.compute<String, Throwable> {
-            val newContext = context.copy(psiMethod = psiMethod)
+            val newContext = context.copy(psiMethod)
             buildAnnotationStr(schema, newContext)
         }
 

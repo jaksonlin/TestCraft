@@ -3,7 +3,6 @@ package com.github.jaksonlin.pitestintellij.services
 import com.github.jaksonlin.pitestintellij.commands.*
 import com.github.jaksonlin.pitestintellij.commands.pitest.*
 import com.github.jaksonlin.pitestintellij.context.PitestContext
-import com.github.jaksonlin.pitestintellij.context.dumpPitestContext
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.progress.ProgressIndicator
@@ -20,7 +19,7 @@ import javax.swing.JTextArea
 class PitestService {
 
     fun runPitest(targetProject: Project, testFilePath: String) {
-        val context = PitestContext(testFilePath = testFilePath, timestamp = System.currentTimeMillis())
+        val context = PitestContext(testFilePath, System.currentTimeMillis())
 
         val commands = listOf(
             PrepareEnvironmentCommand(targetProject, context),
@@ -64,7 +63,7 @@ class PitestService {
         val sw = StringWriter()
         e.printStackTrace(PrintWriter(sw))
         val stackTrace = sw.toString()
-        val contextInformation = dumpPitestContext(context = context)
+        val contextInformation = PitestContext.dumpPitestContext(context)
         val errorMessage = "Error executing Pitest command: ${e.message}; $contextInformation\n$stackTrace"
 
         val textArea = JTextArea(errorMessage)

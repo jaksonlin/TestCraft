@@ -6,7 +6,6 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.github.jaksonlin.pitestintellij.context.PitestContext
-import com.github.jaksonlin.pitestintellij.context.dumpPitestContext
 import com.github.jaksonlin.pitestintellij.services.RunHistoryManager
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.components.service
@@ -41,7 +40,7 @@ abstract class PitestCommand(protected val project: Project, protected val conte
     
     protected fun showError(message: String) {
         ApplicationManager.getApplication().invokeLater {
-            val contextState = dumpPitestContext(context)
+            val contextState = PitestContext.dumpPitestContext(context)
             val messageWithContextState = "$message\n\n$contextState"
             Messages.showErrorDialog(project, messageWithContextState, "Pitest Error")
         }
