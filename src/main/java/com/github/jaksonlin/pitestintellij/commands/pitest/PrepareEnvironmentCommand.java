@@ -3,7 +3,6 @@ package com.github.jaksonlin.pitestintellij.commands.pitest;
 import com.github.jaksonlin.pitestintellij.commands.CommandCancellationException;
 import com.github.jaksonlin.pitestintellij.context.PitestContext;
 import com.github.jaksonlin.pitestintellij.util.*;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.module.Module;
@@ -14,12 +13,11 @@ import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class PrepareEnvironmentCommand extends PitestCommand {
     private final JavaFileProcessor javaFileProcessor = new JavaFileProcessor();

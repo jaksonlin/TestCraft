@@ -1,15 +1,14 @@
 package com.github.jaksonlin.pitestintellij.ui;
 
+import com.github.jaksonlin.pitestintellij.MyBundle;
 import com.github.jaksonlin.pitestintellij.components.ObservableTree;
 import com.github.jaksonlin.pitestintellij.viewmodels.MutationToolWindowViewModel;
 import com.intellij.openapi.project.Project;
-import com.github.jaksonlin.pitestintellij.MyBundle;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;

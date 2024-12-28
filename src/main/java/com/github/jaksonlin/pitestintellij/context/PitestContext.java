@@ -1,6 +1,7 @@
 package com.github.jaksonlin.pitestintellij.context;
 
 import com.github.jaksonlin.pitestintellij.util.ProcessResult;
+
 import java.util.List;
 
 public class PitestContext {

@@ -1,24 +1,23 @@
 package com.github.jaksonlin.pitestintellij.util;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import git4idea.repo.GitRepository;
-import git4idea.repo.GitRepositoryManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiMethod;
 import git4idea.commands.Git;
 import git4idea.commands.GitCommand;
 import git4idea.commands.GitLineHandler;
 import git4idea.config.GitConfigUtil;
-import com.intellij.openapi.fileEditor.FileDocumentManager;
-import com.intellij.psi.PsiMethod;
-import com.intellij.openapi.editor.Document;
+import git4idea.repo.GitRepository;
+import git4idea.repo.GitRepositoryManager;
 
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 public class GitUtil {
 

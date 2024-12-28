@@ -3,6 +3,7 @@ package com.github.jaksonlin.pitestintellij.services;
 import com.github.jaksonlin.pitestintellij.context.PitestContext;
 import com.github.jaksonlin.pitestintellij.observers.ObserverBase;
 import com.github.jaksonlin.pitestintellij.observers.RunHistoryObserver;
+import com.github.jaksonlin.pitestintellij.util.Pair;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
@@ -39,8 +40,8 @@ public final class RunHistoryManager extends ObserverBase {
     public void addObserver(RunHistoryObserver observer) {
         super.addObserver(observer);
         // pass current value of history to observer, List<Pair<String, String>>
-        List<AbstractMap.SimpleImmutableEntry<String, String>> mappedHistory = history.entrySet().stream()
-                .map(entry -> new AbstractMap.SimpleImmutableEntry<>(entry.getValue().getTargetClassPackageName(), entry.getValue().getTargetClassName()))
+        List<Pair<String, String>> mappedHistory = history.entrySet().stream()
+                .map(entry -> new Pair<>(entry.getValue().getTargetClassPackageName(), entry.getValue().getTargetClassName()))
                 .collect(Collectors.toList());
         observer.onRunHistoryChanged(mappedHistory);
     }
@@ -69,7 +70,7 @@ public final class RunHistoryManager extends ObserverBase {
             String json = gson.toJson(history);
             Files.write(historyFile.toPath(), json.getBytes());
             // this should be a Pair<String, String>>
-            notifyObservers(new AbstractMap.SimpleImmutableEntry<>(entry.getTargetClassPackageName(), entry.getTargetClassName()));
+            notifyObservers(new Pair<String, String>(entry.getTargetClassPackageName(), entry.getTargetClassName()));
         } catch (IOException e) {
             // Handle the exception appropriately, e.g., log an error
             e.printStackTrace();

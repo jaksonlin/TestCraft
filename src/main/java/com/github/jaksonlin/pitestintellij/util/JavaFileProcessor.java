@@ -3,8 +3,8 @@ package com.github.jaksonlin.pitestintellij.util;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.PackageDeclaration;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

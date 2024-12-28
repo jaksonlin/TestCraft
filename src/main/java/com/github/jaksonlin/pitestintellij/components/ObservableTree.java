@@ -2,13 +2,13 @@ package com.github.jaksonlin.pitestintellij.components;
 
 import com.github.jaksonlin.pitestintellij.MyBundle;
 import com.github.jaksonlin.pitestintellij.observers.RunHistoryObserver;
-import javax.swing.SwingUtilities;
+import com.github.jaksonlin.pitestintellij.util.Pair;
+import org.jetbrains.annotations.NotNull;
+
+import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
-import org.jetbrains.annotations.NotNull;
-
-import javax.swing.JTree;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -100,21 +100,5 @@ public class ObservableTree extends JTree implements RunHistoryObserver {
         });
     }
 
-    public static class Pair<T, U> {
-        private final T first;
-        private final U second;
 
-        public Pair(T first, U second) {
-            this.first = first;
-            this.second = second;
-        }
-
-        public T getFirst() {
-            return first;
-        }
-
-        public U getSecond() {
-            return second;
-        }
-    }
 }

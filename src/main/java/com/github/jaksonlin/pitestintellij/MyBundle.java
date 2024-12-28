@@ -2,8 +2,8 @@ package com.github.jaksonlin.pitestintellij;
 
 import com.intellij.DynamicBundle;
 import org.jetbrains.annotations.NonNls;
-import org.jetbrains.annotations.PropertyKey;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.PropertyKey;
 
 import java.util.function.Supplier;
 

@@ -1,15 +1,15 @@
 package com.github.jaksonlin.pitestintellij.commands.pitest;
 
 import com.github.jaksonlin.pitestintellij.commands.CommandCancellationException;
-import com.github.jaksonlin.pitestintellij.ui.PitestOutputDialog;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.Messages;
 import com.github.jaksonlin.pitestintellij.context.PitestContext;
 import com.github.jaksonlin.pitestintellij.services.RunHistoryManager;
+import com.github.jaksonlin.pitestintellij.ui.PitestOutputDialog;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.ui.Messages;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;

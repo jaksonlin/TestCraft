@@ -1,8 +1,8 @@
 package com.github.jaksonlin.pitestintellij.context;
 
-import com.github.jaksonlin.pitestintellij.services.AnnotationConfigService;
 import com.github.jaksonlin.pitestintellij.annotations.AnnotationParser;
 import com.github.jaksonlin.pitestintellij.annotations.AnnotationSchema;
+import com.github.jaksonlin.pitestintellij.services.AnnotationConfigService;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiMethod;

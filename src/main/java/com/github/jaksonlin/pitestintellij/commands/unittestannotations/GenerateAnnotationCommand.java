@@ -24,9 +24,7 @@ import com.intellij.ui.CheckedTreeNode;
 import com.intellij.ui.components.JBScrollPane;
 
 import javax.swing.*;
-import javax.swing.tree.DefaultMutableTreeNode;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;

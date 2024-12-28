@@ -1,5 +1,7 @@
 package com.github.jaksonlin.pitestintellij.ui;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.github.jaksonlin.pitestintellij.annotations.AnnotationSchema;
 import com.github.jaksonlin.pitestintellij.services.AnnotationConfigService;
 import com.intellij.json.JsonFileType;
@@ -12,13 +14,10 @@ import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.ui.EditorTextField;
-import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.panels.VerticalLayout;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
 

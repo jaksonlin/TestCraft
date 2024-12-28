@@ -1,10 +1,10 @@
 package com.github.jaksonlin.pitestintellij.commands.pitest;
 
 import com.github.jaksonlin.pitestintellij.context.PitestContext;
+import com.github.jaksonlin.pitestintellij.ui.PitestOutputDialog;
 import com.github.jaksonlin.pitestintellij.util.ProcessResult;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
-import com.github.jaksonlin.pitestintellij.ui.PitestOutputDialog;
 
 import java.io.File;
 

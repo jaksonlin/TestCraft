@@ -12,7 +12,6 @@ import com.intellij.psi.util.PsiTreeUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class CheckAnnotationCommand extends UnittestCaseCheckCommand {
