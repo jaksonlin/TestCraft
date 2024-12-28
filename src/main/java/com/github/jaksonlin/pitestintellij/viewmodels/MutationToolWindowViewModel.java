@@ -42,9 +42,9 @@ public class MutationToolWindowViewModel {
 
     @Nullable
     private DefaultMutableTreeNode findNode(DefaultMutableTreeNode root, String searchText) {
-        Enumeration<DefaultMutableTreeNode> enumeration = root.depthFirstEnumeration();
+        Enumeration enumeration = root.depthFirstEnumeration();
         while (enumeration.hasMoreElements()) {
-            DefaultMutableTreeNode node = enumeration.nextElement();
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode)enumeration.nextElement();
             if (node.getUserObject().toString().toLowerCase().contains(searchText.toLowerCase())) {
                 return node;
             }
