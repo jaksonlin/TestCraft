@@ -95,12 +95,22 @@ public final class ValueProviderService {
         String className = psiClass.getName();
         String baseClassName = (className != null ? className.replaceFirst("^Test", "").replaceFirst("Test$", "") : "");
         String qualifiedName = psiClass.getQualifiedName();
-        String testPackage = (qualifiedName != null ?
-                qualifiedName.substring(0, qualifiedName.lastIndexOf(Objects.requireNonNull(psiClass.getName())))
-                        .replace(".test.", ".").replace(".tests.", ".")
-                : "").replaceFirst("\\.test$", "").replaceFirst("\\.tests$", "");
+        String testPackage = "";
 
-        return testPackage + "." + baseClassName;
+        if (qualifiedName != null) {
+            int lastDotIndex = qualifiedName.lastIndexOf('.');
+            if (lastDotIndex > 0) {
+                testPackage = qualifiedName.substring(0, lastDotIndex);
+            }
+
+            // Adjust package name based on common test package conventions
+            testPackage = testPackage.replace(".test", "").replace(".tests", "");
+            if (testPackage.endsWith(".")) {
+                testPackage = testPackage.substring(0, testPackage.length() - 1);
+            }
+        }
+
+        return (testPackage.isEmpty() ? "" : testPackage + ".") + baseClassName;
     }
 
     private String guessMethodUnderTestMethodName(@NotNull PsiMethod psiMethod) {
@@ -125,7 +135,7 @@ public final class ValueProviderService {
         if (classUnderTest == null) {
             return null;
         }
-
+        // Check if the class under test has test methods, if this is the test class, return null
         boolean hasTestMethods = Arrays.stream(classUnderTest.getMethods())
                 .anyMatch(method -> Arrays.stream(method.getAnnotations())
                         .anyMatch(annotation -> {
