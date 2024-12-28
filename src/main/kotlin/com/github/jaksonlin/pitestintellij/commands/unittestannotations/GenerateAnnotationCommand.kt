@@ -211,7 +211,8 @@ class GenerateAnnotationCommand(project: Project, context: CaseCheckContext):Uni
     protected fun generateAnnotation(psiMethod: PsiMethod, schema: AnnotationSchema) {
         // First compute the annotation text in a read action
         val annotationText = ReadAction.compute<String, Throwable> {
-            buildAnnotationStr(schema)
+            val newContext = context.copy(psiMethod = psiMethod)
+            buildAnnotationStr(schema, newContext)
         }
 
         // Then use the computed text in the write action
@@ -271,7 +272,7 @@ class GenerateAnnotationCommand(project: Project, context: CaseCheckContext):Uni
     }
 
     // we should do this in a read action
-    private fun buildAnnotationStr(schema: AnnotationSchema) : String {
+    private fun buildAnnotationStr(schema: AnnotationSchema, buildAnnotationContext: CaseCheckContext) : String {
         val annotationText = buildString {
             append("@${schema.annotationClassName}(\n")
             schema.fields.filter{ it.required }.forEachIndexed { index, field ->
@@ -280,7 +281,7 @@ class GenerateAnnotationCommand(project: Project, context: CaseCheckContext):Uni
 
                 // Use value provider if available
                 val value = field.valueProvider?.let { provider ->
-                    valueProviderService.provideValue(provider, context)
+                    valueProviderService.provideValue(provider, buildAnnotationContext)
                 } ?: field.defaultValue
 
                 when (field.type) {

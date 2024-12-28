@@ -40,6 +40,7 @@ class BuildPitestCommandCommand (project: Project, context: PitestContext) : Pit
             "2.0",
             "--mutators",
             "STRONGER",
+            "--skipFailingTests",
         )
     }
 }

@@ -18,6 +18,6 @@
 ## 1.0.2 - 2024-10-12
 - Bugfix: change plugin name introduce a bug in the code.
 
-## 1.0.3-preview - 2024-11-14
+## 1.0.3 - 2024-11-14
 - Add unit test annotation generation action.
 - Add unit test annotation inspection.
