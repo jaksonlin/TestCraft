@@ -52,7 +52,7 @@
         />
         <completion.contributor
                 language="JAVA"
-                implementationClass="com.github.jaksonlin.pitestintellij.completion.AnnotationCompletionContributor"/>
+                implementationClass="com.github.jaksonlin.pitestintellij.completions.AnnotationCompletionContributor"/>
 
     </extensions>
 
