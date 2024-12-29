@@ -1,4 +1,4 @@
-package com.github.jaksonlin.pitestintellij.completion;
+package com.github.jaksonlin.pitestintellij.completions;
 
 import com.github.jaksonlin.pitestintellij.annotations.AnnotationFieldConfig;
 import com.github.jaksonlin.pitestintellij.annotations.AnnotationSchema;
@@ -10,7 +10,6 @@ import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.lang.java.JavaLanguage;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.project.Project;
 import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiNameValuePair;

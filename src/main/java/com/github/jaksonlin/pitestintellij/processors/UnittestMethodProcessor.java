@@ -1,4 +1,4 @@
-package com.github.jaksonlin.pitestintellij.processor;
+package com.github.jaksonlin.pitestintellij.processors;
 
 import com.github.jaksonlin.pitestintellij.context.UnittestMethodContext;
 import com.intellij.psi.PsiComment;

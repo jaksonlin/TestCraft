@@ -5,7 +5,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.ui.content.Content;
-import com.intellij.ui.content.ContentFactory;
+import com.intellij.ui.content.ContentManager;
+import com.intellij.ui.content.impl.ContentImpl; // Note the use of ContentImpl
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -14,9 +15,10 @@ public class MutationToolWindowFactory implements ToolWindowFactory {
 
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
-        ContentFactory contentFactory = ContentFactory.getInstance();
-        Content content = contentFactory.createContent(createToolWindowPanel(project), "", false);
-        toolWindow.getContentManager().addContent(content);
+        JPanel toolWindowPanel = createToolWindowPanel(project);
+        ContentManager contentManager = toolWindow.getContentManager();
+        Content content = new ContentImpl(toolWindowPanel, "", false); // Directly create ContentImpl
+        contentManager.addContent(content);
     }
 
     private JPanel createToolWindowPanel(@NotNull Project project) {

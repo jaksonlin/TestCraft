@@ -26,7 +26,9 @@ public class ObservableTree extends JTree implements RunHistoryObserver {
             }
         } else if (eventObj instanceof List) {
             List<?> list = (List<?>) eventObj;
-            if (!list.isEmpty() && list.get(0) instanceof Pair) {
+            if (list.isEmpty()) {
+                initializeMutationTree(Collections.emptyList());
+            } else if (list.get(0) instanceof Pair) {
                 List<Pair<String, String>> nodeList = (List<Pair<String, String>>) list;
                 initializeMutationTree(nodeList);
             }
