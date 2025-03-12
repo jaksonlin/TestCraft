@@ -21,3 +21,6 @@
 ## 1.0.3 - 2024-11-14
 - Add unit test annotation generation action.
 - Add unit test annotation inspection.
+
+## 1.0.4 - 2025-01-16
+- update support version to 251, no functional change
