@@ -12,6 +12,8 @@ import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,6 +26,7 @@ import java.util.stream.Collectors;
 
 @Service(Service.Level.PROJECT)
 public final class RunHistoryManager extends ObserverBase {
+    private static final Logger log = LoggerFactory.getLogger(RunHistoryManager.class);
     private final Project project;
     private final Gson gson = new Gson();
     private final File historyFile;
@@ -50,6 +53,16 @@ public final class RunHistoryManager extends ObserverBase {
         return history.get(targetClassFullyQualifiedName);
     }
 
+    @Nullable
+    public PitestContext getRunHistoryForClassByTargetFilePath(@NotNull String classUnderTestFilePath) {
+        for (PitestContext context : history.values()) {
+            if (context.getTargetClassFilePath().equals(classUnderTestFilePath)) {
+                return context;
+            }
+        }
+        return null;
+    }
+
     public void clearRunHistory() {
         history.clear();
         if (historyFile.exists()) {
@@ -72,7 +85,7 @@ public final class RunHistoryManager extends ObserverBase {
             notifyObservers(new Pair<String, String>(entry.getTargetClassPackageName(), entry.getTargetClassName()));
         } catch (IOException e) {
             // Handle the exception appropriately, e.g., log an error
-            e.printStackTrace();
+            log.error("Error saving run history", e);
         }
     }
 

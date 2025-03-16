@@ -46,6 +46,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.18.0")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.18.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2") // Use latest version
+    implementation("org.commonmark:commonmark:0.21.0")
 }
 
 // Configure Gradle Changelog Plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin

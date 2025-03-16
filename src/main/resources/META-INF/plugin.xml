@@ -84,6 +84,12 @@
                     id="GenerateAnnotationCommandAction"
                     text="Generate Annotation Command On Method">
             </action>
+            <action id="GenerateUnitTest"
+                    class="com.github.jaksonlin.pitestintellij.actions.GenerateUnitTestAction"
+                    text="Generate Unit Test Suggestions"
+                    description="Generate unit test suggestions using LLM based on mutation results">
+                <add-to-group group-id="CodeMenu" anchor="last"/>
+            </action>
         </group>
     </actions>
 </idea-plugin>
