@@ -1,11 +1,9 @@
 package com.github.jaksonlin.pitestintellij.mediators;
 
 import com.github.jaksonlin.pitestintellij.util.Mutation;
-import com.github.jaksonlin.pitestintellij.util.MutationReportParser;
 import com.github.jaksonlin.pitestintellij.util.Pair;
 
 import javax.swing.*;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,14 +16,8 @@ public class MutationMediatorImpl implements IMutationMediator {
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     @Override
-    public void processMutationResult(String mutationTargetClassFilePath, String mutationReportFilePath) {
+    public void processMutationResult(String mutationTargetClassFilePath, List<Mutation> mutations) {
         executorService.submit(() -> {
-            List<Mutation> mutations = null;
-            try {
-                mutations = MutationReportParser.parseMutationsFromXml(mutationReportFilePath).getMutation();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
             Map<Integer, Pair<String, Boolean>> renderedFormat = convertResultToUIRenderFormat(mutations);
             if (clientUI != null) {
                 SwingUtilities.invokeLater(() -> clientUI.updateMutationResult(mutationTargetClassFilePath, renderedFormat));
