@@ -2,7 +2,7 @@ package com.github.jaksonlin.pitestintellij.services;
 
 import com.github.jaksonlin.pitestintellij.context.PitestContext;
 import com.github.jaksonlin.pitestintellij.observers.ObserverBase;
-import com.github.jaksonlin.pitestintellij.observers.RunHistoryObserver;
+import com.github.jaksonlin.pitestintellij.observers.BasicEventObserver;
 import com.github.jaksonlin.pitestintellij.util.Pair;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -39,13 +39,14 @@ public final class RunHistoryManager extends ObserverBase {
     }
 
     @Override
-    public void addObserver(RunHistoryObserver observer) {
+    public void addObserver(BasicEventObserver observer) {
         super.addObserver(observer);
+        // when observer is added, pass current value of history to observer, force it to update
         // pass current value of history to observer, List<Pair<String, String>>
         List<Pair<String, String>> mappedHistory = history.entrySet().stream()
                 .map(entry -> new Pair<>(entry.getValue().getTargetClassPackageName(), entry.getValue().getTargetClassName()))
                 .collect(Collectors.toList());
-        observer.onRunHistoryChanged(mappedHistory);
+        observer.onEventHappen(mappedHistory);
     }
 
     @Nullable

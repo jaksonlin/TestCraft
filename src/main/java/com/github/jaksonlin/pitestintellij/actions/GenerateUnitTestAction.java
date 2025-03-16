@@ -4,17 +4,16 @@ import com.github.jaksonlin.pitestintellij.context.PitestContext;
 import com.github.jaksonlin.pitestintellij.license.PremiumManager;
 import com.github.jaksonlin.pitestintellij.services.LLMService;
 import com.github.jaksonlin.pitestintellij.services.RunHistoryManager;
-import com.github.jaksonlin.pitestintellij.toolWindow.LLMSuggestionsDialog;
 import com.intellij.openapi.actionSystem.AnAction;
-
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
-import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.psi.PsiFile;
 import org.jetbrains.annotations.NotNull;
+
 public class GenerateUnitTestAction extends AnAction {
+
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
 //        if (!PremiumManager.getInstance().isPremium()) {
@@ -42,10 +41,8 @@ public class GenerateUnitTestAction extends AnAction {
             return;
         }
 
-        LLMService llmService = project.getService(LLMService.class);
-        String suggestions = llmService.generateUnitTestSuggestions(context);
+        //project.getService(LLMService.class).generateUnitTestSuggestions(context);
 
-        new LLMSuggestionsDialog(project, suggestions).show();
     }
 
     @Override
