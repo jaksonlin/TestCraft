@@ -39,14 +39,18 @@
         <toolWindow factoryClass="com.github.jaksonlin.pitestintellij.toolWindow.MutationToolWindowFactory" id="MutationTestHistory" icon="/pitestHistoryWindowIcon.svg"/>
         <applicationConfigurable
             instance="com.github.jaksonlin.pitestintellij.ui.AnnotationConfigurable"
-            id="com.github.jaksonlin.pitestintellij.settings"
+            id="com.github.jaksonlin.pitestintellij.settings.annotations"
             displayName="Unittest Annotation Configuration"/>
+        <applicationConfigurable
+                instance="com.github.jaksonlin.pitestintellij.ui.InvalidAssertConfigurable"
+                id="com.github.jaksonlin.pitestintellij.settings.asserts"
+                displayName="Unittest Assert Check Configuration"/>
         <localInspection
             shortName="UnittestCaseAnnotationInspection"
             language="JAVA"
             implementationClass="com.github.jaksonlin.pitestintellij.inspectors.UnittestInspector"
             displayName="Unittest case management annotation inspection"
-            enabledByDefault="false"
+            enabledByDefault="true"
             groupName="Java"
             order="LAST"
         />

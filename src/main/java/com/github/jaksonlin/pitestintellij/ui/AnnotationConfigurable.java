@@ -154,27 +154,28 @@ public class AnnotationConfigurable implements Configurable {
 
     @Override
     public void apply() throws ConfigurationException {
-        if (editor != null) {
-            String jsonText = editor.getText();
-            try {
-                // Validate JSON format and schema
-                jsonMapper.readValue(jsonText, AnnotationSchema.class);
-                AnnotationConfigService.State state = configService.getState();
-                if (state != null) {
-                    state.schemaJson = jsonText;
-                }
-
-                // Update import settings
-                if (packageTextField != null) {
-                    configService.setAnnotationPackage(packageTextField.getText());
-                }
-                if (autoImportCheckbox != null) {
-                    configService.setAutoImport(autoImportCheckbox.isSelected());
-                }
-
-            } catch (IOException e) {
-                throw new ConfigurationException("Invalid JSON schema: " + e.getMessage());
+        if (editor == null){
+            return;
+        }
+        String jsonText = editor.getText();
+        try {
+            // Validate JSON format and schema
+            jsonMapper.readValue(jsonText, AnnotationSchema.class);
+            AnnotationConfigService.State state = configService.getState();
+            if (state != null) {
+                state.schemaJson = jsonText;
             }
+
+            // Update import settings
+            if (packageTextField != null) {
+                configService.setAnnotationPackage(packageTextField.getText());
+            }
+            if (autoImportCheckbox != null) {
+                configService.setAutoImport(autoImportCheckbox.isSelected());
+            }
+
+        } catch (IOException e) {
+            throw new ConfigurationException("Invalid JSON schema: " + e.getMessage());
         }
     }
 

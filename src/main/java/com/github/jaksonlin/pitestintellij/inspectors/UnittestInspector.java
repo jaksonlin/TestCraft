@@ -13,7 +13,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class UnittestInspector extends AbstractBaseJavaLocalInspectionTool {
 
@@ -44,7 +43,6 @@ public class UnittestInspector extends AbstractBaseJavaLocalInspectionTool {
         "org.junit.platform.suite.api.Suite"
     ));
 
-    private final ConcurrentHashMap<String, Boolean> testClassCache = new ConcurrentHashMap<>();
 
     @Override
     public @NotNull PsiElementVisitor buildVisitor(@NotNull ProblemsHolder holder, boolean isOnTheFly) {
@@ -88,7 +86,4 @@ public class UnittestInspector extends AbstractBaseJavaLocalInspectionTool {
         return "UnittestCaseAnnotationInspection";
     }
 
-    public void clearCache() {
-        testClassCache.clear();
-    }
 }
