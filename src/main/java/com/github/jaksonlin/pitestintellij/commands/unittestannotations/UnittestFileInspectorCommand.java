@@ -126,13 +126,13 @@ public class UnittestFileInspectorCommand extends UnittestCaseCheckCommand {
 
     private void checkIfValidAssertionStatement(PsiMethod psiMethod) {
         // check method call statement to see if there's any assert statement that is not valid (listed in invalidAssertions)
-        for (PsiMethod method : PsiTreeUtil.findChildrenOfType(psiMethod, PsiMethod.class)) {
-            for (String invalidAssertion : invalidAssertionConfigService.getInvalidAssertions()) {
-                if (method.getText().contains(invalidAssertion)) {
-                    holder.registerProblem(psiMethod, "Method should contains valid assert statement", ProblemHighlightType.ERROR);
-                    return;
-                }
+        String methodText = psiMethod.getText();
+        for (String invalidAssertion : invalidAssertionConfigService.getInvalidAssertions()) {
+            if (methodText.contains(invalidAssertion)) {
+                holder.registerProblem(psiMethod, "Method should contains valid assert statement", ProblemHighlightType.ERROR);
+                return;
             }
         }
+
     }
 }
