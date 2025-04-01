@@ -1,6 +1,7 @@
 package com.github.jaksonlin.pitestintellij.commands.unittestannotations;
 
 import com.github.jaksonlin.pitestintellij.context.CaseCheckContext;
+import com.github.jaksonlin.pitestintellij.services.AnnotationConfigService;
 import com.github.jaksonlin.pitestintellij.services.InvalidAssertionConfigService;
 import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
@@ -21,6 +22,7 @@ public class UnittestFileInspectorCommand extends UnittestCaseCheckCommand {
     private final ProblemsHolder holder;
 
     private final InvalidAssertionConfigService invalidAssertionConfigService = ApplicationManager.getApplication().getService(InvalidAssertionConfigService.class);
+    private final AnnotationConfigService annotationConfigService = ApplicationManager.getApplication().getService(AnnotationConfigService.class);
     public UnittestFileInspectorCommand(ProblemsHolder holder, Project project, CaseCheckContext context) {
         super(project, context);
         this.holder = holder;
@@ -28,8 +30,10 @@ public class UnittestFileInspectorCommand extends UnittestCaseCheckCommand {
 
     @Override
     public void execute() {
-        if (invalidAssertionConfigService.isEnable()) {
+        if (annotationConfigService.shouldCheckAnnotation()){
             checkAnnotationSchema(getContext().getPsiMethod());
+        }
+        if (invalidAssertionConfigService.isEnable()) {
             checkIfCommentHasStepAndAssert(getContext().getPsiMethod());
             checkIfthereIsAssertionStatement(getContext().getPsiMethod());
             checkIfValidAssertionStatement(getContext().getPsiMethod());
@@ -66,27 +70,32 @@ public class UnittestFileInspectorCommand extends UnittestCaseCheckCommand {
     }
 
     private void checkIfthereIsAssertionStatement(PsiMethod psiMethod) {
-        boolean hasAssertion = false;
+
         // Find all method calls within the method
         if (hasAssertionStatement(psiMethod)) {
             return;
         }
 
         // check if the method has annotation to assert the throw of exception: @Test(expected = Exception)
+        if (useTestExpectedAsAssertion(psiMethod)) {
+            return;
+        }
+
+        holder.registerProblem(psiMethod, "Method should contains assert statement", ProblemHighlightType.ERROR);
+
+    }
+
+    private boolean useTestExpectedAsAssertion(PsiMethod psiMethod){
         for (PsiAnnotation annotation : psiMethod.getAnnotations()) {
             // 1. find the @Test annotation
             if (Objects.requireNonNull(annotation.getQualifiedName()).contains("Test")) {
                 // 2. check if the annotation has "expected" attribute
                 if (annotation.findAttributeValue("expected") != null && !Objects.requireNonNull(annotation.findAttributeValue("expected")).getText().equals("org.junit.Test.None.class")) {
-                    hasAssertion = true;
-                    break;
+                    return true;
                 }
             }
         }
-
-        if (!hasAssertion) {
-            holder.registerProblem(psiMethod, "Method should contains assert statement", ProblemHighlightType.ERROR);
-        }
+        return false;
     }
 
     // check if a test method has assertion statement
@@ -135,18 +144,16 @@ public class UnittestFileInspectorCommand extends UnittestCaseCheckCommand {
     private void checkIfValidAssertionStatement(PsiMethod psiMethod) {
         // check method call statement to see if there's any assert statement that is not valid (listed in invalidAssertions)
         Optional<PsiMethod> assertionMethod = getAssertionMethodFromTestMethod(psiMethod);
-        if (assertionMethod.isEmpty()) {
-            holder.registerProblem(psiMethod, "Method should contains assert statement", ProblemHighlightType.ERROR);
-            return;
-        }
-        List<String> invalidAssertions = invalidAssertionConfigService.getInvalidAssertions();
-        String methodText = assertionMethod.get().getText();
-        for (String invalidAssertion : invalidAssertions) {
-            if (methodText.contains(invalidAssertion)) {
-                holder.registerProblem(psiMethod, "Method should contains valid assert statement", ProblemHighlightType.ERROR);
-                return;
+        // use method call as assertion statement, check the method content
+        if (assertionMethod.isPresent()) {
+            List<String> invalidAssertions = invalidAssertionConfigService.getInvalidAssertions();
+            String methodText = assertionMethod.get().getText();
+            for (String invalidAssertion : invalidAssertions) {
+                if (methodText.contains(invalidAssertion)) {
+                    holder.registerProblem(psiMethod, "Method should contains valid assert statement", ProblemHighlightType.ERROR);
+                    return;
+                }
             }
         }
-
     }
 }

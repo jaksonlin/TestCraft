@@ -18,6 +18,7 @@ import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.panels.VerticalLayout;
+import com.intellij.util.ui.JBUI;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,6 +31,7 @@ public class AnnotationConfigurable implements Configurable {
     private EditorTextField editor;
     private JTextField packageTextField;
     private JCheckBox autoImportCheckbox;
+    private JCheckBox shouldCheckAnnotationCheckbox;
     private final AnnotationConfigService configService = ApplicationManager.getApplication().getService(AnnotationConfigService.class);
     private final ObjectMapper jsonMapper = JsonMapper.builder().build();
 
@@ -48,7 +50,7 @@ public class AnnotationConfigurable implements Configurable {
         mainPanel.add(createImportSettingsPanel());
 
         // Schema Editor Section
-        mainPanel.add(new JBLabel("Annotation Schema:"));
+        mainPanel.add(new JBLabel("Annotation schema:"));
         mainPanel.add(createSchemaEditor());
 
         // Buttons Panel
@@ -81,7 +83,7 @@ public class AnnotationConfigurable implements Configurable {
     private JComponent createImportSettingsPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.insets = JBUI.insets(5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.BASELINE_LEADING;
 
@@ -89,7 +91,7 @@ public class AnnotationConfigurable implements Configurable {
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.weightx = 0.0;
-        panel.add(new JBLabel("Annotation Package:"), gbc);
+        panel.add(new JBLabel("Annotation package:"), gbc);
 
         // Package TextField
         packageTextField = new JTextField(configService.getAnnotationPackage());
@@ -104,6 +106,13 @@ public class AnnotationConfigurable implements Configurable {
         gbc.weightx = 0.0;
         gbc.insets.left = 20;
         panel.add(autoImportCheckbox, gbc);
+
+        // Should Check Annotation Checkbox
+        shouldCheckAnnotationCheckbox = new JCheckBox("Check Annotation Rules", configService.shouldCheckAnnotation());
+        gbc.gridx = 3;
+        gbc.weightx = 0.0;
+        gbc.insets.left = 20;
+        panel.add(shouldCheckAnnotationCheckbox, gbc);
 
         return panel;
     }
@@ -149,7 +158,8 @@ public class AnnotationConfigurable implements Configurable {
         AnnotationConfigService.State state = configService.getState();
         return (editor != null && !Objects.equals(editor.getText(), (state != null ? state.schemaJson : AnnotationSchema.DEFAULT_SCHEMA))) ||
                 (packageTextField != null && !Objects.equals(packageTextField.getText(), configService.getAnnotationPackage())) ||
-                (autoImportCheckbox != null && autoImportCheckbox.isSelected() != configService.isAutoImport());
+                (autoImportCheckbox != null && autoImportCheckbox.isSelected() != configService.isAutoImport()) ||
+                (shouldCheckAnnotationCheckbox != null && shouldCheckAnnotationCheckbox.isSelected() != configService.shouldCheckAnnotation());
     }
 
     @Override
@@ -172,6 +182,9 @@ public class AnnotationConfigurable implements Configurable {
             }
             if (autoImportCheckbox != null) {
                 configService.setAutoImport(autoImportCheckbox.isSelected());
+            }
+            if (shouldCheckAnnotationCheckbox != null) {
+                configService.setShouldCheckAnnotation(shouldCheckAnnotationCheckbox.isSelected());
             }
 
         } catch (IOException e) {

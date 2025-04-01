@@ -50,7 +50,7 @@
             shortName="UnittestCaseAnnotationInspection"
             language="JAVA"
             implementationClass="com.github.jaksonlin.pitestintellij.inspectors.UnittestInspector"
-            displayName="Unittest case management annotation inspection"
+            displayName="Unit test case comment and assert check"
             enabledByDefault="true"
             groupName="Java"
             order="LAST"

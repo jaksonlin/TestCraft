@@ -26,6 +26,7 @@ public final class AnnotationConfigService implements PersistentStateComponent<A
     public static class State {
         public String schemaJson = AnnotationSchema.DEFAULT_SCHEMA;
         public String annotationPackage = "com.example.unittest.annotations";
+        public boolean shouldCheckAnnotation = false;
         public boolean autoImport = true;
 
         public State() {
@@ -109,5 +110,14 @@ public final class AnnotationConfigService implements PersistentStateComponent<A
     public void setAutoImport(boolean auto) {
         myState.autoImport = auto;
         LOG.info("Updated auto import setting: " + auto);
+    }
+
+    public boolean shouldCheckAnnotation() {
+        return myState.shouldCheckAnnotation;
+    }
+
+    public void setShouldCheckAnnotation(boolean shouldCheckAnnotation) {
+        myState.shouldCheckAnnotation = shouldCheckAnnotation;
+        LOG.info("Updated should check annotation setting: " + shouldCheckAnnotation);
     }
 }
