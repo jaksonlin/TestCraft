@@ -1,9 +1,5 @@
 package com.github.jaksonlin.pitestintellij.ui;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.github.jaksonlin.pitestintellij.annotations.AnnotationSchema;
-import com.github.jaksonlin.pitestintellij.services.AnnotationConfigService;
 import com.github.jaksonlin.pitestintellij.services.InvalidAssertionConfigService;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.options.Configurable;
@@ -18,7 +14,6 @@ import javax.swing.BoxLayout;
 import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import java.io.IOException;
 import java.util.Objects;
 
 public class InvalidAssertConfigurable implements Configurable {

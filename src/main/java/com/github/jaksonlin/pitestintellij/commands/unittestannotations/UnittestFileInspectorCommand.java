@@ -12,7 +12,9 @@ import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiMethodCallExpression;
 import com.intellij.psi.util.PsiTreeUtil;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Stack;
 
 public class UnittestFileInspectorCommand extends UnittestCaseCheckCommand {
@@ -89,6 +91,11 @@ public class UnittestFileInspectorCommand extends UnittestCaseCheckCommand {
 
     // check if a test method has assertion statement
     private boolean hasAssertionStatement(PsiMethod psiMethod) {
+       Optional<PsiMethod> assertionMethod = getAssertionMethodFromTestMethod(psiMethod);
+       return assertionMethod.isPresent();
+    }
+
+    private Optional<PsiMethod> getAssertionMethodFromTestMethod(PsiMethod psiMethod) {
         Stack<PsiMethod> stack = new Stack<>();
         stack.push(psiMethod);
         int depth = 0;
@@ -99,7 +106,8 @@ public class UnittestFileInspectorCommand extends UnittestCaseCheckCommand {
                 // 2. check if the method is assert statement
                 String methodName = methodCall.getMethodExpression().getReferenceName();
                 if (methodName != null && (methodName.toLowerCase().contains("assert") || methodName.toLowerCase().contains("verify"))) {
-                    return true;
+                    // which means the method contains assert statement
+                    return Optional.of(method);
                 } else {
                     // 3. if not, push the child method to the stack
                     // 3.1 convert the methodCall to a PsiMethod
@@ -111,23 +119,29 @@ public class UnittestFileInspectorCommand extends UnittestCaseCheckCommand {
             }
             // 4. if the depth is greater than 3, return false
             if (depth > 3) {
-                return false;
+                return Optional.empty();
             }
             // 5. if the stack is empty, return false
             if (stack.isEmpty()) {
-                return false;
+                return Optional.empty();
             }
             depth++;
         }
 
-        return false;
+        return Optional.empty();
     }
     
 
     private void checkIfValidAssertionStatement(PsiMethod psiMethod) {
         // check method call statement to see if there's any assert statement that is not valid (listed in invalidAssertions)
-        String methodText = psiMethod.getText();
-        for (String invalidAssertion : invalidAssertionConfigService.getInvalidAssertions()) {
+        Optional<PsiMethod> assertionMethod = getAssertionMethodFromTestMethod(psiMethod);
+        if (assertionMethod.isEmpty()) {
+            holder.registerProblem(psiMethod, "Method should contains assert statement", ProblemHighlightType.ERROR);
+            return;
+        }
+        List<String> invalidAssertions = invalidAssertionConfigService.getInvalidAssertions();
+        String methodText = assertionMethod.get().getText();
+        for (String invalidAssertion : invalidAssertions) {
             if (methodText.contains(invalidAssertion)) {
                 holder.registerProblem(psiMethod, "Method should contains valid assert statement", ProblemHighlightType.ERROR);
                 return;
