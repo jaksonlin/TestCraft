@@ -4,7 +4,30 @@
     <depends>com.intellij.modules.json</depends>
 </idea-plugin><!-- Keep a Changelog guide -> https://keepachangelog.com -->
 
-# pitest-intellij Changelog
+# TestCraft Pro Changelog
+
+## [1.0.0] - 2025-04-01
+### Project Launch
+- Complete rebranding and expansion of functionality
+- Migration from MIT to Apache 2.0 License
+- New comprehensive test management features
+
+### Added
+- Enhanced test case management system
+- Annotation validation and generation
+- Assertion statement verification
+- Support for both Gradle and Maven projects
+- Configurable test quality rules
+
+### Carried Forward
+- All PITest mutation testing capabilities
+- Results visualization and navigation
+- Editor integration features
+
+### Changed
+- Project name from pitest-gradle to TestCraft Pro
+- License from MIT to Apache 2.0
+- Expanded plugin scope beyond mutation testing
 
 ## 1.0.0 - 2024-10-12
 ### Initial Release

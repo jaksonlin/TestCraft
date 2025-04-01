@@ -88,3 +88,14 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## License
 
 This project is licensed under the [Apache 2.0 License](LICENSE).
+
+## Third-Party Licenses
+
+This project uses the following open-source libraries:
+
+- JavaParser (Apache License 2.0)
+- Jackson Libraries (Apache License 2.0)
+- Kotlinx Serialization (Apache License 2.0)
+- JUnit (Eclipse Public License 1.0)
+
+For full license texts, see the NOTICE file in the project root.

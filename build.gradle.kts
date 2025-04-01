@@ -29,10 +29,17 @@ intellij {
     version.set(providers.gradleProperty("platformVersion"))
     type.set(providers.gradleProperty("platformType"))
 
-    // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file.
     plugins.set(providers.gradleProperty("platformBundledPlugins")
         .map { it.split(',').map(String::trim).filter(String::isNotEmpty) }
-        .map { it + listOf("git4idea") }
+        .map { plugins ->
+            val untilBuild = providers.gradleProperty("pluginUntilBuild").get()
+            println("untilBuild: $untilBuild")
+            if (untilBuild.startsWith("251")) {
+                plugins + "com.intellij.modules.json"
+            } else {
+                plugins
+            }
+        }
     )
 }
 
