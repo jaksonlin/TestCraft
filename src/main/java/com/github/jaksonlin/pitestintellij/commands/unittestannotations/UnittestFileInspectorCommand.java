@@ -114,7 +114,9 @@ public class UnittestFileInspectorCommand extends UnittestCaseCheckCommand {
             for (PsiMethodCallExpression methodCall : PsiTreeUtil.findChildrenOfType(method, PsiMethodCallExpression.class)) {
                 // 2. check if the method is assert statement
                 String methodName = methodCall.getMethodExpression().getReferenceName();
-                if (methodName != null && (methodName.toLowerCase().contains("assert") || methodName.toLowerCase().contains("verify"))) {
+                if (methodName != null && (methodName.toLowerCase().contains("assert")
+                        || methodName.toLowerCase().contains("verify")
+                        || methodName.toLowerCase().contains("fail"))) {
                     // which means the method contains assert statement
                     return Optional.of(method);
                 } else {
