@@ -70,19 +70,19 @@
     <resource-bundle>messages.MyBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="com.github.jaksonlin.pitestintellij.toolWindow.MutationToolWindowFactory" id="MutationTestHistory" icon="/pitestHistoryWindowIcon.svg"/>
+        <toolWindow factoryClass="com.github.jaksonlin.testcraftpro.toolWindow.MutationToolWindowFactory" id="MutationTestHistory" icon="/pitestHistoryWindowIcon.svg"/>
         <applicationConfigurable
-            instance="com.github.jaksonlin.pitestintellij.ui.AnnotationConfigurable"
-            id="com.github.jaksonlin.pitestintellij.settings.annotations"
+            instance="com.github.jaksonlin.testcraftpro.ui.AnnotationConfigurable"
+            id="com.github.jaksonlin.testcraftpro.settings.annotations"
             displayName="Unittest Annotation Configuration"/>
         <applicationConfigurable
-                instance="com.github.jaksonlin.pitestintellij.ui.InvalidAssertConfigurable"
-                id="com.github.jaksonlin.pitestintellij.settings.asserts"
+                instance="com.github.jaksonlin.testcraftpro.ui.InvalidAssertConfigurable"
+                id="com.github.jaksonlin.testcraftpro.settings.asserts"
                 displayName="Unittest Assert Check Configuration"/>
         <localInspection
             shortName="UnittestCaseAnnotationInspection"
             language="JAVA"
-            implementationClass="com.github.jaksonlin.pitestintellij.inspectors.UnittestInspector"
+            implementationClass="com.github.jaksonlin.testcraftpro.inspectors.UnittestInspector"
             displayName="Unit test case comment and assert check"
             enabledByDefault="true"
             groupName="Java"
@@ -90,12 +90,12 @@
         />
         <completion.contributor
                 language="JAVA"
-                implementationClass="com.github.jaksonlin.pitestintellij.completions.AnnotationCompletionContributor"/>
+                implementationClass="com.github.jaksonlin.testcraftpro.completions.AnnotationCompletionContributor"/>
 
     </extensions>
 
     <applicationListeners>
-        <listener class="com.github.jaksonlin.pitestintellij.listeners.MyApplicationActivationListener" topic="com.intellij.openapi.application.ApplicationActivationListener"/>
+        <listener class="com.github.jaksonlin.testcraftpro.listeners.MyApplicationActivationListener" topic="com.intellij.openapi.application.ApplicationActivationListener"/>
     </applicationListeners>
 
     <!-- Add right-click entry to run Pitest on a JUnit test file -->
@@ -110,15 +110,15 @@
             <add-to-group group-id="UnittestHelperToolMenu" anchor="last"/>
             <!-- Action inside the submenu -->
             <action
-                    class="com.github.jaksonlin.pitestintellij.actions.RunPitestAction"
+                    class="com.github.jaksonlin.testcraftpro.actions.RunPitestAction"
                     id="RunPitestAction"
                     text="Run Mutation Test">
             </action>
-            <action class="com.github.jaksonlin.pitestintellij.actions.RunCaseAnnoationCheckAction"
+            <action class="com.github.jaksonlin.testcraftpro.actions.RunCaseAnnoationCheckAction"
                     id="RunCaseAnnoationCheckAction"
                     text="Run Current Method Annotation Check">
             </action>
-            <action class="com.github.jaksonlin.pitestintellij.actions.GenerateAnnotationCommandAction"
+            <action class="com.github.jaksonlin.testcraftpro.actions.GenerateAnnotationCommandAction"
                     id="GenerateAnnotationCommandAction"
                     text="Generate Annotation Command On Method">
             </action>
