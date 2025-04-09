@@ -39,21 +39,41 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow factoryClass="com.github.jaksonlin.pitestintellij.toolWindow.MutationToolWindowFactory" id="MutationTestHistory" icon="/pitestHistoryWindowIcon.svg"/>
+        <toolWindow id="LLM Suggestions" 
+                    secondary="true"
+                    icon="AllIcons.General.Add"
+                    anchor="right"
+                    factoryClass="com.github.jaksonlin.pitestintellij.toolWindow.LLMSuggestionsToolWindowFactory"/>
+
+        <!-- Settings Group -->
         <applicationConfigurable
-            instance="com.github.jaksonlin.pitestintellij.ui.AnnotationConfigurable"
-            id="com.github.jaksonlin.pitestintellij.settings.annotations"
-            displayName="Unittest Annotation Configuration"/>
+                parentId="root"
+                id="com.github.jaksonlin.pitestintellij.settings"
+                displayName="TestCraft"
+                instance="com.github.jaksonlin.pitestintellij.settings.TestCraftSettingsConfigurable"/>
+                
         <applicationConfigurable
+                parentId="com.github.jaksonlin.pitestintellij.settings"
+                instance="com.github.jaksonlin.pitestintellij.ui.AnnotationConfigurable"
+                id="com.github.jaksonlin.pitestintellij.settings.annotations"
+                displayName="Test Annotations"/>
+                
+        <applicationConfigurable
+                parentId="com.github.jaksonlin.pitestintellij.settings"
                 instance="com.github.jaksonlin.pitestintellij.ui.InvalidAssertConfigurable"
                 id="com.github.jaksonlin.pitestintellij.settings.asserts"
-                displayName="Unittest Assert Check Configuration"/>
+                displayName="Assert Validation"/>
+                
         <applicationConfigurable
+                parentId="com.github.jaksonlin.pitestintellij.settings"
                 instance="com.github.jaksonlin.pitestintellij.settings.OllamaSettingsConfigurable"
                 id="com.github.jaksonlin.pitestintellij.settings.ollama"
-                displayName="Ollama Settings"
-                parentId="tools"/>
-        <applicationService
-                serviceImplementation="com.github.jaksonlin.pitestintellij.settings.OllamaSettingsState"/>
+                displayName="LLM Settings"/>
+                
+        <!-- Services -->
+        <applicationService serviceImplementation="com.github.jaksonlin.pitestintellij.settings.OllamaSettingsState"/>
+        <applicationService serviceImplementation="com.github.jaksonlin.pitestintellij.services.AnnotationConfigService"/>
+        <applicationService serviceImplementation="com.github.jaksonlin.pitestintellij.services.InvalidAssertionConfigService"/>
         <localInspection
             shortName="UnittestCaseAnnotationInspection"
             language="JAVA"
@@ -63,14 +83,13 @@
             groupName="Java"
             order="LAST"
         />
+        
         <completion.contributor
                 language="JAVA"
                 implementationClass="com.github.jaksonlin.pitestintellij.completions.AnnotationCompletionContributor"/>
-        <toolWindow id="LLM Suggestions" 
-                    secondary="true"
-                    icon="AllIcons.General.Add"
-                    anchor="right"
-                    factoryClass="com.github.jaksonlin.pitestintellij.toolWindow.LLMSuggestionsToolWindowFactory"/>
+                
+        
+
     </extensions>
 
     <applicationListeners>

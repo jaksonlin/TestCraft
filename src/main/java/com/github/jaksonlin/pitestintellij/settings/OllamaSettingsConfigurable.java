@@ -12,12 +12,12 @@ public class OllamaSettingsConfigurable implements Configurable {
     @Nls(capitalization = Nls.Capitalization.Title)
     @Override
     public String getDisplayName() {
-        return "Ollama Settings";
+        return "LLM Settings";
     }
 
     @Override
     public JComponent getPreferredFocusedComponent() {
-        return settingsComponent.getPanel();
+        return settingsComponent.getPreferredFocusedComponent();
     }
 
     @Nullable
@@ -30,34 +30,40 @@ public class OllamaSettingsConfigurable implements Configurable {
     @Override
     public boolean isModified() {
         OllamaSettingsState settings = OllamaSettingsState.getInstance();
-        return !settingsComponent.getOllamaHost().equals(settings.ollamaHost)
-                || settingsComponent.getOllamaPort() != settings.ollamaPort
-                || !settingsComponent.getOllamaModel().equals(settings.ollamaModel)
-                || settingsComponent.getMaxTokens() != settings.maxTokens
-                || settingsComponent.getTemperature() != settings.temperature
-                || settingsComponent.getRequestTimeout() != settings.requestTimeout;
+        boolean modified = !settingsComponent.getHostText().equals(settings.ollamaHost);
+        modified |= !settingsComponent.getPortText().equals(String.valueOf(settings.ollamaPort));
+        modified |= !settingsComponent.getModelText().equals(settings.ollamaModel);
+        modified |= !settingsComponent.getMaxTokensText().equals(String.valueOf(settings.maxTokens));
+        modified |= !settingsComponent.getTemperatureText().equals(String.valueOf(settings.temperature));
+        modified |= !settingsComponent.getTimeoutText().equals(String.valueOf(settings.requestTimeout));
+        return modified;
     }
 
     @Override
     public void apply() {
         OllamaSettingsState settings = OllamaSettingsState.getInstance();
-        settings.ollamaHost = settingsComponent.getOllamaHost();
-        settings.ollamaPort = settingsComponent.getOllamaPort();
-        settings.ollamaModel = settingsComponent.getOllamaModel();
-        settings.maxTokens = settingsComponent.getMaxTokens();
-        settings.temperature = settingsComponent.getTemperature();
-        settings.requestTimeout = settingsComponent.getRequestTimeout();
+        settings.ollamaHost = settingsComponent.getHostText();
+        try {
+            settings.ollamaPort = Integer.parseInt(settingsComponent.getPortText());
+            settings.maxTokens = Integer.parseInt(settingsComponent.getMaxTokensText());
+            settings.temperature = Float.parseFloat(settingsComponent.getTemperatureText());
+            settings.requestTimeout = Integer.parseInt(settingsComponent.getTimeoutText());
+        } catch (NumberFormatException e) {
+            // Handle invalid number format
+            throw new IllegalStateException("Invalid number format in settings", e);
+        }
+        settings.ollamaModel = settingsComponent.getModelText();
     }
 
     @Override
     public void reset() {
         OllamaSettingsState settings = OllamaSettingsState.getInstance();
-        settingsComponent.setOllamaHost(settings.ollamaHost);
-        settingsComponent.setOllamaPort(settings.ollamaPort);
-        settingsComponent.setOllamaModel(settings.ollamaModel);
-        settingsComponent.setMaxTokens(settings.maxTokens);
-        settingsComponent.setTemperature(settings.temperature);
-        settingsComponent.setRequestTimeout(settings.requestTimeout);
+        settingsComponent.setHostText(settings.ollamaHost);
+        settingsComponent.setPortText(String.valueOf(settings.ollamaPort));
+        settingsComponent.setModelText(settings.ollamaModel);
+        settingsComponent.setMaxTokensText(String.valueOf(settings.maxTokens));
+        settingsComponent.setTemperatureText(String.valueOf(settings.temperature));
+        settingsComponent.setTimeoutText(String.valueOf(settings.requestTimeout));
     }
 
     @Override

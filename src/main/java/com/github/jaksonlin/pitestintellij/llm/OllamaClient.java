@@ -44,7 +44,7 @@ public class OllamaClient {
     public boolean testConnection() {
         try {
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(baseUrl + "/api/health"))
+                    .uri(URI.create(baseUrl))
                     .timeout(Duration.ofSeconds(timeoutSeconds))
                     .GET()
                     .build();
