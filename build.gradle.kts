@@ -22,6 +22,8 @@ kotlin {
 // Configure project's dependencies
 repositories {
     mavenCentral()
+    maven { url = uri("https://www.jetbrains.com/intellij-repository/releases") }
+    maven { url = uri("https://cache-redirector.jetbrains.com/intellij-dependencies") }
 }
 
 intellij {
@@ -32,7 +34,6 @@ intellij {
     // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file.
     plugins.set(providers.gradleProperty("platformBundledPlugins")
         .map { it.split(',').map(String::trim).filter(String::isNotEmpty) }
-        .map { it + listOf("git4idea") }
     )
 }
 

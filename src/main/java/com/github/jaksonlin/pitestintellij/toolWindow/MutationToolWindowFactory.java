@@ -17,7 +17,7 @@ public class MutationToolWindowFactory implements ToolWindowFactory {
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
         JPanel toolWindowPanel = createToolWindowPanel(project);
         ContentManager contentManager = toolWindow.getContentManager();
-        Content content = new ContentImpl(toolWindowPanel, "", false); // Directly create ContentImpl
+        Content content = new ContentImpl(toolWindowPanel, "TestCraft - Mutation Tool Window", false); // Directly create ContentImpl
         contentManager.addContent(content);
     }
 

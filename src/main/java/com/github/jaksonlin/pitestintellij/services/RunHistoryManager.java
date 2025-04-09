@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 @Service(Service.Level.PROJECT)
 public final class RunHistoryManager extends ObserverBase {
     private static final Logger log = LoggerFactory.getLogger(RunHistoryManager.class);
-    private static final Logger log = LoggerFactory.getLogger(RunHistoryManager.class);
     private final Project project;
     private final Gson gson = new Gson();
     private final File historyFile;
