@@ -31,6 +31,7 @@
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
+    <depends>com.intellij.modules.json</depends>
     <depends>Git4Idea</depends>
 
     <resource-bundle>messages.MyBundle</resource-bundle>
@@ -39,14 +40,18 @@
         <toolWindow factoryClass="com.github.jaksonlin.pitestintellij.toolWindow.MutationToolWindowFactory" id="MutationTestHistory" icon="/pitestHistoryWindowIcon.svg"/>
         <applicationConfigurable
             instance="com.github.jaksonlin.pitestintellij.ui.AnnotationConfigurable"
-            id="com.github.jaksonlin.pitestintellij.settings"
+            id="com.github.jaksonlin.pitestintellij.settings.annotations"
             displayName="Unittest Annotation Configuration"/>
+        <applicationConfigurable
+                instance="com.github.jaksonlin.pitestintellij.ui.InvalidAssertConfigurable"
+                id="com.github.jaksonlin.pitestintellij.settings.asserts"
+                displayName="Unittest Assert Check Configuration"/>
         <localInspection
             shortName="UnittestCaseAnnotationInspection"
             language="JAVA"
             implementationClass="com.github.jaksonlin.pitestintellij.inspectors.UnittestInspector"
-            displayName="Unittest case management annotation inspection"
-            enabledByDefault="false"
+            displayName="Unit test case comment and assert check"
+            enabledByDefault="true"
             groupName="Java"
             order="LAST"
         />

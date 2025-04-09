@@ -1,4 +1,8 @@
-<!-- Keep a Changelog guide -> https://keepachangelog.com -->
+<idea-plugin>
+    <!-- Other configurations -->
+
+    <depends>com.intellij.modules.json</depends>
+</idea-plugin><!-- Keep a Changelog guide -> https://keepachangelog.com -->
 
 # pitest-intellij Changelog
 
@@ -21,3 +25,9 @@
 ## 1.0.3 - 2024-11-14
 - Add unit test annotation generation action.
 - Add unit test annotation inspection.
+
+## 1.0.4 - 2025-01-16
+- Add compatibility to 251
+
+## 1.0.5 - 2025-04-01
+- Add assertion statement check
