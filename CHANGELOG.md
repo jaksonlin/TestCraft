@@ -31,3 +31,5 @@
 
 ## 1.0.5 - 2025-04-01
 - Add assertion statement check
+- update support version to 251, no functional change
+
