@@ -11,7 +11,9 @@ import com.intellij.openapi.fileTypes.FileTypeManager;
 import com.intellij.ui.EditorTextField;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
+import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
+import com.intellij.util.ui.UI;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -19,48 +21,23 @@ import java.awt.*;
 
 public class InvalidTestCaseSettingsComponent {
     private final JPanel mainPanel;
-    private final EditorTextField schemaEditor;
+    private final EditorTextField assertionEditor;
     private final JBCheckBox enableCheckbox;
     private final JBCheckBox enableCommentCheckbox;
-    private static final int EDITOR_HEIGHT = 150; // Reduced height since we have more components
-    private final InvalidTestCaseConfigService service = ApplicationManager.getApplication().getService(InvalidTestCaseConfigService.class);
+    private static final int EDITOR_HEIGHT = 200;
 
     public InvalidTestCaseSettingsComponent() {
-        mainPanel = new JPanel(new GridBagLayout());
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.fill = GridBagConstraints.HORIZONTAL;
-        constraints.anchor = GridBagConstraints.NORTHWEST;
-        constraints.weightx = 1.0;
-        constraints.insets = JBUI.insets(5);
-
-        // Section header for Test Case Validation
-        JBLabel sectionLabel = new JBLabel("<html><b>Test Case Validation</b></html>");
-        constraints.gridx = 0;
-        constraints.gridy = 0;
-        constraints.gridwidth = 2;
-        mainPanel.add(sectionLabel, constraints);
-
-        // Enable invalid assertion check
+        // Create checkboxes with descriptions
         enableCheckbox = new JBCheckBox("Enable invalid assertion check");
         enableCheckbox.setToolTipText("When enabled, test methods will be checked for invalid assertion patterns");
-        constraints.gridy = 1;
-        mainPanel.add(enableCheckbox, constraints);
-
-        // Enable comment check
+        
         enableCommentCheckbox = new JBCheckBox("Enable test step comment check");
         enableCommentCheckbox.setToolTipText("When enabled, test methods will be checked for descriptive comments");
-        constraints.gridy = 2;
-        mainPanel.add(enableCommentCheckbox, constraints);
 
-        // Description for invalid assertion patterns
-        JBLabel descriptionLabel = new JBLabel("Enter invalid assertion patterns (one per line)");
-        constraints.gridy = 3;
-        mainPanel.add(descriptionLabel, constraints);
-
-        // Pattern editor
-        schemaEditor = new EditorTextField() {
+        // Create editor for invalid assertions
+        assertionEditor = new EditorTextField() {
             @Override
-            protected EditorEx createEditor() {
+            protected @NotNull EditorEx createEditor() {
                 EditorEx editor = (EditorEx) super.createEditor();
                 editor.setVerticalScrollbarVisible(true);
                 editor.setHorizontalScrollbarVisible(true);
@@ -70,18 +47,30 @@ public class InvalidTestCaseSettingsComponent {
                 return editor;
             }
         };
-        schemaEditor.setPreferredSize(new Dimension(-1, EDITOR_HEIGHT));
-        constraints.gridy = 4;
-        mainPanel.add(schemaEditor, constraints);
+        assertionEditor.setPreferredSize(new Dimension(-1, EDITOR_HEIGHT));
 
-        // Help text
-        String helpText = "<html>Examples of invalid assertions:<br>" +
-                "- assertTrue(true)<br>" +
-                "- assertEquals(1, 1)<br>" +
-                "- assertNotNull(new Object())</html>";
-        JBLabel helpLabel = new JBLabel(helpText);
-        constraints.gridy = 5;
-        mainPanel.add(helpLabel, constraints);
+        // Help text for invalid assertions
+        String helpText = "<html><b>Examples of invalid assertions that will be flagged:</b><br>" +
+                "• assertTrue(true) - trivial assertion<br>" +
+                "• assertEquals(1, 1) - comparing same values<br>" +
+                "• assertNotNull(new Object()) - testing newly created object<br>" +
+                "• assertEquals(\"success\", \"success\") - comparing identical strings</html>";
+
+        // Build the layout using FormBuilder for consistent spacing and organization
+        mainPanel = FormBuilder.createFormBuilder()
+                .addComponent(new JBLabel("<html><b>Test Case Validation Settings</b></html>"))
+                .addVerticalGap(10)
+                .addComponent(enableCheckbox)
+                .addComponent(enableCommentCheckbox)
+                .addVerticalGap(10)
+                .addComponent(new JBLabel("Invalid Assertion Patterns"))
+                .addComponent(new JBLabel("Enter patterns for assertions that should be flagged as invalid (one per line):"))
+                .addComponent(assertionEditor)
+                .addComponent(new JBLabel(helpText))
+                .addComponentFillVertically(new JPanel(), 0)
+                .getPanel();
+
+        mainPanel.setBorder(JBUI.Borders.empty(10));
     }
 
     public JPanel getPanel() {
@@ -89,7 +78,7 @@ public class InvalidTestCaseSettingsComponent {
     }
 
     public JComponent getPreferredFocusedComponent() {
-        return schemaEditor;
+        return assertionEditor;
     }
 
     public boolean isEnableCheck() {
@@ -109,10 +98,10 @@ public class InvalidTestCaseSettingsComponent {
     }
 
     public String getInvalidAssertionText() {
-        return schemaEditor.getText();
+        return assertionEditor.getText();
     }
 
     public void setInvalidAssertionText(String text) {
-        schemaEditor.setText(text);
+        assertionEditor.setText(text);
     }
 } 
