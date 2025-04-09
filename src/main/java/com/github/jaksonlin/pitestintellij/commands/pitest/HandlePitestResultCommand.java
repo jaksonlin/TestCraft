@@ -36,7 +36,19 @@ public class HandlePitestResultCommand extends PitestCommand {
         } else if (exitCode == -1) {
             showOutput("Error running Pitest:\n\n" + result.getErrorOutput(), "Pitest Error");
         } else {
-            showOutput("Pitest exited with code " + exitCode + ":\n\n" + result.getErrorOutput(), "Pitest Error");
+            StringBuilder errorMessage = new StringBuilder()
+                .append("Pitest exited with code ").append(exitCode).append("\n\n")
+                .append("This might indicate an abnormal test process termination.\n")
+                .append("Common causes for exit code 2 include:\n")
+                .append("- System.exit() called in test code\n")
+                .append("- Test process configuration issues\n")
+                .append("- Memory/resource constraints\n\n")
+                .append("=== Error Output ===\n")
+                .append(result.getErrorOutput()).append("\n\n")
+                .append("=== Context Information ===\n")
+                .append(PitestContext.dumpPitestContext(getContext()));
+
+            showOutput(errorMessage.toString(), "Pitest Error");
         }
     }
 
