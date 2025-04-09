@@ -2,8 +2,6 @@ package com.github.jaksonlin.pitestintellij.settings;
 
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextField;
-import com.intellij.util.ui.FormBuilder;
-import com.intellij.util.ui.UI;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.jaksonlin.pitestintellij.llm.OllamaClient;
@@ -21,103 +19,92 @@ public class OllamaSettingsComponent {
     private final JButton testConnectionButton;
 
     public OllamaSettingsComponent() {
-        // Create the main panel with some padding
-        mainPanel = new JPanel();
-        mainPanel.setLayout(new GridBagLayout());
+        // Create main panel with a border layout to ensure full width usage
+        mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
+        // Create content panel with GridBagLayout
+        JPanel contentPanel = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
-        c.insets = new Insets(5, 5, 5, 5);
+        c.insets = new Insets(5, 0, 5, 0);
         c.fill = GridBagConstraints.HORIZONTAL;
+        c.gridwidth = GridBagConstraints.REMAINDER;
+        c.weightx = 1.0; // Make components expand horizontally
 
         // Connection Settings Section
-        addSectionHeader("Connection Settings", 0);
+        JLabel connectionLabel = new JBLabel("<html><body><b>Connection Settings</b></body></html>");
+        contentPanel.add(connectionLabel, c);
 
         // Host field
-        c.gridx = 0;
-        c.gridy = 1;
-        mainPanel.add(new JBLabel("Host:"), c);
-        c.gridx = 1;
-        c.weightx = 1.0;
+        JPanel hostPanel = new JPanel(new BorderLayout());
+        hostPanel.add(new JBLabel("Host:"), BorderLayout.WEST);
         hostField.setToolTipText("The hostname or IP address of your Ollama server");
-        mainPanel.add(hostField, c);
+        hostPanel.add(hostField, BorderLayout.CENTER);
+        contentPanel.add(hostPanel, c);
 
         // Port field
-        c.gridx = 0;
-        c.gridy = 2;
-        c.weightx = 0.0;
-        mainPanel.add(new JBLabel("Port:"), c);
-        c.gridx = 1;
-        c.weightx = 1.0;
+        JPanel portPanel = new JPanel(new BorderLayout());
+        portPanel.add(new JBLabel("Port:"), BorderLayout.WEST);
         portField.setToolTipText("The port number of your Ollama server");
-        mainPanel.add(portField, c);
+        portPanel.add(portField, BorderLayout.CENTER);
+        contentPanel.add(portPanel, c);
 
         // Model Settings Section
-        addSectionHeader("Model Settings", 3);
+        c.insets = new Insets(15, 0, 5, 0);
+        JLabel modelLabel = new JBLabel("<html><body><b>Model Settings</b></body></html>");
+        contentPanel.add(modelLabel, c);
 
         // Model field
-        c.gridx = 0;
-        c.gridy = 4;
-        c.weightx = 0.0;
-        mainPanel.add(new JBLabel("Model:"), c);
-        c.gridx = 1;
-        c.weightx = 1.0;
+        c.insets = new Insets(5, 0, 5, 0);
+        JPanel modelPanel = new JPanel(new BorderLayout());
+        modelPanel.add(new JBLabel("Model:"), BorderLayout.WEST);
         modelField.setToolTipText("The name of the Ollama model to use");
-        mainPanel.add(modelField, c);
+        modelPanel.add(modelField, BorderLayout.CENTER);
+        contentPanel.add(modelPanel, c);
 
         // Max Tokens field
-        c.gridx = 0;
-        c.gridy = 5;
-        c.weightx = 0.0;
-        mainPanel.add(new JBLabel("Max Tokens:"), c);
-        c.gridx = 1;
-        c.weightx = 1.0;
+        JPanel maxTokensPanel = new JPanel(new BorderLayout());
+        maxTokensPanel.add(new JBLabel("Max Tokens:"), BorderLayout.WEST);
         maxTokensField.setToolTipText("Maximum number of tokens in the response");
-        mainPanel.add(maxTokensField, c);
+        maxTokensPanel.add(maxTokensField, BorderLayout.CENTER);
+        contentPanel.add(maxTokensPanel, c);
 
         // Temperature field
-        c.gridx = 0;
-        c.gridy = 6;
-        c.weightx = 0.0;
-        mainPanel.add(new JBLabel("Temperature:"), c);
-        c.gridx = 1;
-        c.weightx = 1.0;
+        JPanel temperaturePanel = new JPanel(new BorderLayout());
+        temperaturePanel.add(new JBLabel("Temperature:"), BorderLayout.WEST);
         temperatureField.setToolTipText("Controls randomness in the response (0.0 to 1.0)");
-        mainPanel.add(temperatureField, c);
+        temperaturePanel.add(temperatureField, BorderLayout.CENTER);
+        contentPanel.add(temperaturePanel, c);
 
         // Timeout field
-        c.gridx = 0;
-        c.gridy = 7;
-        c.weightx = 0.0;
-        mainPanel.add(new JBLabel("Timeout (ms):"), c);
-        c.gridx = 1;
-        c.weightx = 1.0;
+        JPanel timeoutPanel = new JPanel(new BorderLayout());
+        timeoutPanel.add(new JBLabel("Timeout (ms):"), BorderLayout.WEST);
         timeoutField.setToolTipText("Request timeout in milliseconds");
-        mainPanel.add(timeoutField, c);
+        timeoutPanel.add(timeoutField, BorderLayout.CENTER);
+        contentPanel.add(timeoutPanel, c);
 
         // Test Connection button
+        c.insets = new Insets(15, 0, 5, 0);
         testConnectionButton = new JButton("Test Connection");
-        c.gridx = 0;
-        c.gridy = 8;
-        c.gridwidth = 2;
-        c.weightx = 1.0;
-        c.anchor = GridBagConstraints.CENTER;
-        mainPanel.add(testConnectionButton, c);
+        contentPanel.add(testConnectionButton, c);
+
+        // Add help text
+        c.insets = new Insets(10, 0, 5, 0);
+        JLabel helpText = new JBLabel("<html><body style='width: 100%'>" +
+                "<p><b>Connection Help:</b></p>" +
+                "<ul>" +
+                "<li>Make sure Ollama is running on your system</li>" +
+                "<li>Default host is localhost (127.0.0.1)</li>" +
+                "<li>Default port is 11434</li>" +
+                "</ul>" +
+                "</body></html>");
+        contentPanel.add(helpText, c);
 
         // Add action listener to test connection button
         testConnectionButton.addActionListener(e -> testConnection());
-    }
 
-    private void addSectionHeader(String text, int gridy) {
-        GridBagConstraints c = new GridBagConstraints();
-        c.gridx = 0;
-        c.gridy = gridy;
-        c.gridwidth = 2;
-        c.insets = new Insets(10, 5, 5, 5);
-        c.anchor = GridBagConstraints.WEST;
-        
-        JLabel header = new JBLabel(text);
-        Font font = header.getFont();
-        header.setFont(font.deriveFont(font.getStyle() | Font.BOLD));
-        mainPanel.add(header, c);
+        // Add content panel to main panel
+        mainPanel.add(contentPanel, BorderLayout.CENTER);
     }
 
     private void testConnection() {

@@ -54,13 +54,13 @@
                 
         <applicationConfigurable
                 parentId="com.github.jaksonlin.pitestintellij.settings"
-                instance="com.github.jaksonlin.pitestintellij.ui.AnnotationConfigurable"
+                instance="com.github.jaksonlin.pitestintellij.settings.AnnotationSettingsConfigurable"
                 id="com.github.jaksonlin.pitestintellij.settings.annotations"
                 displayName="Test Annotations"/>
                 
         <applicationConfigurable
                 parentId="com.github.jaksonlin.pitestintellij.settings"
-                instance="com.github.jaksonlin.pitestintellij.ui.InvalidAssertConfigurable"
+                instance="com.github.jaksonlin.pitestintellij.settings.InvalidAssertSettingsConfigurable"
                 id="com.github.jaksonlin.pitestintellij.settings.asserts"
                 displayName="Assert Validation"/>
                 
