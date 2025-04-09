@@ -1,7 +1,7 @@
 package com.github.jaksonlin.pitestintellij.components;
 
 import com.github.jaksonlin.pitestintellij.MyBundle;
-import com.github.jaksonlin.pitestintellij.observers.RunHistoryObserver;
+import com.github.jaksonlin.pitestintellij.observers.BasicEventObserver;
 import com.github.jaksonlin.pitestintellij.util.Pair;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,10 +13,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-public class ObservableTree extends JTree implements RunHistoryObserver {
+public class ObservableTree extends JTree implements BasicEventObserver {
 
     @Override
-    public void onRunHistoryChanged(Object eventObj) {
+    public void onEventHappen(Object eventObj) {
         if (eventObj == null) {
             initializeMutationTree(Collections.emptyList());
         } else if (eventObj instanceof Pair) {

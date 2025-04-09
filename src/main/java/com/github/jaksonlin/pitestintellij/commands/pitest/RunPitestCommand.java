@@ -1,6 +1,7 @@
 package com.github.jaksonlin.pitestintellij.commands.pitest;
 
 import com.github.jaksonlin.pitestintellij.context.PitestContext;
+import com.github.jaksonlin.pitestintellij.util.Mutation;
 import com.github.jaksonlin.pitestintellij.util.ProcessExecutor;
 import com.github.jaksonlin.pitestintellij.util.ProcessResult;
 import com.intellij.openapi.diagnostic.Logger;
@@ -19,7 +20,7 @@ public class RunPitestCommand extends PitestCommand {
     }
 
     @Override
-    public void execute() {
+    public void execute()  {
         List<String> command = getContext().getCommand();
         if (command == null || command.isEmpty()) {
             throw new IllegalStateException("Pitest command not set");
@@ -36,5 +37,16 @@ public class RunPitestCommand extends PitestCommand {
 
         ProcessResult processResult = ProcessExecutor.executeProcess(command);
         getContext().setProcessResult(processResult);
+        try {
+            List<Mutation> mutations = getContext().collectMutationsResults();
+            if (mutations.isEmpty()){
+                log.info("No mutations found");
+            } else {
+                log.info("Found " + mutations.size() + " mutations");
+            }
+        } catch (Exception e) {
+            log.warn("Error parsing mutation report: " + e.getMessage());
+            // Not throwing exception here as it's not critical for the process execution
+        }
     }
 }

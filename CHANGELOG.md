@@ -31,5 +31,7 @@
 
 ## 1.0.5 - 2025-04-01
 - Add assertion statement check
-- update support version to 251, no functional change
+
+## 1.0.6 - 2025-04-09
+- Add ollama access to evaulate the unit test and create new test
 
