@@ -2,7 +2,7 @@ package com.github.jaksonlin.pitestintellij.services;
 
 import com.github.jaksonlin.pitestintellij.context.PitestContext;
 import com.github.jaksonlin.pitestintellij.observers.ObserverBase;
-import com.github.jaksonlin.pitestintellij.observers.RunHistoryObserver;
+import com.github.jaksonlin.pitestintellij.observers.BasicEventObserver;
 import com.github.jaksonlin.pitestintellij.util.Pair;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -14,12 +14,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
-import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,18 +41,29 @@ public final class RunHistoryManager extends ObserverBase {
     }
 
     @Override
-    public void addObserver(RunHistoryObserver observer) {
+    public void addObserver(BasicEventObserver observer) {
         super.addObserver(observer);
+        // when observer is added, pass current value of history to observer, force it to update
         // pass current value of history to observer, List<Pair<String, String>>
         List<Pair<String, String>> mappedHistory = history.entrySet().stream()
                 .map(entry -> new Pair<>(entry.getValue().getTargetClassPackageName(), entry.getValue().getTargetClassName()))
                 .collect(Collectors.toList());
-        observer.onRunHistoryChanged(mappedHistory);
+        observer.onEventHappen(mappedHistory);
     }
 
     @Nullable
     public PitestContext getRunHistoryForClass(@NotNull String targetClassFullyQualifiedName) {
         return history.get(targetClassFullyQualifiedName);
+    }
+
+    @Nullable
+    public PitestContext getRunHistoryForClassByTargetFilePath(@NotNull String classUnderTestFilePath) {
+        for (PitestContext context : history.values()) {
+            if (context.getTargetClassFilePath().equals(classUnderTestFilePath)) {
+                return context;
+            }
+        }
+        return null;
     }
 
     public void clearRunHistory() {
@@ -76,7 +88,7 @@ public final class RunHistoryManager extends ObserverBase {
             notifyObservers(new Pair<String, String>(entry.getTargetClassPackageName(), entry.getTargetClassName()));
         } catch (IOException e) {
             // Handle the exception appropriately, e.g., log an error
-            log.error(e.getMessage());
+            log.error("Error saving run history", e);
         }
     }
 

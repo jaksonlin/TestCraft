@@ -4,6 +4,7 @@ import com.github.jaksonlin.pitestintellij.context.PitestContext;
 import com.github.jaksonlin.pitestintellij.mediators.IMutationMediator;
 import com.github.jaksonlin.pitestintellij.mediators.IMutationReportUI;
 import com.github.jaksonlin.pitestintellij.services.RunHistoryManager;
+import com.github.jaksonlin.pitestintellij.util.Mutation;
 import com.github.jaksonlin.pitestintellij.util.Pair;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.application.ApplicationManager;
@@ -22,16 +23,20 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.messages.MessageBusConnection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 public class MutationTreeMediatorViewModel implements IMutationReportUI {
+    private static final Logger log = LoggerFactory.getLogger(MutationTreeMediatorViewModel.class);
     private final Project project;
     private final IMutationMediator mediator;
     private final RunHistoryManager runHistoryManager;
@@ -87,10 +92,12 @@ public class MutationTreeMediatorViewModel implements IMutationReportUI {
         if (context == null) {
             return; // if for any reason the class is not in the history, we do nothing
         }
+        // if the file is already annotated, we switch to it
         if (annotatedNodes.containsKey(context.getTargetClassFilePath())) {
             switchToSelectedFile(context.getTargetClassFilePath());
             return;
         }
+        // if the file is not annotated, we annotate it and open the file
         openClassFileAndAnnotate(context);
         annotatedNodes.put(context.getTargetClassFilePath(), 1);
     }
@@ -127,8 +134,8 @@ public class MutationTreeMediatorViewModel implements IMutationReportUI {
     }
 
     private void openClassFileAndAnnotate(PitestContext context) {
-        String xmlReport = Paths.get(context.getReportDirectory(), "mutations.xml").toString();
-        mediator.processMutationResult(context.getTargetClassFilePath(), xmlReport);
+        List<Mutation> mutations = context.getMutationResults();
+        mediator.processMutationResult(context.getTargetClassFilePath(), mutations);
     }
 
     @Nullable

@@ -1,13 +1,28 @@
-# Pitest-Gradle
+# TestCraft
 
 <!-- Plugin description -->
-This is a plugin for IntelliJ IDEA that allows you to run PITest (https://pitest.org/) mutation testing on your Gradle project.
+TestCraft is a comprehensive testing assistant plugin for IntelliJ IDEA that enhances your testing workflow with mutation testing, test case management, and AI-powered test analysis. Originally focused on PITest integration, TestCraft has evolved to provide a complete suite of testing tools.
 <!-- Plugin description end -->
 
 ## Features
-- Run Pitest on your Java Gradle projects
-- View mutation test results in a tool window and navigate to the source code
-- Decorate the editor of the source code with mutation test results
+
+### Mutation Testing
+- Run PITest mutation testing on your Java Gradle projects
+- View mutation test results in a dedicated tool window
+- Navigate directly to mutated code with inline editor decorations
+- Track mutation testing history and trends
+
+### Test Case Management
+- Manage test cases with structured annotations
+- Validate test assertions to prevent trivial or redundant tests
+- Enforce test documentation standards with comment validation
+- Track test cases across your codebase
+
+### AI-Powered Testing Assistant
+- Get intelligent suggestions for test improvements
+- Analyze test coverage and quality
+- Copy responses in markdown format for documentation
+- Integration with local LLM services (e.g., Ollama) for privacy
 
 ## Installation
 
@@ -18,61 +33,67 @@ This is a plugin for IntelliJ IDEA that allows you to run PITest (https://pitest
 
 ## Usage
 
-1. Open your junit test file, run the test make sure it is passing
-2. Right click on the test file and select `Run PIT Mutation Test`
-3. Input the target mutation test class, for example `com.example.MyClass` or `MyClass`, and click `OK`
-4. The mutation test will run and the results will be displayed in the `Mutation Tool Window`
+### Mutation Testing
+1. Open your JUnit test file and ensure it passes
+2. Right-click on the test file and select `Run Mutation Test` in the `TestCraft` menu
+3. Input the target class (e.g., `com.example.MyClass` or `MyClass`)
+4. View results in the `Mutation Test History` tool window
+
+### Test Case Management
+1. Configure test annotations in `Settings` -> `TestCraft` -> `Test Annotations`
+2. Set up assertion validation rules in `Settings` -> `TestCraft` -> `Test Case Validation`
+3. Add required annotations to your test methods
+4. TestCraft will validate your tests as you write them
+
+### AI Testing Assistant
+1. Configure LLM settings in `Settings` -> `TestCraft` -> `LLM Settings`
+2. Right-click on a test method and select `Analyze Test` for AI suggestions
+3. View suggestions in the `LLM Suggestions` tool window
+4. Copy suggestions as markdown for documentation
 
 ## Screenshots
 
+### Mutation Testing
+![run mutation test](./screenshots/1.png)
+*Running a mutation test on a target class*
 
-To run the plugin, right click on the test file and select `Run Mutation Test` in the `Unittest Helpers` menu.
+![mutation results](./screenshots/4.png)
+*Detailed mutation test results with browser view option*
 
-![run pitest](./screenshots/1.png)
+![mutation history](./screenshots/5.png)
+*Mutation Test History with searchable interface*
+
+### Test Case Management
+[Add screenshots for test case management features]
+
+### AI Testing Assistant
+[Add screenshots for AI testing features]
+
+## Configuration
+
+### Test Annotations
+Configure test case management annotations in `Settings` -> `TestCraft` -> `Test Annotations`:
+- Define required fields
+- Set validation rules
+- Configure auto-import behavior
+
+### Test Validation
+Set up test validation rules in `Settings` -> `TestCraft` -> `Test Case Validation`:
+- Define invalid assertion patterns
+- Configure comment requirements
+- Set validation severity levels
+
+### LLM Settings
+Configure AI integration in `Settings` -> `TestCraft` -> `LLM Settings`:
+- Set up Ollama endpoint
+- Configure model parameters
+- Manage response formatting
 
 
-Input the target mutation test class, for example `com.example.MyClass` or `MyClass`, and click `OK`
+## Plugin Compatibility
 
-![input target class](./screenshots/2.png)
+TestCraft is compatible with IntelliJ IDEA versions 2020.1 through latest published (not rc/eap). 
 
-It will prompt you with the collected classpath information, click `OK` (you can also click `Cancel` to stop the mutation test)
+## License
 
-![classpath](./screenshots/3.png)
-
-The mutation test will run; and upon finishing, it will popup a dialog with the verbose output of the mutation test, as well as a button to view the results in the browser
-
-![mutation test results](./screenshots/4.png)
-
-You can also navigate to the `MutationTestHistory` tool window to view the results; 
-double click on a row to will open the code editor to the class under test, and the editor will be decorated with the mutation test results
-
-![mutation test history](./screenshots/5.png)
-
-`MutationTestHistory` tool window also support searching, input the class name and press enter to locate the class; and a second enter will open the code editor to the class under test.
-
-![search](./screenshots/6.png)
-
-
-
-
-## Known Issues
-
-- [ ] it cannot find the classpath if the project is not managed by Gradle, click on the Project structure and import the project as Gradle project
-- [ ] it cannot find the resource directory if you don't mark the directory as resource root, right click on the directory and mark as resource root
-
-## runPluginVerifier
-
-```shell
-./gradlew runPluginVerifier
-```
-```
-2024-10-12T18:50:17 [main] INFO  verification - Finished 1 of 8 verifications (in 2.1 s): IC-223.8836.26 against com.github.jaksonlin.pitestintellij:1.0.1-beta: Compatible
-2024-10-12T18:50:17 [main] INFO  verification - Finished 2 of 8 verifications (in 2.1 s): IC-232.10335.12 against com.github.jaksonlin.pitestintellij:1.0.1-beta: Compatible
-2024-10-12T18:50:17 [main] INFO  verification - Finished 3 of 8 verifications (in 2.1 s): IC-233.15619.7 against com.github.jaksonlin.pitestintellij:1.0.1-beta: Compatible
-2024-10-12T18:50:17 [main] INFO  verification - Finished 4 of 8 verifications (in 2.1 s): IC-231.9423.9 against com.github.jaksonlin.pitestintellij:1.0.1-beta: Compatible
-2024-10-12T18:50:17 [main] INFO  verification - Finished 5 of 8 verifications (in 2.1 s): IC-222.4554.5 against com.github.jaksonlin.pitestintellij:1.0.1-beta: Compatible
-2024-10-12T18:50:17 [main] INFO  verification - Finished 6 of 8 verifications (in 2.1 s): IC-241.19072.14 against com.github.jaksonlin.pitestintellij:1.0.1-beta: Compatible
-2024-10-12T18:50:17 [main] INFO  verification - Finished 7 of 8 verifications (in 2.1 s): IC-242.23726.16 against com.github.jaksonlin.pitestintellij:1.0.1-beta: Compatible
-2024-10-12T18:50:25 [main] INFO  verification - Finished 8 of 8 verifications (in 10.4 s): IC-243.19420.21 against com.github.jaksonlin.pitestintellij:1.0.1-beta: Compatible
-
-```
+TestCraft is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.

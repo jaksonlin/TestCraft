@@ -4,19 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ObserverBase {
-    private final List<RunHistoryObserver> observers = new ArrayList<>();
+    private final List<BasicEventObserver> observers = new ArrayList<>();
 
-    public void addObserver(RunHistoryObserver observer) {
+    public void addObserver(BasicEventObserver observer) {
         observers.add(observer);
     }
 
-    public void removeObserver(RunHistoryObserver observer) {
+    public void removeObserver(BasicEventObserver observer) {
         observers.remove(observer);
     }
 
     protected void notifyObservers(Object eventObj) {
-        for (RunHistoryObserver observer : observers) {
-            observer.onRunHistoryChanged(eventObj);
+        for (BasicEventObserver observer : observers) {
+            observer.onEventHappen(eventObj);
         }
     }
 }

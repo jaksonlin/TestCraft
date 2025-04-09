@@ -1,7 +1,11 @@
 package com.github.jaksonlin.pitestintellij.context;
 
+import com.github.jaksonlin.pitestintellij.util.Mutation;
+import com.github.jaksonlin.pitestintellij.util.MutationReportParser;
 import com.github.jaksonlin.pitestintellij.util.ProcessResult;
 
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
 
 public class PitestContext {
@@ -22,6 +26,25 @@ public class PitestContext {
     private String pitestDependencies;
     private List<String> resourceDirectories;
     private final long timestamp;
+    private List<Mutation> mutationResults;
+
+    // this will also init the fielid mutationResults
+    public List<Mutation> collectMutationsResults() throws Exception {
+        String mutationReportFilePath = this.getPitestReportXml();
+        try {
+            this.mutationResults = MutationReportParser.parseMutationsFromXml(mutationReportFilePath).getMutation();
+            return this.mutationResults;
+        } catch (IOException e) {
+            throw new Exception("Error parsing mutation report: " + e.getMessage() + " at " + mutationReportFilePath);
+        }
+    }
+    public List<Mutation> getMutationResults()  {
+        return this.mutationResults;
+    }
+
+    public String getPitestReportXml() {
+        return Paths.get(this.getReportDirectory(), "mutations.xml").toString();
+    }
 
     public PitestContext(long timestamp) {
         this.timestamp = timestamp;
