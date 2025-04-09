@@ -20,17 +20,15 @@ import java.util.stream.Collectors;
 public class LLMChatMediatorImpl implements ILLMChatMediator {
     private static final Logger LOG = Logger.getInstance(LLMChatMediatorImpl.class);
     private final OllamaClient ollamaClient;
-    private static final String DEFAULT_MODEL = "deepseek-r1:32b";
     private ILLMChatUI clientUI;
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     public LLMChatMediatorImpl() {
-        this.ollamaClient = new OllamaClient("localhost", 11434);
+        this.ollamaClient = new OllamaClient();
     }
 
     @Override
     public void generateUnittestRequest(String testCodeFile, String sourceCodeFile, List<Mutation> mutations) {
-
         executorService.submit(() -> {
             String chatResponse = LLmChatRequest(testCodeFile, sourceCodeFile, mutations);
             if (clientUI != null) {
@@ -110,12 +108,12 @@ public class LLMChatMediatorImpl implements ILLMChatMediator {
             messages.add(new OllamaClient.Message("user", prompt));
 
             try {
-                return ollamaClient.chatCompletion(DEFAULT_MODEL, messages);
+                return ollamaClient.chatCompletion(messages);
             } catch (Exception e) {
-                return "Failed to generate unit test suggestions";
+                return String.format("Failed to generate unit test suggestions: %s", e.toString());
             }
         } catch (IOException e) {
-            return "Failed to read source files";
+            return String.format("Error reading source/test files: %s", e.toString());
         }
     }
 

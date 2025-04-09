@@ -1,6 +1,7 @@
 package com.github.jaksonlin.pitestintellij.llm;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.jaksonlin.pitestintellij.settings.OllamaSettingsState;
 import com.intellij.openapi.diagnostic.Logger;
 
 import java.io.IOException;
@@ -8,6 +9,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,22 +20,56 @@ public class OllamaClient {
     private final String baseUrl;
     private final ObjectMapper objectMapper;
     private final HttpClient httpClient;
+    private final int timeoutSeconds;
 
-    public OllamaClient(String host, int port) {
+    public OllamaClient(String host, int port, int timeoutSeconds) {
         this.baseUrl = String.format("http://%s:%d", host, port);
         this.objectMapper = new ObjectMapper();
-        this.httpClient = HttpClient.newHttpClient();
+        this.timeoutSeconds = timeoutSeconds;
+        this.httpClient = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(timeoutSeconds))
+                .build();
     }
 
-    public String chatCompletion(String model, List<Message> messages) throws IOException, InterruptedException {
+    public OllamaClient() {
+        OllamaSettingsState settings = OllamaSettingsState.getInstance();
+        this.baseUrl = String.format("http://%s:%d", settings.ollamaHost, settings.ollamaPort);
+        this.objectMapper = new ObjectMapper();
+        this.timeoutSeconds = settings.requestTimeout;
+        this.httpClient = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(settings.requestTimeout))
+                .build();
+    }
+
+    public boolean testConnection() {
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(baseUrl + "/api/health"))
+                    .timeout(Duration.ofSeconds(timeoutSeconds))
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            return response.statusCode() == 200;
+        } catch (Exception e) {
+            LOG.warn("Failed to test connection to Ollama server", e);
+            return false;
+        }
+    }
+
+    public String chatCompletion(List<Message> messages) throws IOException, InterruptedException {
+        OllamaSettingsState settings = OllamaSettingsState.getInstance();
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("model", model);
+        requestBody.put("model", settings.ollamaModel);
         requestBody.put("messages", messages);
         requestBody.put("stream", false);
+        requestBody.put("temperature", settings.temperature);
+        requestBody.put("num_predict", settings.maxTokens);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "/api/chat"))
                 .header("Content-Type", "application/json")
+                .timeout(Duration.ofSeconds(timeoutSeconds))
                 .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(requestBody)))
                 .build();
 

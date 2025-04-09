@@ -13,20 +13,24 @@ public class LLMSuggestionsPanelViewModel implements ILLMChatUI {
 
     private final LLMService llmService;
     private final ILLMChatMediator llmChatMediator = new LLMChatMediatorImpl();
+    private final LLMResponsePanel responsePanel;
 
     public LLMSuggestionsPanelViewModel(Project project, LLMResponsePanel mainPanel) {
         this.llmService = project.getService(LLMService.class);
+        this.responsePanel = mainPanel;
         llmService.addObserver(mainPanel);
         llmChatMediator.register(this);
     }
 
     public void generateSuggestions(PitestContext context) {
+        responsePanel.startLoading();
         llmChatMediator.generateUnittestRequest(context.getTestFilePath(), context.getTargetClassFilePath(), context.getMutationResults());
     }
 
     @Override
     public void updateChatResponse(String chatResponse) {
         ApplicationManager.getApplication().invokeLater(() -> {
+            responsePanel.stopLoading();
             llmService.notifyLLMResponse(chatResponse);
         });
     }

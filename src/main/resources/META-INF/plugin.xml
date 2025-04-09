@@ -47,6 +47,13 @@
                 instance="com.github.jaksonlin.pitestintellij.ui.InvalidAssertConfigurable"
                 id="com.github.jaksonlin.pitestintellij.settings.asserts"
                 displayName="Unittest Assert Check Configuration"/>
+        <applicationConfigurable
+                instance="com.github.jaksonlin.pitestintellij.settings.OllamaSettingsConfigurable"
+                id="com.github.jaksonlin.pitestintellij.settings.ollama"
+                displayName="Ollama Settings"
+                parentId="tools"/>
+        <applicationService
+                serviceImplementation="com.github.jaksonlin.pitestintellij.settings.OllamaSettingsState"/>
         <localInspection
             shortName="UnittestCaseAnnotationInspection"
             language="JAVA"
