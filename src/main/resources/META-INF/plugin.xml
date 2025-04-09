@@ -74,6 +74,7 @@
         <applicationService serviceImplementation="com.github.jaksonlin.pitestintellij.settings.OllamaSettingsState"/>
         <applicationService serviceImplementation="com.github.jaksonlin.pitestintellij.services.AnnotationConfigService"/>
         <applicationService serviceImplementation="com.github.jaksonlin.pitestintellij.services.InvalidTestCaseConfigService"/>
+        <applicationService serviceImplementation="com.github.jaksonlin.pitestintellij.services.LLMResponseService"/>
         <localInspection
             shortName="UnittestCaseAnnotationInspection"
             language="JAVA"

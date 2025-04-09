@@ -26,6 +26,8 @@ public final class InvalidTestCaseConfigService implements PersistentStateCompon
         public String invalidAssertionText = InvalidTestCaseConfigService.getBuiltInInvalidAssertionText();
         public boolean enable = false;
         public boolean enableCommentCheck = false;
+        public boolean copyAsMarkdown = true;
+        public boolean copyPrompt = false;
 
         public State() {
         }
@@ -34,19 +36,21 @@ public final class InvalidTestCaseConfigService implements PersistentStateCompon
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            InvalidTestCaseConfigService.State state = (InvalidTestCaseConfigService.State) o;
+            State state = (State) o;
             return enable == state.enable &&
                    enableCommentCheck == state.enableCommentCheck &&
+                   copyAsMarkdown == state.copyAsMarkdown &&
+                   copyPrompt == state.copyPrompt &&
                    Objects.equals(invalidAssertionText, state.invalidAssertionText);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(invalidAssertionText, enable, enableCommentCheck);
+            return Objects.hash(invalidAssertionText, enable, enableCommentCheck, copyAsMarkdown, copyPrompt);
         }
     }
 
-    private InvalidTestCaseConfigService.State myState = new InvalidTestCaseConfigService.State();
+    private State myState = new State();
 
     public List<String> getInvalidAssertions() {
         return myState.invalidAssertionText == null ? new ArrayList<>() : Arrays.asList(myState.invalidAssertionText.split("\n"));
@@ -68,14 +72,30 @@ public final class InvalidTestCaseConfigService implements PersistentStateCompon
         myState.enableCommentCheck = enable;
     }
 
+    public boolean isCopyAsMarkdown() {
+        return myState.copyAsMarkdown;
+    }
+
+    public void setCopyAsMarkdown(boolean copyAsMarkdown) {
+        myState.copyAsMarkdown = copyAsMarkdown;
+    }
+
+    public boolean isCopyPrompt() {
+        return myState.copyPrompt;
+    }
+
+    public void setCopyPrompt(boolean copyPrompt) {
+        myState.copyPrompt = copyPrompt;
+    }
+
     @Nullable
     @Override
-    public InvalidTestCaseConfigService.State getState() {
+    public State getState() {
         return myState;
     }
 
     @Override
-    public void loadState(@NotNull InvalidTestCaseConfigService.State state) {
+    public void loadState(@NotNull State state) {
         LOG.info("Loading invalid test case config: " + state.invalidAssertionText);
         myState = state;
     }
