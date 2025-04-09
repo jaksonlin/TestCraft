@@ -60,9 +60,9 @@
                 
         <applicationConfigurable
                 parentId="com.github.jaksonlin.pitestintellij.settings"
-                instance="com.github.jaksonlin.pitestintellij.settings.InvalidAssertSettingsConfigurable"
+                instance="com.github.jaksonlin.pitestintellij.settings.InvalidTestCaseSettingsConfigurable"
                 id="com.github.jaksonlin.pitestintellij.settings.asserts"
-                displayName="Assert Validation"/>
+                displayName="Test Case Validation"/>
                 
         <applicationConfigurable
                 parentId="com.github.jaksonlin.pitestintellij.settings"
@@ -73,7 +73,7 @@
         <!-- Services -->
         <applicationService serviceImplementation="com.github.jaksonlin.pitestintellij.settings.OllamaSettingsState"/>
         <applicationService serviceImplementation="com.github.jaksonlin.pitestintellij.services.AnnotationConfigService"/>
-        <applicationService serviceImplementation="com.github.jaksonlin.pitestintellij.services.InvalidAssertionConfigService"/>
+        <applicationService serviceImplementation="com.github.jaksonlin.pitestintellij.services.InvalidTestCaseConfigService"/>
         <localInspection
             shortName="UnittestCaseAnnotationInspection"
             language="JAVA"
