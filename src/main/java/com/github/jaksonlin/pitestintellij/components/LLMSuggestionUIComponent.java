@@ -12,6 +12,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import com.github.jaksonlin.pitestintellij.services.LLMService;
 
 public class LLMSuggestionUIComponent implements BasicEventObserver {
     private final LLMSuggestionUIComponentViewModel viewModel;
@@ -21,22 +22,25 @@ public class LLMSuggestionUIComponent implements BasicEventObserver {
     private final JComboBox<FileItem> fileSelector = new ComboBox<>(fileListModel);
     private final JButton generateButton = new JButton("Generate Suggestions");
 
-    public LLMSuggestionUIComponent() {
+    public LLMSuggestionUIComponent(LLMService llmService) {
         setupUI();
-        viewModel = new LLMSuggestionUIComponentViewModel(responsePanel);
+        llmService.addObserver(responsePanel);
+        llmService.addObserver(this);
+        viewModel = new LLMSuggestionUIComponentViewModel(llmService);
     }
     
     @Override
     public void onEventHappen(String eventName, Object eventObj) {
         switch (eventName) {
-            case "ENABLE_GENERATE_BUTTON":
-                generateButton.setEnabled((boolean) eventObj);
-                break;
-            case "DISABLE_GENERATE_BUTTON":
+            case "START_LOADING":
                 generateButton.setEnabled(false);
+                break;
+            case "STOP_LOADING":
+                generateButton.setEnabled(true);
                 break;
             case "RUN_HISTORY_LIST":
                 ApplicationManager.getApplication().invokeLater(() -> loadFileHistory(eventObj));
+                break;
             default:
                 break;
         }
