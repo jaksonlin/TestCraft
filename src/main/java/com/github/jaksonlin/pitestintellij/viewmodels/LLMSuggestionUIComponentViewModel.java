@@ -11,7 +11,7 @@ public class LLMSuggestionUIComponentViewModel  {
     
 
     public LLMSuggestionUIComponentViewModel(LLMResponsePanel mainPanel) {
-        this.llmService = ApplicationManager.getApplication().getService(LLMService.class);
+        llmService = ApplicationManager.getApplication().getService(LLMService.class);
         llmService.addObserver(mainPanel);
     }
 

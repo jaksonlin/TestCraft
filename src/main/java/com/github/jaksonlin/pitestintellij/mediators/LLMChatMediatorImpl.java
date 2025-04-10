@@ -1,9 +1,7 @@
 package com.github.jaksonlin.pitestintellij.mediators;
 
-import com.github.jaksonlin.pitestintellij.llm.OllamaClient;
-import com.github.jaksonlin.pitestintellij.services.LLMService;
 import com.github.jaksonlin.pitestintellij.util.Mutation;
-import com.github.jaksonlin.pitestintellij.util.Pair;
+import com.github.jaksonlin.pitestintellij.util.OllamaClient;
 import com.intellij.openapi.diagnostic.Logger;
 
 import javax.swing.*;
@@ -21,23 +19,18 @@ import java.util.regex.Matcher;
 
 public class LLMChatMediatorImpl implements ILLMChatMediator {
     private static final Logger LOG = Logger.getInstance(LLMChatMediatorImpl.class);
-    private final OllamaClient ollamaClient;
     private ILLMChatClient chatClient;
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-    public LLMChatMediatorImpl() {
-        this.ollamaClient = new OllamaClient();
-    }
 
     @Override
-    public void generateUnittestRequest(String testCodeFile, String sourceCodeFile, List<Mutation> mutations) {
+    public void generateUnittestRequest(OllamaClient ollamaClient, String testCodeFile, String sourceCodeFile, List<Mutation> mutations) {
         executorService.submit(() -> {
             try {
-                String rawResponse = LLmChatRequest(testCodeFile, sourceCodeFile, mutations);
+                String rawResponse = LLmChatRequest(ollamaClient, testCodeFile, sourceCodeFile, mutations);
                 String formattedResponse = formatResponse(rawResponse);
-                if (chatClient != null) {
-                    SwingUtilities.invokeLater(() -> chatClient.updateChatResponse(formattedResponse));
-                }
+                SwingUtilities.invokeLater(() -> chatClient.updateChatResponse(formattedResponse));
+                
             } catch (Exception e) {
                 LOG.error("Failed to generate unit test suggestions", e);
                 if (chatClient != null) {
@@ -93,7 +86,7 @@ public class LLMChatMediatorImpl implements ILLMChatMediator {
         return text;
     }
 
-    private String LLmChatRequest(String testCodeFile, String sourceCodeFile, List<Mutation> mutations) throws IOException {
+    private String LLmChatRequest(OllamaClient ollamaClient, String testCodeFile, String sourceCodeFile, List<Mutation> mutations) throws IOException {
         // Read source files
         String sourceCode = Files.readString(Paths.get(testCodeFile));
         String testCode = Files.readString(Paths.get(sourceCodeFile));

@@ -1,29 +1,14 @@
 package com.github.jaksonlin.pitestintellij.settings;
 
-import com.github.jaksonlin.pitestintellij.services.InvalidTestCaseConfigService;
-import com.intellij.icons.AllIcons;
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.EditorSettings;
 import com.intellij.openapi.editor.ex.EditorEx;
-import com.intellij.openapi.ide.CopyPasteManager;
-import com.intellij.lang.Language;
-import com.intellij.openapi.fileTypes.FileType;
-import com.intellij.openapi.fileTypes.FileTypeManager;
 import com.intellij.ui.EditorTextField;
-import com.intellij.ui.components.ActionLink;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
-import com.intellij.ui.components.JBScrollPane;
-import com.intellij.util.ui.FormBuilder;
-import com.intellij.util.ui.JBUI;
-import com.intellij.util.ui.UI;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.datatransfer.StringSelection;
 
 public class InvalidTestCaseSettingsComponent {
     private final JPanel mainPanel;

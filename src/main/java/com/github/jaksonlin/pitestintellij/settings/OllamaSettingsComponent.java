@@ -4,7 +4,7 @@ import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextField;
 import org.jetbrains.annotations.NotNull;
 
-import com.github.jaksonlin.pitestintellij.llm.OllamaClient;
+import com.github.jaksonlin.pitestintellij.util.OllamaClient;
 import javax.swing.*;
 import java.awt.*;
 
@@ -16,7 +16,6 @@ public class OllamaSettingsComponent {
     private final JBTextField maxTokensField = new JBTextField();
     private final JBTextField temperatureField = new JBTextField();
     private final JBTextField timeoutField = new JBTextField();
-    private final JButton testConnectionButton;
     private final JCheckBox copyAsMarkdownCheckbox;
 
     public OllamaSettingsComponent() {
@@ -88,7 +87,7 @@ public class OllamaSettingsComponent {
         // Test Connection button
         c.gridy = 10;
         c.insets = new Insets(15, 5, 5, 5);
-        testConnectionButton = new JButton("Test Connection");
+        JButton testConnectionButton = new JButton("Test Connection");
         contentPanel.add(testConnectionButton, c);
 
         // Add help text
@@ -139,7 +138,7 @@ public class OllamaSettingsComponent {
         String port = portField.getText();
         
         try {
-            OllamaClient client = new OllamaClient(host, Integer.parseInt(port), Integer.parseInt(timeoutField.getText()));
+            OllamaClient client = new OllamaClient(host, "dummy", 100, 0.5f, Integer.parseInt(port), Integer.parseInt(timeoutField.getText()));
             boolean success = client.testConnection();
             if (success) {
                 JOptionPane.showMessageDialog(mainPanel,

@@ -75,7 +75,12 @@ public class LLMSuggestionUIComponent implements BasicEventObserver {
 
 
     private void loadFileHistory(Object eventObj) {
-        
+
+        if (eventObj == null) {
+            // clear the file selector
+            fileListModel.removeAllElements();
+            return;
+        }
         if (!(eventObj instanceof Map<?, ?>)) {
             return;
         }

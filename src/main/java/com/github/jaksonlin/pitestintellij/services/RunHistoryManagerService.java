@@ -71,6 +71,7 @@ public final class RunHistoryManagerService extends ObserverBase {
             historyFile.delete();
         }
         notifyObservers("RUN_HISTORY", null);
+        notifyObservers("RUN_HISTORY_LIST", null);
     }
 
     @NotNull
