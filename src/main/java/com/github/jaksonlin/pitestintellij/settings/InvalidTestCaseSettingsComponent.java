@@ -33,15 +33,74 @@ public class InvalidTestCaseSettingsComponent {
     private static final int EDITOR_HEIGHT = 200;
 
     public InvalidTestCaseSettingsComponent() {
-        // Create checkboxes with descriptions
+        // Create main panel with a border layout to ensure full width usage
+        mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
+        // Create content panel with GridBagLayout
+        JPanel contentPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.insets = new Insets(5, 5, 5, 5);
+        c.fill = GridBagConstraints.BOTH;
+        c.anchor = GridBagConstraints.LINE_START;
+        c.weightx = 1.0;
+
+        // Validation Settings section
+        c.gridwidth = 2;
+        c.gridx = 0;
+        c.gridy = 0;
+        c.weighty = 0.0;
+        JLabel validationLabel = new JBLabel("<html><body><b>Test Case Validation Settings</b></body></html>");
+        contentPanel.add(validationLabel, c);
+
+        // Checkboxes
+        c.gridy = 1;
         enableCheckbox = new JBCheckBox("Enable invalid assertion check");
         enableCheckbox.setToolTipText("When enabled, test methods will be checked for invalid assertion patterns");
-        
+        contentPanel.add(enableCheckbox, c);
+
+        c.gridy = 2;
         enableCommentCheckbox = new JBCheckBox("Enable test step comment check");
         enableCommentCheckbox.setToolTipText("When enabled, test methods will be checked for descriptive comments");
+        contentPanel.add(enableCommentCheckbox, c);
 
-        // Create editor for invalid assertions with enhanced configuration
-        assertionEditor = new EditorTextField() {
+        // Invalid Assertions section
+        c.gridy = 3;
+        c.insets = new Insets(15, 5, 5, 5);
+        JLabel assertionsLabel = new JBLabel("<html><body><b>Invalid Assertion Patterns</b></body></html>");
+        contentPanel.add(assertionsLabel, c);
+
+        // Editor description
+        c.gridy = 4;
+        c.insets = new Insets(5, 5, 5, 5);
+        JLabel editorDesc = new JBLabel("Enter patterns for assertions that should be flagged as invalid (one per line):");
+        contentPanel.add(editorDesc, c);
+
+        // Assertion editor
+        c.gridy = 5;
+        c.weighty = 1.0; // Make editor expand vertically
+        assertionEditor = createAssertionEditor();
+        contentPanel.add(assertionEditor, c);
+
+        // Help text
+        c.gridy = 6;
+        c.weighty = 0.0; // Reset vertical weight
+        c.insets = new Insets(10, 5, 5, 5);
+        JLabel helpText = new JBLabel("<html><body style='width: 300px'>" +
+                "<b>Examples of invalid assertions that will be flagged:</b><br>" +
+                "• assertTrue(true) - trivial assertion<br>" +
+                "• assertEquals(1, 1) - comparing same values<br>" +
+                "• assertNotNull(new Object()) - testing newly created object<br>" +
+                "• assertEquals(\"success\", \"success\") - comparing identical strings" +
+                "</body></html>");
+        contentPanel.add(helpText, c);
+
+        // Add content panel to main panel
+        mainPanel.add(contentPanel, BorderLayout.CENTER);
+    }
+
+    private EditorTextField createAssertionEditor() {
+        EditorTextField editor = new EditorTextField() {
             @Override
             protected @NotNull EditorEx createEditor() {
                 EditorEx editor = (EditorEx) super.createEditor();
@@ -71,34 +130,8 @@ public class InvalidTestCaseSettingsComponent {
                 return new Dimension(100, EDITOR_HEIGHT);
             }
         };
-        assertionEditor.setOneLineMode(false);
-
-        // Help text for invalid assertions
-        String helpText = "<html><b>Examples of invalid assertions that will be flagged:</b><br>" +
-                "• assertTrue(true) - trivial assertion<br>" +
-                "• assertEquals(1, 1) - comparing same values<br>" +
-                "• assertNotNull(new Object()) - testing newly created object<br>" +
-                "• assertEquals(\"success\", \"success\") - comparing identical strings</html>";
-
-        // Create editor panel with scroll pane
-        JPanel editorPanel = new JPanel(new BorderLayout());
-        editorPanel.add(new JBLabel("Invalid Assertion Patterns"), BorderLayout.NORTH);
-        editorPanel.add(new JBLabel("Enter patterns for assertions that should be flagged as invalid (one per line):"), BorderLayout.CENTER);
-        editorPanel.add(assertionEditor, BorderLayout.SOUTH);
-
-        // Build the layout using FormBuilder for consistent spacing and organization
-        mainPanel = FormBuilder.createFormBuilder()
-                .addComponent(new JBLabel("<html><b>Test Case Validation Settings</b></html>"))
-                .addVerticalGap(10)
-                .addComponent(enableCheckbox)
-                .addComponent(enableCommentCheckbox)
-                .addVerticalGap(20)
-                .addComponent(editorPanel)
-                .addComponent(new JBLabel(helpText))
-                .addComponentFillVertically(new JPanel(), 0)
-                .getPanel();
-
-        mainPanel.setBorder(JBUI.Borders.empty(10));
+        editor.setOneLineMode(false);
+        return editor;
     }
 
     public JPanel getPanel() {

@@ -19,6 +19,7 @@ public class OllamaSettingsState implements PersistentStateComponent<OllamaSetti
     public int maxTokens = 2000;
     public float temperature = 0.7f;
     public int requestTimeout = 60;  // seconds
+    public boolean copyAsMarkdown = false;
 
     public static OllamaSettingsState getInstance() {
         return ApplicationManager.getApplication().getService(OllamaSettingsState.class);

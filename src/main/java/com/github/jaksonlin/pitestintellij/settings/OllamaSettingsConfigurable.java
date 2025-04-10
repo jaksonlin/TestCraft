@@ -36,6 +36,7 @@ public class OllamaSettingsConfigurable implements Configurable {
         modified |= !settingsComponent.getMaxTokensText().equals(String.valueOf(settings.maxTokens));
         modified |= !settingsComponent.getTemperatureText().equals(String.valueOf(settings.temperature));
         modified |= !settingsComponent.getTimeoutText().equals(String.valueOf(settings.requestTimeout));
+        modified |= settingsComponent.getCopyAsMarkdown() != settings.copyAsMarkdown;
         return modified;
     }
 
@@ -53,6 +54,7 @@ public class OllamaSettingsConfigurable implements Configurable {
             throw new IllegalStateException("Invalid number format in settings", e);
         }
         settings.ollamaModel = settingsComponent.getModelText();
+        settings.copyAsMarkdown = settingsComponent.getCopyAsMarkdown();
     }
 
     @Override
@@ -64,6 +66,7 @@ public class OllamaSettingsConfigurable implements Configurable {
         settingsComponent.setMaxTokensText(String.valueOf(settings.maxTokens));
         settingsComponent.setTemperatureText(String.valueOf(settings.temperature));
         settingsComponent.setTimeoutText(String.valueOf(settings.requestTimeout));
+        settingsComponent.setCopyAsMarkdown(settings.copyAsMarkdown);
     }
 
     @Override
