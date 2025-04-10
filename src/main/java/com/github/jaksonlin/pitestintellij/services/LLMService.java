@@ -6,6 +6,7 @@ import com.github.jaksonlin.pitestintellij.observers.ObserverBase;
 import com.github.jaksonlin.pitestintellij.util.Mutation;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
+import com.github.jaksonlin.pitestintellij.settings.OllamaSettingsState;
 import java.util.List;
 import com.github.jaksonlin.pitestintellij.mediators.ILLMChatClient;
 
@@ -19,6 +20,8 @@ public final class LLMService extends ObserverBase implements ILLMChatClient {
     }
 
     public void generateUnittestRequest(String testCodeFile, String sourceCodeFile, List<Mutation> mutationList) {
+        LOG.info("Generating unittest request for " + testCodeFile + " and " + sourceCodeFile);
+        notifyObservers("START_LOADING", null);
         llmChatMediator.generateUnittestRequest(testCodeFile, sourceCodeFile, mutationList);
     }
 
@@ -27,7 +30,9 @@ public final class LLMService extends ObserverBase implements ILLMChatClient {
     // the mediator is not responsible for the UI, so it does not know the UI is a Swing UI
     @Override
     public void updateChatResponse(String chatResponse) {
-        super.notifyObservers(chatResponse);
+        LOG.info("Received chat response: " + chatResponse);
+        notifyObservers("STOP_LOADING", null);
+        super.notifyObservers("CHAT_RESPONSE", chatResponse);
     }
 
 }

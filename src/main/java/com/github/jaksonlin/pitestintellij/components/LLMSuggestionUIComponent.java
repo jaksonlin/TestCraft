@@ -1,13 +1,9 @@
-package com.github.jaksonlin.pitestintellij.ui;
+package com.github.jaksonlin.pitestintellij.components;
 
-import com.github.jaksonlin.pitestintellij.components.LLMResponsePanel;
 import com.github.jaksonlin.pitestintellij.context.PitestContext;
 import com.github.jaksonlin.pitestintellij.observers.BasicEventObserver;
-import com.github.jaksonlin.pitestintellij.services.RunHistoryManager;
-import com.github.jaksonlin.pitestintellij.viewmodels.LLMSuggestionsPanelViewModel;
-import com.github.jaksonlin.pitestintellij.viewmodels.ILLMSuggestionsView;
+import com.github.jaksonlin.pitestintellij.viewmodels.LLMSuggestionUIComponentViewModel;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.util.ui.JBUI;
 
@@ -16,33 +12,36 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import com.github.jaksonlin.pitestintellij.util.Pair;
 
-public class LLMSuggestionsUI implements BasicEventObserver, ILLMSuggestionsView {
-    private final Project project;
-    private final LLMSuggestionsPanelViewModel vm;
+public class LLMSuggestionUIComponent implements BasicEventObserver {
+    private final LLMSuggestionUIComponentViewModel viewModel;
     private final LLMResponsePanel responsePanel = new LLMResponsePanel();
     private final JPanel mainPanel = new JPanel(new BorderLayout());
     private final DefaultComboBoxModel<FileItem> fileListModel = new DefaultComboBoxModel<>();
     private final JComboBox<FileItem> fileSelector = new ComboBox<>(fileListModel);
-    private final RunHistoryManager historyManager;
     private final JButton generateButton = new JButton("Generate Suggestions");
 
-    public LLMSuggestionsUI(Project project) {
-        this.project = project;
-        this.historyManager = project.getService(RunHistoryManager.class);
-        this.vm = new LLMSuggestionsPanelViewModel(project, responsePanel);
+    public LLMSuggestionUIComponent() {
         setupUI();
-        loadFileHistory();
-        historyManager.addObserver(this);
+        viewModel = new LLMSuggestionUIComponentViewModel(responsePanel);
+    }
+    
+    @Override
+    public void onEventHappen(String eventName, Object eventObj) {
+        switch (eventName) {
+            case "ENABLE_GENERATE_BUTTON":
+                generateButton.setEnabled((boolean) eventObj);
+                break;
+            case "DISABLE_GENERATE_BUTTON":
+                generateButton.setEnabled(false);
+                break;
+            case "RUN_HISTORY_LIST":
+                ApplicationManager.getApplication().invokeLater(() -> loadFileHistory(eventObj));
+            default:
+                break;
+        }
     }
 
-    @Override
-    public void setGenerateButtonEnabled(boolean enabled) {
-        generateButton.setEnabled(enabled);
-    }
-
-    @Override
     public JPanel getPanel() {
         return this.mainPanel;
     }
@@ -57,7 +56,12 @@ public class LLMSuggestionsUI implements BasicEventObserver, ILLMSuggestionsView
         fileSelector.addActionListener(e -> onFileSelected());
 
         // Create generate button
-        generateButton.addActionListener(e -> onGenerateClicked());
+        generateButton.addActionListener(e -> {
+            FileItem selectedItem = (FileItem) fileSelector.getSelectedItem();
+            if (selectedItem != null) {
+                viewModel.generateSuggestions(selectedItem.context);
+            }
+        });
 
         // Add components to top panel
         topPanel.add(new JLabel("Select File: "), BorderLayout.WEST);
@@ -69,21 +73,19 @@ public class LLMSuggestionsUI implements BasicEventObserver, ILLMSuggestionsView
         mainPanel.add(responsePanel, BorderLayout.CENTER);
     }
 
-    @Override
-    public void onEventHappen(Object event) {
-        if (event instanceof List<?>) {
-            List<?> list = (List<?>) event;
-            if (!list.isEmpty() && list.get(0) instanceof Pair) {
-                // We're receiving a List<Pair<String, String>> from RunHistoryManager
-                ApplicationManager.getApplication().invokeLater(this::loadFileHistory);
-            }
-        }
-    }
 
-    private void loadFileHistory() {
-        fileListModel.removeAllElements();
-        Map<String, PitestContext> history = historyManager.getRunHistory();
+    private void loadFileHistory(Object eventObj) {
         
+        if (!(eventObj instanceof Map<?, ?>)) {
+            return;
+        }
+        
+        Map<String, PitestContext> history = (Map<String, PitestContext>) eventObj;
+        if (history.isEmpty()) {
+            return;
+        }
+        fileListModel.removeAllElements();
+
         List<FileItem> items = new ArrayList<>();
         history.forEach((key, context) -> {
             String displayName = String.format("%s.%s",
@@ -119,12 +121,6 @@ public class LLMSuggestionsUI implements BasicEventObserver, ILLMSuggestionsView
         // For now, we'll leave it empty as generation is handled by the button
     }
 
-    private void onGenerateClicked() {
-        FileItem selectedItem = (FileItem) fileSelector.getSelectedItem();
-        if (selectedItem != null) {
-            vm.generateSuggestions(selectedItem.context);
-        }
-    }
 
     // Helper class to store file information in the combo box
     private static class FileItem {

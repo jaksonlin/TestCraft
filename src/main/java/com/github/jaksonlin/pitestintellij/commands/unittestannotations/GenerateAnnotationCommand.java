@@ -7,7 +7,7 @@ import com.github.jaksonlin.pitestintellij.annotations.AnnotationSchema;
 import com.github.jaksonlin.pitestintellij.annotations.DefaultValue;
 import com.github.jaksonlin.pitestintellij.context.CaseCheckContext;
 import com.github.jaksonlin.pitestintellij.services.AnnotationConfigService;
-import com.github.jaksonlin.pitestintellij.services.ValueProviderService;
+import com.github.jaksonlin.pitestintellij.services.AnnotationValueProviderService;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.command.WriteCommandAction;
@@ -35,14 +35,14 @@ import java.util.stream.Collectors;
 public class GenerateAnnotationCommand extends UnittestCaseCheckCommand {
     private final PsiElementFactory psiElementFactory;
     private final AnnotationConfigService configService;
-    private final ValueProviderService valueProviderService;
+    private final AnnotationValueProviderService valueProviderService;
     private static final Logger LOG = Logger.getInstance(GenerateAnnotationCommand.class);
 
     public GenerateAnnotationCommand(Project project, CaseCheckContext context) {
         super(project, context);
         this.psiElementFactory = JavaPsiFacade.getInstance(project).getElementFactory();
         this.configService = ApplicationManager.getApplication().getService(AnnotationConfigService.class);
-        this.valueProviderService = project.getService(ValueProviderService.class);
+        this.valueProviderService = project.getService(AnnotationValueProviderService.class);
     }
 
     @Override

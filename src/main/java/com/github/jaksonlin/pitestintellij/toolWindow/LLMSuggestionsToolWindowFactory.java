@@ -1,6 +1,7 @@
 package com.github.jaksonlin.pitestintellij.toolWindow;
 
-import com.github.jaksonlin.pitestintellij.ui.LLMSuggestionsUI;
+import com.github.jaksonlin.pitestintellij.components.LLMSuggestionUIComponent;
+import com.github.jaksonlin.pitestintellij.services.RunHistoryManagerService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
@@ -9,19 +10,20 @@ import org.jetbrains.annotations.NotNull;
 import com.intellij.ui.content.ContentManager;
 import com.intellij.ui.content.impl.ContentImpl;
 
-import javax.swing.*;
+import javax.swing.JPanel;
 
 public class LLMSuggestionsToolWindowFactory implements ToolWindowFactory {
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
-        JPanel toolWindowPanel =createToolWindowPanel(project);
+        // create a new LLMSuggestionUIComponent
+        LLMSuggestionUIComponent uiComponent = new LLMSuggestionUIComponent();
+        // add the uiComponent to the toolWindow through the content manager
+        JPanel toolWindowPanel = uiComponent.getPanel();
         ContentManager contentManager = toolWindow.getContentManager();
         Content content = new ContentImpl(toolWindowPanel, "TestCraft - LLM Suggestions Tool Window", false); // Directly create ContentImpl
         contentManager.addContent(content);
-    }
-
-    private JPanel createToolWindowPanel(@NotNull Project project) {
-        LLMSuggestionsUI suggestionsPanel = new LLMSuggestionsUI(project);
-        return suggestionsPanel.getPanel();
+        // register the uiComponent to the runHistoryManagerService to sync the run history
+        RunHistoryManagerService runHistoryManagerService = project.getService(RunHistoryManagerService.class);
+        runHistoryManagerService.addObserver(uiComponent);
     }
 } 

@@ -20,10 +20,10 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service(Service.Level.PROJECT)
-public final class ValueProviderService {
+public final class AnnotationValueProviderService {
     private final Project project;
 
-    public ValueProviderService(Project project) {
+    public AnnotationValueProviderService(Project project) {
         this.project = project;
     }
 

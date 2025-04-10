@@ -16,7 +16,10 @@ import java.util.Objects;
 public class ObservableTree extends JTree implements BasicEventObserver {
 
     @Override
-    public void onEventHappen(Object eventObj) {
+    public void onEventHappen(String eventName,Object eventObj) {
+        if (!eventName.equals("RUN_HISTORY")) {
+            return;
+        }
         if (eventObj == null) {
             initializeMutationTree(Collections.emptyList());
         } else if (eventObj instanceof Pair) {

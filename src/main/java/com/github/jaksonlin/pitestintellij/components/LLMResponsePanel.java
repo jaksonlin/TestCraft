@@ -1,7 +1,6 @@
 package com.github.jaksonlin.pitestintellij.components;
 
 import com.github.jaksonlin.pitestintellij.observers.BasicEventObserver;
-import com.github.jaksonlin.pitestintellij.observers.LLMMessageObserver;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
 import org.commonmark.node.Node;
@@ -9,6 +8,8 @@ import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 import com.intellij.util.ui.UIUtil;
 import com.intellij.ui.JBColor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.Toolkit;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,11 +18,34 @@ import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class LLMResponsePanel extends JPanel {
+public class LLMResponsePanel extends JPanel implements BasicEventObserver {
     private final JEditorPane editorPane = new JEditorPane();
     private Timer loadingTimer;
     private int loadingDots = 0;
     private boolean isLoading = false;
+    private String lastMarkdown = "";
+    private boolean copyAsMarkdown = false;  // Default value matching OllamaSettingsState
+    
+    @Override
+    public void onEventHappen(String eventName, Object eventObj) {
+        switch (eventName) {
+            case "CONFIG_CHANGE:copyAsMarkdown":
+                copyAsMarkdown = (boolean) eventObj;
+                break;
+            case "CHAT_RESPONSE":
+                updateSuggestionMarkdown(eventObj.toString());
+                break;
+            case "START_LOADING":
+                startLoading();
+                break;
+            case "STOP_LOADING":
+                stopLoading();
+                break;
+            default:
+                break;
+        }
+    }
+
 
     private String getCodeStyle() {
         boolean isDarkTheme = !JBColor.isBright();
@@ -144,7 +168,7 @@ public class LLMResponsePanel extends JPanel {
         return code;
     }
 
-    public void startLoading() {
+    private void startLoading() {
         if (loadingTimer != null) {
             loadingTimer.cancel();
         }
@@ -161,12 +185,13 @@ public class LLMResponsePanel extends JPanel {
                 loadingDots = (loadingDots + 1) % 4;
                 String dots = ".".repeat(loadingDots);
                 String loadingText = String.format("Generating suggestions%s", dots);
-                updateContent(loadingText);
+
+                editorPane.setText(loadingText);
             }
         }, 0, 500); // Update every 500ms
     }
 
-    public void stopLoading() {
+    private void stopLoading() {
         isLoading = false;
         if (loadingTimer != null) {
             loadingTimer.cancel();
@@ -174,16 +199,23 @@ public class LLMResponsePanel extends JPanel {
         }
     }
 
-    public void updateContent(String markdown) {
+    private void updateSuggestionMarkdown(String markdown) {
+        lastMarkdown = markdown;
         String htmlContent = convertMarkdownToHtml(markdown);
         editorPane.setText(htmlContent);
         editorPane.setCaretPosition(0); // Scroll to top
     }
 
     private void copyToClipboard() {
-        editorPane.selectAll();
-        editorPane.copy();
-        editorPane.select(0, 0); // Clear selection
+        String contentToCopy;
+        if (copyAsMarkdown) {
+            contentToCopy = lastMarkdown;
+        } else {
+            contentToCopy = editorPane.getText();
+        }
+        
+        StringSelection selection = new StringSelection(contentToCopy);
+        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
     }
 
     private void clearContent() {
