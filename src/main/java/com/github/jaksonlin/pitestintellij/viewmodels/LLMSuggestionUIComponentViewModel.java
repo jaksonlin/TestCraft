@@ -18,4 +18,8 @@ public class LLMSuggestionUIComponentViewModel  {
         llmService.generateUnittestRequest(context.getTestFilePath(), context.getTargetClassFilePath(), context.getMutationResults());
     }
 
+    public void dryRunGetPrompt(PitestContext context) {
+        llmService.dryRunGetPrompt(context.getTestFilePath(), context.getTargetClassFilePath(), context.getMutationResults());
+    }
+
 }

@@ -8,4 +8,5 @@ import java.util.List;
 public interface ILLMChatMediator {
     void generateUnittestRequest(OllamaClient ollamaClient, String testCodeFile, String sourceCodeFile, List<Mutation> mutationList);
     void register(ILLMChatClient chatClient);
+    String dryRunGetPrompt(String testCodeFile, String sourceCodeFile, List<Mutation> mutations);
 }

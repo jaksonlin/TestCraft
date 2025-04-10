@@ -41,6 +41,9 @@ public class LLMResponsePanel extends JPanel implements BasicEventObserver {
             case "STOP_LOADING":
                 stopLoading();
                 break;
+            case "DRY_RUN_PROMPT":
+                updateDryRunPrompt(eventObj.toString());
+                break;
             default:
                 break;
         }
@@ -247,5 +250,10 @@ public class LLMResponsePanel extends JPanel implements BasicEventObserver {
                 + "</body></html>";
     }
 
-
+    private void updateDryRunPrompt(String prompt) {
+        lastMarkdown = prompt;
+        String htmlContent = convertMarkdownToHtml(prompt);
+        editorPane.setText(htmlContent);
+        editorPane.setCaretPosition(0); // Scroll to top
+    }
 }

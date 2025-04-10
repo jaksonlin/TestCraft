@@ -86,7 +86,7 @@ public class LLMChatMediatorImpl implements ILLMChatMediator {
         return text;
     }
 
-    private String LLmChatRequest(OllamaClient ollamaClient, String testCodeFile, String sourceCodeFile, List<Mutation> mutations) throws IOException {
+    private List<OllamaClient.Message> createPromptOnly(String testCodeFile, String sourceCodeFile, List<Mutation> mutations) throws IOException {
         // Read source files
         String sourceCode = Files.readString(Paths.get(testCodeFile));
         String testCode = Files.readString(Paths.get(sourceCodeFile));
@@ -153,10 +153,55 @@ public class LLMChatMediatorImpl implements ILLMChatMediator {
                 (survivedMutations * 100.0 / totalMutations),
                 analysisBuilder.toString()
         );
-
         messages.add(new OllamaClient.Message("user", prompt));
+        return messages;
+    }
 
+    @Override
+    public String dryRunGetPrompt(String testCodeFile, String sourceCodeFile, List<Mutation> mutations) {
+        try {   
+            List<OllamaClient.Message> messages = createPromptOnly(testCodeFile, sourceCodeFile, mutations);
+            
+            StringBuilder markdownBuilder = new StringBuilder();
+            for (OllamaClient.Message message : messages) {
+                String role = message.getRole();
+                String content = message.getContent();
+                
+                // Format based on role
+                switch (role) {
+                    case "system":
+                        markdownBuilder.append("## System Message\n\n")
+                                     .append(content)
+                                     .append("\n\n");
+                        break;
+                    case "user":
+                        markdownBuilder.append("## User Request\n\n")
+                                     .append(content)
+                                     .append("\n\n");
+                        break;
+                    case "assistant":
+                        markdownBuilder.append("## Assistant Response\n\n")
+                                     .append(content)
+                                     .append("\n\n");
+                        break;
+                    default:
+                        markdownBuilder.append("## ").append(role).append("\n\n")
+                                     .append(content)
+                                     .append("\n\n");
+                }
+            }
+            
+            return markdownBuilder.toString();
+        } catch (IOException e) {
+            LOG.error("Failed to generate unit test suggestions", e);
+            return "Error: " + e.getMessage();
+        }
+    }
+
+    private String LLmChatRequest(OllamaClient ollamaClient, String testCodeFile, String sourceCodeFile, List<Mutation> mutations) throws IOException {
+        
         try {
+            List<OllamaClient.Message> messages = createPromptOnly(testCodeFile, sourceCodeFile, mutations);
             return ollamaClient.chatCompletion(messages);
         } catch (Exception e) {
             throw new IOException("Failed to generate unit test suggestions: " + e.getMessage());

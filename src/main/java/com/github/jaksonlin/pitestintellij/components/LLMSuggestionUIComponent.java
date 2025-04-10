@@ -21,6 +21,7 @@ public class LLMSuggestionUIComponent implements BasicEventObserver {
     private final DefaultComboBoxModel<FileItem> fileListModel = new DefaultComboBoxModel<>();
     private final JComboBox<FileItem> fileSelector = new ComboBox<>(fileListModel);
     private final JButton generateButton = new JButton("Generate Suggestions");
+    private final JButton dryRunButton = new JButton("Dry Run");
 
     public LLMSuggestionUIComponent(LLMService llmService) {
         setupUI();
@@ -59,6 +60,11 @@ public class LLMSuggestionUIComponent implements BasicEventObserver {
         fileSelector.setPreferredSize(new Dimension(400, 30));
         fileSelector.addActionListener(e -> onFileSelected());
 
+        // Create button panel for side-by-side buttons
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.add(dryRunButton);
+        buttonPanel.add(generateButton);
+
         // Create generate button
         generateButton.addActionListener(e -> {
             FileItem selectedItem = (FileItem) fileSelector.getSelectedItem();
@@ -67,10 +73,17 @@ public class LLMSuggestionUIComponent implements BasicEventObserver {
             }
         });
 
+        dryRunButton.addActionListener(e -> {
+            FileItem selectedItem = (FileItem) fileSelector.getSelectedItem();
+            if (selectedItem != null) {
+                viewModel.dryRunGetPrompt(selectedItem.context);
+            }
+        });
+
         // Add components to top panel
         topPanel.add(new JLabel("Select File: "), BorderLayout.WEST);
         topPanel.add(fileSelector, BorderLayout.CENTER);
-        topPanel.add(generateButton, BorderLayout.EAST);
+        topPanel.add(buttonPanel, BorderLayout.EAST);
 
         // Add panels to main panel
         mainPanel.add(topPanel, BorderLayout.NORTH);

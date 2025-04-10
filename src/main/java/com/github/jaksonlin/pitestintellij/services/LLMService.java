@@ -25,6 +25,11 @@ public final class LLMService extends ObserverBase implements ILLMChatClient, Pe
     private static final Logger LOG = Logger.getInstance(LLMService.class);
     private final ILLMChatMediator llmChatMediator = new LLMChatMediatorImpl();
 
+    public void dryRunGetPrompt(String testCodeFile, String sourceCodeFile, List<Mutation> mutations) {
+        String prompt = llmChatMediator.dryRunGetPrompt(testCodeFile, sourceCodeFile, mutations);
+        notifyObservers("DRY_RUN_PROMPT", prompt);
+    }
+
     public LLMService() {
         llmChatMediator.register(this);
     }
