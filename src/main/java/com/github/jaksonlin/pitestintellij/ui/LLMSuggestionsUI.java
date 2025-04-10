@@ -5,6 +5,7 @@ import com.github.jaksonlin.pitestintellij.context.PitestContext;
 import com.github.jaksonlin.pitestintellij.observers.BasicEventObserver;
 import com.github.jaksonlin.pitestintellij.services.RunHistoryManager;
 import com.github.jaksonlin.pitestintellij.viewmodels.LLMSuggestionsPanelViewModel;
+import com.github.jaksonlin.pitestintellij.viewmodels.ILLMSuggestionsView;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
@@ -17,8 +18,7 @@ import java.util.List;
 import java.util.Map;
 import com.github.jaksonlin.pitestintellij.util.Pair;
 
-
-public class LLMSuggestionsUI implements BasicEventObserver {
+public class LLMSuggestionsUI implements BasicEventObserver, ILLMSuggestionsView {
     private final Project project;
     private final LLMSuggestionsPanelViewModel vm;
     private final LLMResponsePanel responsePanel = new LLMResponsePanel();
@@ -26,6 +26,7 @@ public class LLMSuggestionsUI implements BasicEventObserver {
     private final DefaultComboBoxModel<FileItem> fileListModel = new DefaultComboBoxModel<>();
     private final JComboBox<FileItem> fileSelector = new ComboBox<>(fileListModel);
     private final RunHistoryManager historyManager;
+    private final JButton generateButton = new JButton("Generate Suggestions");
 
     public LLMSuggestionsUI(Project project) {
         this.project = project;
@@ -34,6 +35,16 @@ public class LLMSuggestionsUI implements BasicEventObserver {
         setupUI();
         loadFileHistory();
         historyManager.addObserver(this);
+    }
+
+    @Override
+    public void setGenerateButtonEnabled(boolean enabled) {
+        generateButton.setEnabled(enabled);
+    }
+
+    @Override
+    public JPanel getPanel() {
+        return this.mainPanel;
     }
 
     private void setupUI() {
@@ -46,7 +57,6 @@ public class LLMSuggestionsUI implements BasicEventObserver {
         fileSelector.addActionListener(e -> onFileSelected());
 
         // Create generate button
-        JButton generateButton = new JButton("Generate Suggestions");
         generateButton.addActionListener(e -> onGenerateClicked());
 
         // Add components to top panel
@@ -114,10 +124,6 @@ public class LLMSuggestionsUI implements BasicEventObserver {
         if (selectedItem != null) {
             vm.generateSuggestions(selectedItem.context);
         }
-    }
-
-    public JPanel getPanel() {
-        return this.mainPanel;
     }
 
     // Helper class to store file information in the combo box

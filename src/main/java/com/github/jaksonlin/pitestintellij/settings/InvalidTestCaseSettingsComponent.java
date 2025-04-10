@@ -15,6 +15,7 @@ import com.intellij.ui.EditorTextField;
 import com.intellij.ui.components.ActionLink;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
+import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
@@ -29,8 +30,6 @@ public class InvalidTestCaseSettingsComponent {
     private final EditorTextField assertionEditor;
     private final JBCheckBox enableCheckbox;
     private final JBCheckBox enableCommentCheckbox;
-    private final JBCheckBox copyAsMarkdownCheckbox;
-    private final JBCheckBox copyPromptCheckbox;
     private static final int EDITOR_HEIGHT = 200;
 
     public InvalidTestCaseSettingsComponent() {
@@ -41,26 +40,38 @@ public class InvalidTestCaseSettingsComponent {
         enableCommentCheckbox = new JBCheckBox("Enable test step comment check");
         enableCommentCheckbox.setToolTipText("When enabled, test methods will be checked for descriptive comments");
 
-        copyAsMarkdownCheckbox = new JBCheckBox("Copy LLM response as markdown");
-        copyAsMarkdownCheckbox.setToolTipText("When enabled, LLM responses will be copied in markdown format");
-
-        copyPromptCheckbox = new JBCheckBox("Copy prompt to clipboard");
-        copyPromptCheckbox.setToolTipText("When enabled, allows copying the prompt sent to LLM for external services");
-
-        // Create editor for invalid assertions
+        // Create editor for invalid assertions with enhanced configuration
         assertionEditor = new EditorTextField() {
             @Override
             protected @NotNull EditorEx createEditor() {
                 EditorEx editor = (EditorEx) super.createEditor();
                 editor.setVerticalScrollbarVisible(true);
                 editor.setHorizontalScrollbarVisible(true);
+                
                 EditorSettings settings = editor.getSettings();
+                settings.setFoldingOutlineShown(true);
                 settings.setLineNumbersShown(true);
+                settings.setLineMarkerAreaShown(true);
                 settings.setIndentGuidesShown(true);
+                settings.setUseSoftWraps(false);
+                settings.setAdditionalLinesCount(3);
+                settings.setAdditionalColumnsCount(3);
+                settings.setRightMarginShown(true);
+                
                 return editor;
             }
+
+            @Override
+            public Dimension getPreferredSize() {
+                return new Dimension(super.getPreferredSize().width, EDITOR_HEIGHT);
+            }
+
+            @Override
+            public Dimension getMinimumSize() {
+                return new Dimension(100, EDITOR_HEIGHT);
+            }
         };
-        assertionEditor.setPreferredSize(new Dimension(-1, EDITOR_HEIGHT));
+        assertionEditor.setOneLineMode(false);
 
         // Help text for invalid assertions
         String helpText = "<html><b>Examples of invalid assertions that will be flagged:</b><br>" +
@@ -69,9 +80,11 @@ public class InvalidTestCaseSettingsComponent {
                 "• assertNotNull(new Object()) - testing newly created object<br>" +
                 "• assertEquals(\"success\", \"success\") - comparing identical strings</html>";
 
-        // Create a panel for LLM-related settings
-        JPanel llmPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        llmPanel.add(new JBLabel("<html><b>LLM Integration Settings</b></html>"));
+        // Create editor panel with scroll pane
+        JPanel editorPanel = new JPanel(new BorderLayout());
+        editorPanel.add(new JBLabel("Invalid Assertion Patterns"), BorderLayout.NORTH);
+        editorPanel.add(new JBLabel("Enter patterns for assertions that should be flagged as invalid (one per line):"), BorderLayout.CENTER);
+        editorPanel.add(assertionEditor, BorderLayout.SOUTH);
 
         // Build the layout using FormBuilder for consistent spacing and organization
         mainPanel = FormBuilder.createFormBuilder()
@@ -80,14 +93,7 @@ public class InvalidTestCaseSettingsComponent {
                 .addComponent(enableCheckbox)
                 .addComponent(enableCommentCheckbox)
                 .addVerticalGap(20)
-                .addComponent(llmPanel)
-                .addVerticalGap(5)
-                .addComponent(copyAsMarkdownCheckbox)
-                .addComponent(copyPromptCheckbox)
-                .addVerticalGap(20)
-                .addComponent(new JBLabel("Invalid Assertion Patterns"))
-                .addComponent(new JBLabel("Enter patterns for assertions that should be flagged as invalid (one per line):"))
-                .addComponent(assertionEditor)
+                .addComponent(editorPanel)
                 .addComponent(new JBLabel(helpText))
                 .addComponentFillVertically(new JPanel(), 0)
                 .getPanel();
@@ -117,22 +123,6 @@ public class InvalidTestCaseSettingsComponent {
 
     public void setEnableCommentCheck(boolean selected) {
         enableCommentCheckbox.setSelected(selected);
-    }
-
-    public boolean isCopyAsMarkdown() {
-        return copyAsMarkdownCheckbox.isSelected();
-    }
-
-    public void setCopyAsMarkdown(boolean selected) {
-        copyAsMarkdownCheckbox.setSelected(selected);
-    }
-
-    public boolean isCopyPrompt() {
-        return copyPromptCheckbox.isSelected();
-    }
-
-    public void setCopyPrompt(boolean selected) {
-        copyPromptCheckbox.setSelected(selected);
     }
 
     public String getInvalidAssertionText() {

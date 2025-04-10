@@ -8,6 +8,7 @@ import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 import com.intellij.util.ui.UIUtil;
+import com.intellij.ui.JBColor;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,14 +17,14 @@ import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class LLMResponsePanel extends JPanel implements BasicEventObserver {
+public class LLMResponsePanel extends JPanel {
     private final JEditorPane editorPane = new JEditorPane();
     private Timer loadingTimer;
     private int loadingDots = 0;
     private boolean isLoading = false;
 
     private String getCodeStyle() {
-        boolean isDarkTheme = UIUtil.isUnderDarcula();
+        boolean isDarkTheme = !JBColor.isBright();
         String backgroundColor = isDarkTheme ? "#2b2d30" : "#fafafa";
         String textColor = isDarkTheme ? "#bababa" : "#2b2b2b";
         String codeBackground = isDarkTheme ? "#1e1f22" : "#f6f8fa";
@@ -214,9 +215,5 @@ public class LLMResponsePanel extends JPanel implements BasicEventObserver {
                 + "</body></html>";
     }
 
-    @Override
-    public void onEventHappen(Object eventObj) {
-        String markdown = eventObj.toString();
-        updateContent(markdown);
-    }
+
 }

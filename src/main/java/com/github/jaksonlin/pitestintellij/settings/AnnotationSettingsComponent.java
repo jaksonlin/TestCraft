@@ -73,7 +73,9 @@ public class AnnotationSettingsComponent {
                 editor.getSettings().setLineMarkerAreaShown(true);
                 editor.getSettings().setIndentGuidesShown(true);
                 editor.getSettings().setUseSoftWraps(false);
-                
+                editor.getSettings().setAdditionalLinesCount(3);
+                editor.getSettings().setAdditionalColumnsCount(3);
+                editor.getSettings().setRightMarginShown(true);
                 return editor;
             }
 

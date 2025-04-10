@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface ILLMChatMediator {
     void generateUnittestRequest(String testCodeFile, String sourceCodeFile, List<Mutation> mutationList);
-    void register(ILLMChatUI clientUI);
+    void register(ILLMChatClient clientUI);
 }

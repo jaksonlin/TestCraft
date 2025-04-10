@@ -2,36 +2,35 @@ package com.github.jaksonlin.pitestintellij.viewmodels;
 
 import com.github.jaksonlin.pitestintellij.components.LLMResponsePanel;
 import com.github.jaksonlin.pitestintellij.context.PitestContext;
-import com.github.jaksonlin.pitestintellij.mediators.ILLMChatMediator;
-import com.github.jaksonlin.pitestintellij.mediators.ILLMChatUI;
-import com.github.jaksonlin.pitestintellij.mediators.LLMChatMediatorImpl;
 import com.github.jaksonlin.pitestintellij.services.LLMService;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
+import com.github.jaksonlin.pitestintellij.observers.BasicEventObserver;
 
-public class LLMSuggestionsPanelViewModel implements ILLMChatUI {
+public class LLMSuggestionsPanelViewModel  implements BasicEventObserver {
 
     private final LLMService llmService;
-    private final ILLMChatMediator llmChatMediator = new LLMChatMediatorImpl();
+    
     private final LLMResponsePanel responsePanel;
 
     public LLMSuggestionsPanelViewModel(Project project, LLMResponsePanel mainPanel) {
-        this.llmService = project.getService(LLMService.class);
+        this.llmService = ApplicationManager.getApplication().getService(LLMService.class);
         this.responsePanel = mainPanel;
-        llmService.addObserver(mainPanel);
-        llmChatMediator.register(this);
+        llmService.addObserver(this);
+        
     }
 
     public void generateSuggestions(PitestContext context) {
         responsePanel.startLoading();
-        llmChatMediator.generateUnittestRequest(context.getTestFilePath(), context.getTargetClassFilePath(), context.getMutationResults());
+        llmService.generateUnittestRequest(context.getTestFilePath(), context.getTargetClassFilePath(), context.getMutationResults());
     }
 
+
     @Override
-    public void updateChatResponse(String chatResponse) {
+    public void onEventHappen(Object eventObj) {
         ApplicationManager.getApplication().invokeLater(() -> {
             responsePanel.stopLoading();
-            llmService.notifyLLMResponse(chatResponse);
+            responsePanel.updateContent(eventObj.toString());
         });
     }
 }

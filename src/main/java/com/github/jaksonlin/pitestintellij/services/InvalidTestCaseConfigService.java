@@ -26,8 +26,6 @@ public final class InvalidTestCaseConfigService implements PersistentStateCompon
         public String invalidAssertionText = InvalidTestCaseConfigService.getBuiltInInvalidAssertionText();
         public boolean enable = false;
         public boolean enableCommentCheck = false;
-        public boolean copyAsMarkdown = true;
-        public boolean copyPrompt = false;
 
         public State() {
         }
@@ -39,14 +37,12 @@ public final class InvalidTestCaseConfigService implements PersistentStateCompon
             State state = (State) o;
             return enable == state.enable &&
                    enableCommentCheck == state.enableCommentCheck &&
-                   copyAsMarkdown == state.copyAsMarkdown &&
-                   copyPrompt == state.copyPrompt &&
                    Objects.equals(invalidAssertionText, state.invalidAssertionText);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(invalidAssertionText, enable, enableCommentCheck, copyAsMarkdown, copyPrompt);
+            return Objects.hash(invalidAssertionText, enable, enableCommentCheck);
         }
     }
 
@@ -70,22 +66,6 @@ public final class InvalidTestCaseConfigService implements PersistentStateCompon
 
     public void setEnableCommentCheck(boolean enable) {
         myState.enableCommentCheck = enable;
-    }
-
-    public boolean isCopyAsMarkdown() {
-        return myState.copyAsMarkdown;
-    }
-
-    public void setCopyAsMarkdown(boolean copyAsMarkdown) {
-        myState.copyAsMarkdown = copyAsMarkdown;
-    }
-
-    public boolean isCopyPrompt() {
-        return myState.copyPrompt;
-    }
-
-    public void setCopyPrompt(boolean copyPrompt) {
-        myState.copyPrompt = copyPrompt;
     }
 
     @Nullable
@@ -119,8 +99,5 @@ public final class InvalidTestCaseConfigService implements PersistentStateCompon
             "assertNotNull(\"true\")", "assertNotNull(\"false\")",
             "assertNotNull(\"0\");", "assertNotNull(\"3\");", "assertNotNull(\"4\");",
             "assertNotNull(\"5\");", "assertNotNull(\"6\");", "assertNotNull(\"7\");",
-            "assertNotNull(\"8\");", "assertNotNull(\"9\");", "assertNotNull(\"suc\")",
-            "assertNotNull(\"true\")", "assertEquals(\"1\", \"1\")",
-            "assertEquals(\"equals\", s, s)",
-            "assertEquals(b, b)", "assertTrue(1==1)"};
+            "assertNotNull(\"8\");"};
 }
