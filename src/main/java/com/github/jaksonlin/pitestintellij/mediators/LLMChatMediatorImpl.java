@@ -1,5 +1,6 @@
 package com.github.jaksonlin.pitestintellij.mediators;
 
+import com.github.jaksonlin.pitestintellij.MyBundle;
 import com.github.jaksonlin.pitestintellij.util.Mutation;
 import com.github.jaksonlin.pitestintellij.util.OllamaClient;
 import com.intellij.openapi.diagnostic.Logger;
@@ -47,7 +48,7 @@ public class LLMChatMediatorImpl implements ILLMChatMediator {
                 if (!ollamaClient.testConnection()) {
                     if (chatClient != null) {
                         SwingUtilities.invokeLater(() -> chatClient.updateChatResponse("ERROR", 
-                            "Cannot connect to Ollama server. Please check if the server is running and accessible."));
+                            MyBundle.message("llm.error.connection")));
                     }
                     return;
                 }
@@ -76,7 +77,7 @@ public class LLMChatMediatorImpl implements ILLMChatMediator {
                 if (!ollamaClient.testConnection()) {
                     if (chatClient != null) {
                         SwingUtilities.invokeLater(() -> chatClient.updateChatResponse("ERROR", 
-                            "Cannot connect to Ollama server. Please check if the server is running and accessible."));
+                            MyBundle.message("llm.error.connection")));
                     }
                     return;
                 }
@@ -177,35 +178,10 @@ public class LLMChatMediatorImpl implements ILLMChatMediator {
         
 
         // System message to set context
-        promptOnlyMessages.add(new OllamaClient.Message("system",
-                "You are a specialized code analysis assistant focused on improving unit test coverage based on mutation testing results. " +
-                        "Your task is to first analysis the mutation result, look at the lines that have both `KILLED` and `SURVIVED` mutations; " +
-                        "and then look at the unit tests that can execute the mutations, exam how the test `KILLED` the mutation and why some `SURVIVED`. " +
-                        "Finally, suggest specific unit tests to handle the `SURVIVED` mutations. "
-        ));
+        promptOnlyMessages.add(new OllamaClient.Message("system", MyBundle.message("llm.prompt.system")));
 
         // User message with the structured data
-        String prompt = String.format(
-                "Please analyze the following mutation testing results and suggest specific unit tests:\n\n" +
-                        "=== Source Code Under Test ===\n" +
-                        "```\n" +   
-                        "%s\n" +
-                        "```\n\n" +
-                        "=== Current Test File ===\n" +
-                        "```\n" +
-                        "%s\n" +
-                        "```\n\n" +
-                        "=== Mutation Testing Statistics ===\n" +
-                        "Total Mutations: %d\n" +
-                        "Killed Mutations: %d (%.1f%%)\n" +
-                        "Survived Mutations: %d (%.1f%%)\n\n" +
-                        "=== Detailed Mutation Analysis ===\n" +
-                        "%s\n\n" +
-                        "Based on the above analysis, please provide:\n" +
-                        "1. Specific test cases to handle survived mutations\n" +
-                        "2. The exact assertions needed for each test case\n" +
-                        "3. Brief explanations of why each test is necessary\n" +
-                        "Format your response in markdown with code blocks for the test cases.",
+        String prompt = String.format(MyBundle.message("llm.prompt.user"),
                 sourceCode,
                 testCode,
                 totalMutations,
