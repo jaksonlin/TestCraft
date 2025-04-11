@@ -88,8 +88,8 @@ public class LLMChatMediatorImpl implements ILLMChatMediator {
 
     private List<OllamaClient.Message> createPromptOnly(String testCodeFile, String sourceCodeFile, List<Mutation> mutations) throws IOException {
         // Read source files
-        String sourceCode = Files.readString(Paths.get(testCodeFile));
-        String testCode = Files.readString(Paths.get(sourceCodeFile));
+        String sourceCode = Files.readString(Paths.get(sourceCodeFile));
+        String testCode = Files.readString(Paths.get(testCodeFile));
         
         // Group mutations by line number
         Map<Integer, List<Mutation>> mutationsByLine = mutations.stream()
@@ -130,9 +130,13 @@ public class LLMChatMediatorImpl implements ILLMChatMediator {
         String prompt = String.format(
                 "Please analyze the following mutation testing results and suggest specific unit tests:\n\n" +
                         "=== Source Code Under Test ===\n" +
-                        "%s\n\n" +
+                        "```java\n" +   
+                        "%s\n" +
+                        "```\n\n" +
                         "=== Current Test File ===\n" +
-                        "%s\n\n" +
+                        "```java\n" +
+                        "%s\n" +
+                        "```\n\n" +
                         "=== Mutation Testing Statistics ===\n" +
                         "Total Mutations: %d\n" +
                         "Killed Mutations: %d (%.1f%%)\n" +

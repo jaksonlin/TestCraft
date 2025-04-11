@@ -35,9 +35,11 @@ public class LLMSuggestionUIComponent implements BasicEventObserver {
         switch (eventName) {
             case "START_LOADING":
                 generateButton.setEnabled(false);
+                dryRunButton.setEnabled(false);
                 break;
             case "STOP_LOADING":
                 generateButton.setEnabled(true);
+                dryRunButton.setEnabled(true);
                 break;
             case "RUN_HISTORY_LIST":
                 ApplicationManager.getApplication().invokeLater(() -> loadFileHistory(eventObj));
