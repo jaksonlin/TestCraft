@@ -332,12 +332,15 @@ public class LLMResponsePanel extends JPanel implements BasicEventObserver {
         updateOutputArea();
     }
 
-    private void copyToClipboard(String contentToCopy) {
+    
+
+    private void copyToClipboard(Object eventObj) {
         String currentContentToCopy;
-        if (contentToCopy == null || contentToCopy.isEmpty()) {
-            currentContentToCopy = outputArea.getText();
+
+        if (copyAsMarkdown) {
+            currentContentToCopy = eventObj.toString();
         } else {
-            currentContentToCopy = contentToCopy;
+            currentContentToCopy = outputArea.getText();
         }
         StringSelection selection = new StringSelection(currentContentToCopy);
         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
@@ -353,7 +356,7 @@ public class LLMResponsePanel extends JPanel implements BasicEventObserver {
                 stopLoading();
                 break;
             case "COPY_CHAT_RESPONSE":
-                copyToClipboard(eventObj.toString());
+                copyToClipboard(eventObj);
                 break;
             case "CONFIG_CHANGE:copyAsMarkdown":
                 copyAsMarkdown = (boolean) eventObj;

@@ -136,4 +136,7 @@ public final class LLMService
         return llmChatMediator.getChatHistory();
     }
 
+    public void propagateConfigChange() {
+        notifyObservers("CONFIG_CHANGE:copyAsMarkdown", myState.copyAsMarkdown);
+    }
 }

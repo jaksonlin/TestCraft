@@ -16,12 +16,20 @@ public class LLMSuggestionUIComponentViewModel extends ObserverBase implements B
         this.addObserver(llmService);
     }
 
+    public void propagateConfigChange() {
+        llmService.propagateConfigChange();
+    }
+
     public void clearChat() {
         notifyObservers("CLEAR_CHAT", null);
     }
 
     public void copyChat() {
         String chatHistory = llmService.getChatHistory();
+        // when chatHistory is empty, use the lastDryRunPrompt
+        if (chatHistory.isEmpty()) {
+            chatHistory = lastDryRunPrompt;
+        }
         notifyObservers("COPY_CHAT_RESPONSE", chatHistory);
     }
 
@@ -47,9 +55,11 @@ public class LLMSuggestionUIComponentViewModel extends ObserverBase implements B
         llmService.generateUnittestRequest(context.getTestFilePath(), context.getTargetClassFilePath(), context.getMutationResults());
     }
 
+    private String lastDryRunPrompt = "";
+
     public void dryRunGetPrompt(PitestContext context) {
-        String prompt = llmService.dryRunGetPrompt(context.getTestFilePath(), context.getTargetClassFilePath(), context.getMutationResults());
-        notifyObservers("DRY_RUN_PROMPT", prompt);
+        lastDryRunPrompt = llmService.dryRunGetPrompt(context.getTestFilePath(), context.getTargetClassFilePath(), context.getMutationResults());
+        notifyObservers("DRY_RUN_PROMPT", lastDryRunPrompt);
     }
 
     public void handleChatMessage(String message) {

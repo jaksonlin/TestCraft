@@ -54,6 +54,8 @@ public class LLMSuggestionUIComponent implements BasicEventObserver {
                 viewModel.copyChat();
             }
         });
+
+        viewModel.propagateConfigChange();
         
     }
 
