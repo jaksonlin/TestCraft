@@ -21,20 +21,27 @@ public class LLMChatMediatorImpl implements ILLMChatMediator {
     private static final Logger LOG = Logger.getInstance(LLMChatMediatorImpl.class);
     private ILLMChatClient chatClient;
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private OllamaClient ollamaClient;
+    private List<OllamaClient.Message> messageHistory = new ArrayList<>();
 
+    public void setOllamaClient(OllamaClient ollamaClient) {
+        this.ollamaClient = ollamaClient;
+    }
 
     @Override
-    public void generateUnittestRequest(OllamaClient ollamaClient, String testCodeFile, String sourceCodeFile, List<Mutation> mutations) {
+    public void generateUnittestRequest(String testCodeFile, String sourceCodeFile, List<Mutation> mutations) {
         executorService.submit(() -> {
             try {
-                String rawResponse = LLmChatRequest(ollamaClient, testCodeFile, sourceCodeFile, mutations);
+                // clear the message history
+                messageHistory.clear();
+                String rawResponse = LLmChatRequest(testCodeFile, sourceCodeFile, mutations);
                 String formattedResponse = formatResponse(rawResponse);
-                SwingUtilities.invokeLater(() -> chatClient.updateChatResponse(formattedResponse));
+                SwingUtilities.invokeLater(() -> chatClient.updateChatResponse("UNIT_TEST_REQUEST", formattedResponse));
                 
             } catch (Exception e) {
                 LOG.error("Failed to generate unit test suggestions", e);
                 if (chatClient != null) {
-                    SwingUtilities.invokeLater(() -> chatClient.updateChatResponse("Error: " + e.getMessage()));
+                    SwingUtilities.invokeLater(() -> chatClient.updateChatResponse("ERROR", "Error: " + e.getMessage()));
                 }
             }
         });
@@ -87,6 +94,7 @@ public class LLMChatMediatorImpl implements ILLMChatMediator {
     }
 
     private List<OllamaClient.Message> createPromptOnly(String testCodeFile, String sourceCodeFile, List<Mutation> mutations) throws IOException {
+        List<OllamaClient.Message> promptOnlyMessages = new ArrayList<>();
         // Read source files
         String sourceCode = Files.readString(Paths.get(sourceCodeFile));
         String testCode = Files.readString(Paths.get(testCodeFile));
@@ -116,10 +124,10 @@ public class LLMChatMediatorImpl implements ILLMChatMediator {
                 .filter(m -> "SURVIVED".equals(m.getStatus()))
                 .count();
 
-        List<OllamaClient.Message> messages = new ArrayList<>();
+        
 
         // System message to set context
-        messages.add(new OllamaClient.Message("system",
+        promptOnlyMessages.add(new OllamaClient.Message("system",
                 "You are a specialized code analysis assistant focused on improving unit test coverage based on mutation testing results. " +
                         "Your task is to first analysis the mutation result, look at the lines that have both `KILLED` and `SURVIVED` mutations; " +
                         "and then look at the unit tests that can execute the mutations, exam how the test `KILLED` the mutation and why some `SURVIVED`. " +
@@ -130,11 +138,11 @@ public class LLMChatMediatorImpl implements ILLMChatMediator {
         String prompt = String.format(
                 "Please analyze the following mutation testing results and suggest specific unit tests:\n\n" +
                         "=== Source Code Under Test ===\n" +
-                        "```java\n" +   
+                        "```\n" +   
                         "%s\n" +
                         "```\n\n" +
                         "=== Current Test File ===\n" +
-                        "```java\n" +
+                        "```\n" +
                         "%s\n" +
                         "```\n\n" +
                         "=== Mutation Testing Statistics ===\n" +
@@ -157,17 +165,17 @@ public class LLMChatMediatorImpl implements ILLMChatMediator {
                 (survivedMutations * 100.0 / totalMutations),
                 analysisBuilder.toString()
         );
-        messages.add(new OllamaClient.Message("user", prompt));
-        return messages;
+        promptOnlyMessages.add(new OllamaClient.Message("user", prompt));
+        return promptOnlyMessages;
     }
 
     @Override
     public String dryRunGetPrompt(String testCodeFile, String sourceCodeFile, List<Mutation> mutations) {
         try {   
-            List<OllamaClient.Message> messages = createPromptOnly(testCodeFile, sourceCodeFile, mutations);
+            List<OllamaClient.Message> dryRunMessages = createPromptOnly(testCodeFile, sourceCodeFile, mutations);
             
             StringBuilder markdownBuilder = new StringBuilder();
-            for (OllamaClient.Message message : messages) {
+            for (OllamaClient.Message message : dryRunMessages) {
                 String role = message.getRole();
                 String content = message.getContent();
                 
@@ -202,15 +210,41 @@ public class LLMChatMediatorImpl implements ILLMChatMediator {
         }
     }
 
-    private String LLmChatRequest(OllamaClient ollamaClient, String testCodeFile, String sourceCodeFile, List<Mutation> mutations) throws IOException {
-        
+ 
+    private String LLmChatRequest(String testCodeFile, String sourceCodeFile, List<Mutation> mutations) throws IOException {
+
         try {
             List<OllamaClient.Message> messages = createPromptOnly(testCodeFile, sourceCodeFile, mutations);
-            return ollamaClient.chatCompletion(messages);
+            messageHistory.addAll(messages);
+            String response = ollamaClient.chatCompletion(messageHistory);
+            messageHistory.add(new OllamaClient.Message("assistant", response));
+            return response;
         } catch (Exception e) {
             throw new IOException("Failed to generate unit test suggestions: " + e.getMessage());
         }
     }
+
+    @Override
+    public void handleChatMessage(String message) {
+        //
+        try {
+            messageHistory.add(new OllamaClient.Message("user", message));
+            String response = ollamaClient.chatCompletion(messageHistory);
+            messageHistory.add(new OllamaClient.Message("assistant", response));
+            chatClient.updateChatResponse("CHAT_MESSAGE", response);
+        } catch (IOException e) {
+            LOG.error("Failed to respond to chat message", e);
+            if (chatClient != null) {
+                SwingUtilities.invokeLater(() -> chatClient.updateChatResponse("ERROR", "Error: " + e.getMessage()));
+            }
+        } catch (InterruptedException e) {
+            LOG.error("Failed to respond to chat message", e);
+            if (chatClient != null) {
+                SwingUtilities.invokeLater(() -> chatClient.updateChatResponse("ERROR", "Error: " + e.getMessage()));
+            }
+        }
+    }
+
 
     @Override
     public void register(ILLMChatClient chatClient) {

@@ -68,11 +68,6 @@ public final class LLMService extends ObserverBase implements ILLMChatClient, Pe
 
     private State myState = new State();
 
-
-
-
-
-
     @Nullable
     @Override
     public State getState() {
@@ -89,25 +84,30 @@ public final class LLMService extends ObserverBase implements ILLMChatClient, Pe
     public void generateUnittestRequest(String testCodeFile, String sourceCodeFile, List<Mutation> mutationList) {
         LOG.info("Generating unittest request for " + testCodeFile + " and " + sourceCodeFile);
         notifyObservers("START_LOADING", null);
-        OllamaClient ollamaClient = new OllamaClient(
+        llmChatMediator.setOllamaClient(new OllamaClient(
             myState.ollamaHost, 
             myState.ollamaModel, 
             myState.maxTokens, 
             myState.temperature, 
             myState.ollamaPort, 
             myState.requestTimeout
-        );
-        llmChatMediator.generateUnittestRequest(ollamaClient, testCodeFile, sourceCodeFile, mutationList);
+        ));
+        llmChatMediator.generateUnittestRequest(testCodeFile, sourceCodeFile, mutationList);
     }
 
     // the mediator is dedicated to talk to the LLM, and when the response is ready, the service will propagate the response to the observers
     // so that on the UI layer, this is the place to notify all the observers
     // the mediator is not responsible for the UI, so it does not know the UI is a Swing UI
     @Override
-    public void updateChatResponse(String chatResponse) {
+    public void updateChatResponse(String responseType, String chatResponse) {
         LOG.info("Received chat response: " + chatResponse);
         notifyObservers("STOP_LOADING", null);
-        notifyObservers("CHAT_RESPONSE", chatResponse);
+        notifyObservers("CHAT_RESPONSE:" + responseType, chatResponse);
+    }
+
+    public void handleChatMessage(String message) {
+        LOG.info("Received chat message: " + message);
+        llmChatMediator.handleChatMessage(message);
     }
 
 }

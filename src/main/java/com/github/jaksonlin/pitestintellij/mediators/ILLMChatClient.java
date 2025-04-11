@@ -2,5 +2,5 @@ package com.github.jaksonlin.pitestintellij.mediators;
 
 
 public interface ILLMChatClient {
-    void updateChatResponse(String chatResponse);
+    void updateChatResponse(String responseType,String chatResponse);
 }

@@ -21,7 +21,8 @@ import com.github.jaksonlin.pitestintellij.services.LLMService;
 
 public class LLMSuggestionUIComponent implements BasicEventObserver {
     private final LLMSuggestionUIComponentViewModel viewModel;
-    private final LLMResponsePanel responsePanel = new LLMResponsePanel();
+    private final ChatPanel chatPanel = new ChatPanel();
+    private final LLMResponsePanel responsePanel = new LLMResponsePanel(chatPanel);
     private final JPanel mainPanel = new JPanel(new BorderLayout());
     private final DefaultComboBoxModel<FileItem> fileListModel = new DefaultComboBoxModel<>();
     private final JComboBox<FileItem> fileSelector = new ComboBox<>(fileListModel);
@@ -35,6 +36,10 @@ public class LLMSuggestionUIComponent implements BasicEventObserver {
         llmService.addObserver(responsePanel);
         llmService.addObserver(this);
         viewModel = new LLMSuggestionUIComponentViewModel(llmService);
+        // add the chatPanel to the mainPanel
+        chatPanel.addListener(message -> {
+            viewModel.handleChatMessage(message);
+        });
     }
     
     @Override

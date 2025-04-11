@@ -22,4 +22,8 @@ public class LLMSuggestionUIComponentViewModel  {
         llmService.dryRunGetPrompt(context.getTestFilePath(), context.getTargetClassFilePath(), context.getMutationResults());
     }
 
+    public void handleChatMessage(String message) {
+        llmService.handleChatMessage(message);
+    }
+
 }
