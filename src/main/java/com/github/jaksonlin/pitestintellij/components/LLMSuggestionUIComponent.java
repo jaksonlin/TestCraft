@@ -8,7 +8,12 @@ import com.intellij.openapi.ui.ComboBox;
 import com.intellij.util.ui.JBUI;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.plaf.basic.BasicComboBoxEditor;
 import java.awt.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +27,8 @@ public class LLMSuggestionUIComponent implements BasicEventObserver {
     private final JComboBox<FileItem> fileSelector = new ComboBox<>(fileListModel);
     private final JButton generateButton = new JButton("Generate Suggestions");
     private final JButton dryRunButton = new JButton("Dry Run");
+    private List<FileItem> allFileItems = new ArrayList<>();
+    private boolean isFiltering = false;
 
     public LLMSuggestionUIComponent(LLMService llmService) {
         setupUI();
@@ -55,19 +62,90 @@ public class LLMSuggestionUIComponent implements BasicEventObserver {
 
     private void setupUI() {
         // Create the top panel for file selection
-        JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setBorder(JBUI.Borders.empty(5));
+        JPanel topPanel = new JPanel(new BorderLayout(5, 5));
+        topPanel.setBorder(JBUI.Borders.empty(10));
 
-        // Setup file selector
+        // Setup file selector with search capability
         fileSelector.setPreferredSize(new Dimension(400, 30));
-        fileSelector.addActionListener(e -> onFileSelected());
+        fileSelector.setMaximumRowCount(15);
+        fileSelector.setEditable(true);
+        
+        // Create and set custom editor
+        JTextField editorComponent = new JTextField();
+        ComboBoxEditor editor = new BasicComboBoxEditor() {
+            @Override
+            public Component getEditorComponent() {
+                return editorComponent;
+            }
+        };
+        fileSelector.setEditor(editor);
 
-        // Create button panel for side-by-side buttons
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        // Add document listener to editor component
+        editorComponent.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                filterFiles();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                filterFiles();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                filterFiles();
+            }
+        });
+
+        // Add key listener to handle enter key
+        editorComponent.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
+            public void keyPressed(java.awt.event.KeyEvent e) {
+                if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
+                    if (fileListModel.getSize() > 0 && fileSelector.isPopupVisible()) {
+                        FileItem selectedItem = (FileItem) fileSelector.getSelectedItem();
+                        if (selectedItem != null) {
+                            editorComponent.setText(selectedItem.toString());
+                            fileSelector.setSelectedItem(selectedItem);
+                        } else {
+                            // If no item is selected but we have items, select the first one
+                            FileItem firstItem = fileListModel.getElementAt(0);
+                            editorComponent.setText(firstItem.toString());
+                            fileSelector.setSelectedItem(firstItem);
+                        }
+                        fileSelector.hidePopup();
+                        e.consume();
+                    }
+                }
+            }
+        });
+
+        // Add focus listener to maintain selection
+        editorComponent.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (!isFiltering) {
+                    FileItem selectedItem = (FileItem) fileSelector.getSelectedItem();
+                    if (selectedItem != null) {
+                        editorComponent.setText(selectedItem.toString());
+                    }
+                }
+            }
+        });
+
+        fileSelector.addActionListener(e -> {
+            if (!isFiltering) {
+                onFileSelected();
+            }
+        });
+
+        // Create button panel
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
         buttonPanel.add(dryRunButton);
         buttonPanel.add(generateButton);
 
-        // Create generate button
+        // Setup action listeners
         generateButton.addActionListener(e -> {
             FileItem selectedItem = (FileItem) fileSelector.getSelectedItem();
             if (selectedItem != null) {
@@ -83,8 +161,10 @@ public class LLMSuggestionUIComponent implements BasicEventObserver {
         });
 
         // Add components to top panel
-        topPanel.add(new JLabel("Select File: "), BorderLayout.WEST);
-        topPanel.add(fileSelector, BorderLayout.CENTER);
+        JPanel selectorPanel = new JPanel(new BorderLayout());
+        selectorPanel.add(new JLabel("Select File: "), BorderLayout.WEST);
+        selectorPanel.add(fileSelector, BorderLayout.CENTER);
+        topPanel.add(selectorPanel, BorderLayout.CENTER);
         topPanel.add(buttonPanel, BorderLayout.EAST);
 
         // Add panels to main panel
@@ -92,12 +172,29 @@ public class LLMSuggestionUIComponent implements BasicEventObserver {
         mainPanel.add(responsePanel, BorderLayout.CENTER);
     }
 
+    private void filterFiles() {
+        isFiltering = true;
+        String searchText = ((JTextField) fileSelector.getEditor().getEditorComponent()).getText().toLowerCase();
+        fileListModel.removeAllElements();
+        
+        if (searchText.isEmpty()) {
+            allFileItems.forEach(fileListModel::addElement);
+        } else {
+            allFileItems.stream()
+                .filter(item -> item.displayName.toLowerCase().contains(searchText))
+                .forEach(fileListModel::addElement);
+        }
+        
+        if (fileListModel.getSize() > 0) {
+            fileSelector.showPopup();
+        }
+        isFiltering = false;
+    }
 
     private void loadFileHistory(Object eventObj) {
-
         if (eventObj == null) {
-            // clear the file selector
             fileListModel.removeAllElements();
+            allFileItems.clear();
             return;
         }
         if (!(eventObj instanceof Map<?, ?>)) {
@@ -109,24 +206,25 @@ public class LLMSuggestionUIComponent implements BasicEventObserver {
             return;
         }
         fileListModel.removeAllElements();
+        allFileItems.clear();
 
-        List<FileItem> items = new ArrayList<>();
         history.forEach((key, context) -> {
             String displayName = String.format("%s.%s",
                     context.getTargetClassPackageName(),
                     context.getTargetClassName());
             String filePath = context.getTargetClassFilePath();
-            items.add(new FileItem(displayName, filePath, context));
+            allFileItems.add(new FileItem(displayName, filePath, context));
         });
 
         // Sort items by display name
-        items.sort((a, b) -> a.displayName.compareTo(b.displayName));
+        allFileItems.sort((a, b) -> a.displayName.compareTo(b.displayName));
 
         // If there was a previously selected item, try to maintain the selection
         FileItem selectedItem = (FileItem) fileSelector.getSelectedItem();
         String previousSelection = selectedItem != null ? selectedItem.filePath : null;
 
-        items.forEach(fileListModel::addElement);
+        // Add all items to the model
+        allFileItems.forEach(fileListModel::addElement);
 
         // Restore previous selection if possible
         if (previousSelection != null) {
