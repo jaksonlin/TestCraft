@@ -22,19 +22,33 @@ public class LLMChatMediatorImpl implements ILLMChatMediator {
     private ILLMChatClient chatClient;
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private OllamaClient ollamaClient;
-    private List<OllamaClient.Message> messageHistory = new ArrayList<>();
+    private final List<OllamaClient.Message> messageHistory = new ArrayList<>();
 
     public void setOllamaClient(OllamaClient ollamaClient) {
         this.ollamaClient = ollamaClient;
     }
 
+    public void clearChat() {
+        messageHistory.clear();
+    }
+
+    public String getChatHistory() {
+        return messageHistory.stream()
+                .map(message -> message.getRole() + ": " + message.getContent())
+                .collect(Collectors.joining("\n"));
+    }
+
+    // generate unittest using mutation result, this will clear the chat history
     @Override
     public void generateUnittestRequest(String testCodeFile, String sourceCodeFile, List<Mutation> mutations) {
         executorService.submit(() -> {
             try {
                 // clear the message history
                 messageHistory.clear();
-                String rawResponse = LLmChatRequest(testCodeFile, sourceCodeFile, mutations);
+                List<OllamaClient.Message> messages = createPromptOnly(testCodeFile, sourceCodeFile, mutations);
+                messageHistory.addAll(messages);
+                String rawResponse = ollamaClient.chatCompletion(messageHistory);
+                messageHistory.add(new OllamaClient.Message("assistant", rawResponse));
                 String formattedResponse = formatResponse(rawResponse);
                 SwingUtilities.invokeLater(() -> chatClient.updateChatResponse("UNIT_TEST_REQUEST", formattedResponse));
                 
@@ -46,6 +60,28 @@ public class LLMChatMediatorImpl implements ILLMChatMediator {
             }
         });
     }
+
+    // normal chat
+    @Override
+    public void handleChatMessage(String message) {
+        executorService.submit(() -> {
+            try {
+                messageHistory.add(new OllamaClient.Message("user", message));
+                String rawResponse = ollamaClient.chatCompletion(messageHistory);
+                messageHistory.add(new OllamaClient.Message("assistant", rawResponse));
+                // Format the response
+                String formattedResponse = formatResponse(rawResponse);
+                chatClient.updateChatResponse("CHAT_MESSAGE", formattedResponse);
+            } catch (IOException | InterruptedException e) {
+                LOG.error("Failed to respond to chat message", e);
+                if (chatClient != null) {
+                    SwingUtilities.invokeLater(() -> chatClient.updateChatResponse("ERROR", "Error: " + e.getMessage()));
+                }
+            }
+        });
+    }
+
+
 
     private String formatResponse(String rawResponse) {
         // Process code blocks
@@ -211,39 +247,7 @@ public class LLMChatMediatorImpl implements ILLMChatMediator {
     }
 
  
-    private String LLmChatRequest(String testCodeFile, String sourceCodeFile, List<Mutation> mutations) throws IOException {
 
-        try {
-            List<OllamaClient.Message> messages = createPromptOnly(testCodeFile, sourceCodeFile, mutations);
-            messageHistory.addAll(messages);
-            String response = ollamaClient.chatCompletion(messageHistory);
-            messageHistory.add(new OllamaClient.Message("assistant", response));
-            return response;
-        } catch (Exception e) {
-            throw new IOException("Failed to generate unit test suggestions: " + e.getMessage());
-        }
-    }
-
-    @Override
-    public void handleChatMessage(String message) {
-        //
-        try {
-            messageHistory.add(new OllamaClient.Message("user", message));
-            String response = ollamaClient.chatCompletion(messageHistory);
-            messageHistory.add(new OllamaClient.Message("assistant", response));
-            chatClient.updateChatResponse("CHAT_MESSAGE", response);
-        } catch (IOException e) {
-            LOG.error("Failed to respond to chat message", e);
-            if (chatClient != null) {
-                SwingUtilities.invokeLater(() -> chatClient.updateChatResponse("ERROR", "Error: " + e.getMessage()));
-            }
-        } catch (InterruptedException e) {
-            LOG.error("Failed to respond to chat message", e);
-            if (chatClient != null) {
-                SwingUtilities.invokeLater(() -> chatClient.updateChatResponse("ERROR", "Error: " + e.getMessage()));
-            }
-        }
-    }
 
 
     @Override

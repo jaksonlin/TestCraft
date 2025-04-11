@@ -14,10 +14,10 @@ import javax.swing.*;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.List;
 
 public class LLMResponsePanel extends JPanel implements BasicEventObserver {
     private final JEditorPane outputArea;
@@ -25,7 +25,6 @@ public class LLMResponsePanel extends JPanel implements BasicEventObserver {
     private Timer loadingTimer;
     private int loadingDots = 0;
     private boolean isLoading = false;
-    private String lastMarkdown = "";
     private boolean copyAsMarkdown = false;
     private final StringBuilder chatHistory = new StringBuilder();
     private static final String BASE_HTML_TEMPLATE = """
@@ -51,8 +50,46 @@ public class LLMResponsePanel extends JPanel implements BasicEventObserver {
         </div>
         """;
 
+    public interface ResponseActionListener {
+        void onClearButtonClick();
+        void onCopyButtonClick();
+    }
+
+    private List<ResponseActionListener> responseActionListeners = new ArrayList<>();
+
+    public void addResponseActionListener(ResponseActionListener listener) {
+        responseActionListeners.add(listener);
+    }
+
+    public void removeResponseActionListener(ResponseActionListener listener) {
+        responseActionListeners.remove(listener);
+    }
+
+    public void notifyClearButtonClick() {
+        
+        for (ResponseActionListener listener : responseActionListeners) {
+            listener.onClearButtonClick();
+        }
+    }
+
+    private void clearOutput() {
+        chatHistory.setLength(0);
+        updateOutputArea();
+    }
+
+    public void notifyCopyButtonClick() {
+        for (ResponseActionListener listener : responseActionListeners) {
+            listener.onCopyButtonClick();
+        }
+    }
+
     public LLMResponsePanel(ChatPanel chatPanel) {
         this.chatPanel = chatPanel;
+        // add the chatPanel to the responsePanel, and notify update on the responsePanel with user message
+        this.chatPanel.addListener(message -> {
+            onEventHappen("CHAT_REQUEST", message);
+        });
+
         setLayout(new BorderLayout());
         setBorder(JBUI.Borders.empty(10));
 
@@ -79,11 +116,17 @@ public class LLMResponsePanel extends JPanel implements BasicEventObserver {
         toolbar.setBorder(JBUI.Borders.empty(2, 2));
 
         JButton copyButton = new JButton("Copy to Clipboard");
-        copyButton.addActionListener(e -> copyToClipboard());
+        copyButton.addActionListener(e -> {
+            notifyCopyButtonClick();
+        }
+        );
         toolbar.add(copyButton);
 
         JButton clearButton = new JButton("Clear");
-        clearButton.addActionListener(e -> clearOutput());
+        clearButton.addActionListener(e -> {
+            clearOutput();
+            notifyClearButtonClick();
+        });
         toolbar.add(clearButton);
         
         // Create input panel at the bottom
@@ -99,23 +142,14 @@ public class LLMResponsePanel extends JPanel implements BasicEventObserver {
         add(centerPanel, BorderLayout.CENTER);
         add(inputPanel, BorderLayout.SOUTH);
 
-        // add the chatPanel to the responsePanel, and notify update on the responsePanel with user message
-        this.chatPanel.addListener(message -> {
-            onEventHappen("CHAT_REQUEST", message);
-        });
+
     }
 
     @Override
     public void onEventHappen(String eventName, Object eventObj) {
         switch (eventName) {
-            case "RESPONSE":
-                if (eventObj instanceof String) {
-                    clearOutput();
-                    appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "system", "System", "New Unit Test Suggestion\n" + eventObj.toString()));
-                }
-                break;
-            case "CLEAR":
-                clearOutput();
+            case "COPY_CHAT_RESPONSE":
+                copyToClipboard(eventObj.toString());
                 break;
             case "CONFIG_CHANGE:copyAsMarkdown":
                 copyAsMarkdown = (boolean) eventObj;
@@ -134,7 +168,7 @@ public class LLMResponsePanel extends JPanel implements BasicEventObserver {
                 break;
             default:
                 String[] responseType = eventName.split(":");
-                if (responseType.length > 1 && responseType[1].equals("CHAT_RESPONSE")) {
+                if (responseType.length > 1 && responseType[0].equals("CHAT_RESPONSE")) {
                     switch (responseType[1]) {
                         case "CHAT_MESSAGE":
                             appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "assistant", "Assistant", eventObj.toString()));
@@ -245,8 +279,7 @@ public class LLMResponsePanel extends JPanel implements BasicEventObserver {
     }
 
     private void appendMarkdownToOutput(String markdown) {
-        lastMarkdown = markdown;
-        String htmlContent = convertMarkdownToHtml(markdown, false);
+        String htmlContent = convertMarkdownToHtml(markdown);
         chatHistory.append(htmlContent);
         updateOutputArea();
     }
@@ -257,11 +290,7 @@ public class LLMResponsePanel extends JPanel implements BasicEventObserver {
         outputArea.setCaretPosition(outputArea.getDocument().getLength());
     }
 
-    private void clearOutput() {
-        chatHistory.setLength(0);
-        lastMarkdown = "";
-        updateOutputArea();
-    }
+
 
     private void startLoading() {
         if (loadingTimer != null) {
@@ -295,36 +324,24 @@ public class LLMResponsePanel extends JPanel implements BasicEventObserver {
         }
     }
 
-    private void updateSuggestionMarkdown(String markdown) {
-        lastMarkdown = markdown;
-        String htmlContent = convertMarkdownToHtml(markdown, false);
-        chatHistory.setLength(0);
-        chatHistory.append(htmlContent);
-        updateOutputArea();
-    }
-
-    private void copyToClipboard() {
-        String contentToCopy;
-        if (copyAsMarkdown) {
-            contentToCopy = lastMarkdown;
+    private void copyToClipboard(String contentToCopy) {
+        String currentContentToCopy;
+        if (contentToCopy == null || contentToCopy.isEmpty()) {
+            // which means the llmservice mediator is empty, any copy operation can only happen on our outputArea
+            currentContentToCopy = outputArea.getText();
         } else {
-            contentToCopy = outputArea.getText();
+            // what ever return from the llmservice mediator, we will copy it to the clipboard, this is what rendered in the outputArea
+            currentContentToCopy = contentToCopy;
         }
-        
-        StringSelection selection = new StringSelection(contentToCopy);
+        StringSelection selection = new StringSelection(currentContentToCopy);
         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
     }
 
-    private String convertMarkdownToHtml(String markdown, boolean withHtmlHeader) {
+    private String convertMarkdownToHtml(String markdown) {
         Parser parser = Parser.builder().build();
         Node document = parser.parse(markdown);
         HtmlRenderer renderer = HtmlRenderer.builder().build();
-        String html = renderer.render(document);
-
-        if (withHtmlHeader) {
-            return String.format(BASE_HTML_TEMPLATE, getCodeStyle(), html);
-        }
-        return html;
+        return renderer.render(document);
     }
 
     private void updateDryRunPrompt(String prompt) {

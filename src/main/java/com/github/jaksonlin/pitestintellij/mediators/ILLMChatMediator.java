@@ -11,4 +11,6 @@ public interface ILLMChatMediator {
     void register(ILLMChatClient chatClient);
     String dryRunGetPrompt(String testCodeFile, String sourceCodeFile, List<Mutation> mutations);
     void handleChatMessage(String message);
+    void clearChat();
+    String getChatHistory();
 }

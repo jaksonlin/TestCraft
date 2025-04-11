@@ -2,6 +2,7 @@ package com.github.jaksonlin.pitestintellij.services;
 
 import com.github.jaksonlin.pitestintellij.mediators.ILLMChatMediator;
 import com.github.jaksonlin.pitestintellij.mediators.LLMChatMediatorImpl;
+import com.github.jaksonlin.pitestintellij.observers.BasicEventObserver;
 import com.github.jaksonlin.pitestintellij.observers.ObserverBase;
 import com.github.jaksonlin.pitestintellij.util.Mutation;
 import com.github.jaksonlin.pitestintellij.util.OllamaClient;
@@ -21,14 +22,13 @@ import com.intellij.openapi.components.PersistentStateComponent;
     name = "com.github.jaksonlin.pitestintellij.services.LLMService",
     storages = @Storage(value = "$APP_CONFIG$/LLMService.xml")
 )
-public final class LLMService extends ObserverBase implements ILLMChatClient, PersistentStateComponent<LLMService.State> {
+public final class LLMService
+        extends ObserverBase
+        implements ILLMChatClient, BasicEventObserver, PersistentStateComponent<LLMService.State> {
+
     private static final Logger LOG = Logger.getInstance(LLMService.class);
     private final ILLMChatMediator llmChatMediator = new LLMChatMediatorImpl();
 
-    public void dryRunGetPrompt(String testCodeFile, String sourceCodeFile, List<Mutation> mutations) {
-        String prompt = llmChatMediator.dryRunGetPrompt(testCodeFile, sourceCodeFile, mutations);
-        notifyObservers("DRY_RUN_PROMPT", prompt);
-    }
 
     public LLMService() {
         llmChatMediator.register(this);
@@ -83,7 +83,7 @@ public final class LLMService extends ObserverBase implements ILLMChatClient, Pe
 
     public void generateUnittestRequest(String testCodeFile, String sourceCodeFile, List<Mutation> mutationList) {
         LOG.info("Generating unittest request for " + testCodeFile + " and " + sourceCodeFile);
-        notifyObservers("START_LOADING", null);
+
         llmChatMediator.setOllamaClient(new OllamaClient(
             myState.ollamaHost, 
             myState.ollamaModel, 
@@ -101,13 +101,39 @@ public final class LLMService extends ObserverBase implements ILLMChatClient, Pe
     @Override
     public void updateChatResponse(String responseType, String chatResponse) {
         LOG.info("Received chat response: " + chatResponse);
-        notifyObservers("STOP_LOADING", null);
         notifyObservers("CHAT_RESPONSE:" + responseType, chatResponse);
     }
 
     public void handleChatMessage(String message) {
         LOG.info("Received chat message: " + message);
+        llmChatMediator.setOllamaClient(new OllamaClient(
+            myState.ollamaHost, 
+            myState.ollamaModel, 
+            myState.maxTokens, 
+            myState.temperature, 
+            myState.ollamaPort, 
+            myState.requestTimeout
+        ));
         llmChatMediator.handleChatMessage(message);
+    }
+
+    public String dryRunGetPrompt(String testCodeFile, String sourceCodeFile, List<Mutation> mutations) {
+        return llmChatMediator.dryRunGetPrompt(testCodeFile, sourceCodeFile, mutations);
+    }
+
+    public void onEventHappen(String eventName, Object eventObj) {
+        // Handle events from LLMChatMediator if needed
+        switch (eventName) {
+            case "CLEAR_CHAT":
+                this.llmChatMediator.clearChat();
+                break;
+            default:
+                break;
+        }
+    }
+
+    public String getChatHistory() {
+        return llmChatMediator.getChatHistory();
     }
 
 }

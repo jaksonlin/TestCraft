@@ -33,14 +33,32 @@ public class LLMSuggestionUIComponent implements BasicEventObserver {
 
     public LLMSuggestionUIComponent(LLMService llmService) {
         setupUI();
-        llmService.addObserver(responsePanel);
-        llmService.addObserver(this);
+        // setup message routing
         viewModel = new LLMSuggestionUIComponentViewModel(llmService);
+        viewModel.addObserver(this);
+        viewModel.addObserver(responsePanel);
+
         // add the chatPanel to the mainPanel
         chatPanel.addListener(message -> {
             viewModel.handleChatMessage(message);
         });
+
+        // add the reponse listener to the responsePanel
+        responsePanel.addResponseActionListener(new LLMResponsePanel.ResponseActionListener() {
+            @Override
+            public void onClearButtonClick() {
+                viewModel.clearChat();
+            }
+
+            @Override
+            public void onCopyButtonClick() {
+                viewModel.copyChat();
+            }
+        });
+        
     }
+
+
     
     @Override
     public void onEventHappen(String eventName, Object eventObj) {
