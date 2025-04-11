@@ -43,8 +43,6 @@ public class LLMChatMediatorImpl implements ILLMChatMediator {
     public void generateUnittestRequest(String testCodeFile, String sourceCodeFile, List<Mutation> mutations) {
         executorService.submit(() -> {
             try {
-                // clear the message history
-                messageHistory.clear();
                 List<OllamaClient.Message> messages = createPromptOnly(testCodeFile, sourceCodeFile, mutations);
                 messageHistory.addAll(messages);
                 String rawResponse = ollamaClient.chatCompletion(messageHistory);

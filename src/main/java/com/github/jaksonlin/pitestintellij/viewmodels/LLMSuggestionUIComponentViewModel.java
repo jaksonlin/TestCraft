@@ -32,6 +32,10 @@ public class LLMSuggestionUIComponentViewModel extends ObserverBase implements B
         // Handle events from LLMService/UIComponent if needed
         switch (eventName) {
             default:
+                // if have chat response, stop loading
+                if (eventName.contains("CHAT_RESPONSE:")) {
+                    notifyObservers("STOP_LOADING", null);
+                }
                 notifyObservers(eventName, eventObj);
                 break;
         }

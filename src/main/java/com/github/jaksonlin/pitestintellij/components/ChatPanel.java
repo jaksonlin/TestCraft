@@ -71,4 +71,12 @@ public class ChatPanel extends JPanel {
     public void clear() {
         inputArea.setText("");
     }
+
+    public void setInputEnabled(boolean enabled) {
+        inputArea.setEnabled(enabled);
+        sendButton.setEnabled(enabled);
+        if (enabled) {
+            inputArea.requestFocus();
+        }
+    }
 } 
