@@ -29,7 +29,6 @@ public class LLMSuggestionUIComponent implements BasicEventObserver {
     private final JButton generateButton = new JButton("Generate Suggestions");
     private final JButton dryRunButton = new JButton("Dry Run");
     private List<FileItem> allFileItems = new ArrayList<>();
-    private boolean isFiltering = false;
 
     public LLMSuggestionUIComponent(LLMService llmService) {
         setupUI();
@@ -91,7 +90,7 @@ public class LLMSuggestionUIComponent implements BasicEventObserver {
         // Setup file selector with search capability
         fileSelector.setPreferredSize(new Dimension(400, 30));
         fileSelector.setMaximumRowCount(15);
-        fileSelector.setEditable(true);
+        fileSelector.setEditable(false);
         
         // Create and set custom editor
         JTextField editorComponent = new JTextField();
@@ -103,64 +102,10 @@ public class LLMSuggestionUIComponent implements BasicEventObserver {
         };
         fileSelector.setEditor(editor);
 
-        // Add document listener to editor component
-        editorComponent.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                filterFiles();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                filterFiles();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                filterFiles();
-            }
-        });
-
-        // Add key listener to handle enter key
-        editorComponent.addKeyListener(new java.awt.event.KeyAdapter() {
-            @Override
-            public void keyPressed(java.awt.event.KeyEvent e) {
-                if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
-                    if (fileListModel.getSize() > 0 && fileSelector.isPopupVisible()) {
-                        FileItem selectedItem = (FileItem) fileSelector.getSelectedItem();
-                        if (selectedItem != null) {
-                            editorComponent.setText(selectedItem.toString());
-                            fileSelector.setSelectedItem(selectedItem);
-                        } else {
-                            // If no item is selected but we have items, select the first one
-                            FileItem firstItem = fileListModel.getElementAt(0);
-                            editorComponent.setText(firstItem.toString());
-                            fileSelector.setSelectedItem(firstItem);
-                        }
-                        fileSelector.hidePopup();
-                        e.consume();
-                    }
-                }
-            }
-        });
-
-        // Add focus listener to maintain selection
-        editorComponent.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusLost(FocusEvent e) {
-                if (!isFiltering) {
-                    FileItem selectedItem = (FileItem) fileSelector.getSelectedItem();
-                    if (selectedItem != null) {
-                        editorComponent.setText(selectedItem.toString());
-                    }
-                }
-            }
-        });
-
         fileSelector.addActionListener(e -> {
-            if (!isFiltering) {
+            
                 onFileSelected();
-            }
+            
         });
 
         // Create button panel
@@ -195,24 +140,7 @@ public class LLMSuggestionUIComponent implements BasicEventObserver {
         mainPanel.add(responsePanel, BorderLayout.CENTER);
     }
 
-    private void filterFiles() {
-        isFiltering = true;
-        String searchText = ((JTextField) fileSelector.getEditor().getEditorComponent()).getText().toLowerCase();
-        fileListModel.removeAllElements();
-        
-        if (searchText.isEmpty()) {
-            allFileItems.forEach(fileListModel::addElement);
-        } else {
-            allFileItems.stream()
-                .filter(item -> item.displayName.toLowerCase().contains(searchText))
-                .forEach(fileListModel::addElement);
-        }
-        
-        if (fileListModel.getSize() > 0) {
-            fileSelector.showPopup();
-        }
-        isFiltering = false;
-    }
+
 
     private void loadFileHistory(Object eventObj) {
         if (eventObj == null) {

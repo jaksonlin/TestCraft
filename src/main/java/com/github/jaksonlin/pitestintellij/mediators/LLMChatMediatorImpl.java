@@ -43,6 +43,14 @@ public class LLMChatMediatorImpl implements ILLMChatMediator {
     public void generateUnittestRequest(String testCodeFile, String sourceCodeFile, List<Mutation> mutations) {
         executorService.submit(() -> {
             try {
+                // Test connection before attempting to send message
+                if (!ollamaClient.testConnection()) {
+                    if (chatClient != null) {
+                        SwingUtilities.invokeLater(() -> chatClient.updateChatResponse("ERROR", 
+                            "Cannot connect to Ollama server. Please check if the server is running and accessible."));
+                    }
+                    return;
+                }
                 List<OllamaClient.Message> messages = createPromptOnly(testCodeFile, sourceCodeFile, mutations);
                 messageHistory.addAll(messages);
                 String rawResponse = ollamaClient.chatCompletion(messageHistory);
@@ -53,7 +61,7 @@ public class LLMChatMediatorImpl implements ILLMChatMediator {
             } catch (Exception e) {
                 LOG.error("Failed to generate unit test suggestions", e);
                 if (chatClient != null) {
-                    SwingUtilities.invokeLater(() -> chatClient.updateChatResponse("ERROR", "Error: " + e.getMessage()));
+                    SwingUtilities.invokeLater(() -> chatClient.updateChatResponse("ERROR", "Error: " + e.toString()));
                 }
             }
         });
@@ -64,16 +72,24 @@ public class LLMChatMediatorImpl implements ILLMChatMediator {
     public void handleChatMessage(String message) {
         executorService.submit(() -> {
             try {
+                // Test connection before attempting to send message
+                if (!ollamaClient.testConnection()) {
+                    if (chatClient != null) {
+                        SwingUtilities.invokeLater(() -> chatClient.updateChatResponse("ERROR", 
+                            "Cannot connect to Ollama server. Please check if the server is running and accessible."));
+                    }
+                    return;
+                }
                 messageHistory.add(new OllamaClient.Message("user", message));
                 String rawResponse = ollamaClient.chatCompletion(messageHistory);
                 messageHistory.add(new OllamaClient.Message("assistant", rawResponse));
                 // Format the response
                 String formattedResponse = formatResponse(rawResponse);
                 chatClient.updateChatResponse("CHAT_MESSAGE", formattedResponse);
-            } catch (IOException | InterruptedException e) {
+            } catch (Exception e) {
                 LOG.error("Failed to respond to chat message", e);
                 if (chatClient != null) {
-                    SwingUtilities.invokeLater(() -> chatClient.updateChatResponse("ERROR", "Error: " + e.getMessage()));
+                    SwingUtilities.invokeLater(() -> chatClient.updateChatResponse("ERROR", "Error: " + e.toString()));
                 }
             }
         });
