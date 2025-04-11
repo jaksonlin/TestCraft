@@ -17,7 +17,7 @@ import java.util.Objects;
 @Service(Service.Level.APP)
 @State(
         name = "InvalidTestCaseConfig",
-        storages = {@Storage("pitestInvalidTestCase.xml")}
+        storages = {@Storage(value = "$APP_CONFIG$/pitestInvalidTestCase.xml")}
 )
 public final class InvalidTestCaseConfigService implements PersistentStateComponent<InvalidTestCaseConfigService.State> {
     private static final Logger LOG = Logger.getInstance(InvalidTestCaseConfigService.class);

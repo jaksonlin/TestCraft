@@ -17,7 +17,7 @@ import java.util.Objects;
 @Service(Service.Level.APP)
 @State(
         name = "AnnotationConfig",
-        storages = {@Storage("pitestAnnotationConfig.xml")}
+        storages = {@Storage(value = "$APP_CONFIG$/pitestAnnotationConfig.xml")}
 )
 public final class AnnotationConfigService implements PersistentStateComponent<AnnotationConfigService.State> {
     private static final Logger LOG = Logger.getInstance(AnnotationConfigService.class);

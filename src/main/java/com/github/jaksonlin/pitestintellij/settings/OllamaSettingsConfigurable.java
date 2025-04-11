@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 
 public class OllamaSettingsConfigurable implements Configurable {
-    private OllamaSettingsComponent settingsComponent;
+    private OllamaSettingsComponent settingsComponent = new OllamaSettingsComponent();
     private final LLMService llmService = ApplicationManager.getApplication().getService(LLMService.class);
     
     @Nls(capitalization = Nls.Capitalization.Title)
@@ -32,40 +32,50 @@ public class OllamaSettingsConfigurable implements Configurable {
 
     @Override
     public boolean isModified() {
-        boolean modified = !settingsComponent.getHostText().equals(llmService.getOllamaHost());
-        modified |= !settingsComponent.getPortText().equals(String.valueOf(llmService.getOllamaPort()));
-        modified |= !settingsComponent.getModelText().equals(llmService.getOllamaModel());
-        modified |= !settingsComponent.getMaxTokensText().equals(String.valueOf(llmService.getMaxTokens()));
-        modified |= !settingsComponent.getTemperatureText().equals(String.valueOf(llmService.getTemperature()));
-        modified |= !settingsComponent.getTimeoutText().equals(String.valueOf(llmService.getRequestTimeout()));
-        modified |= settingsComponent.getCopyAsMarkdown() != llmService.getCopyAsMarkdown();
+        if (settingsComponent == null) {
+            return false;
+        }
+        LLMService.State state = llmService.getState();
+        boolean modified = !settingsComponent.getHostText().equals(state.ollamaHost);
+        modified |= !settingsComponent.getPortText().equals(String.valueOf(state.ollamaPort));
+        modified |= !settingsComponent.getModelText().equals(state.ollamaModel);
+        modified |= !settingsComponent.getMaxTokensText().equals(String.valueOf(state.maxTokens));
+        modified |= !settingsComponent.getTemperatureText().equals(String.valueOf(state.temperature));
+        modified |= !settingsComponent.getTimeoutText().equals(String.valueOf(state.requestTimeout));
+        modified |= settingsComponent.getCopyAsMarkdown() != state.copyAsMarkdown;
         return modified;
     }
 
     @Override
     public void apply() {
         try {
-            llmService.setOllamaPort(Integer.parseInt(settingsComponent.getPortText()));
-            llmService.setMaxTokens(Integer.parseInt(settingsComponent.getMaxTokensText()));
-            llmService.setTemperature(Float.parseFloat(settingsComponent.getTemperatureText()));
-            llmService.setRequestTimeout(Integer.parseInt(settingsComponent.getTimeoutText()));
+            LLMService.State state = llmService.getState();
+            state.ollamaHost = settingsComponent.getHostText();
+            state.ollamaPort = Integer.parseInt(settingsComponent.getPortText());
+            state.maxTokens = Integer.parseInt(settingsComponent.getMaxTokensText());
+            state.temperature = Float.parseFloat(settingsComponent.getTemperatureText());
+            state.requestTimeout = Integer.parseInt(settingsComponent.getTimeoutText());
+            state.ollamaModel = settingsComponent.getModelText();
+            state.copyAsMarkdown = settingsComponent.getCopyAsMarkdown();
+
+            llmService.loadState(state);
         } catch (NumberFormatException e) {
             // Handle invalid number format
             throw new IllegalStateException("Invalid number format in settings", e);
         }
-        llmService.setOllamaModel(settingsComponent.getModelText());
-        llmService.setCopyAsMarkdown(settingsComponent.getCopyAsMarkdown());
     }
 
     @Override
-    public void reset() {   
-        settingsComponent.setHostText(llmService.getOllamaHost());
-        settingsComponent.setPortText(String.valueOf(llmService.getOllamaPort()));
-        settingsComponent.setModelText(llmService.getOllamaModel());
-        settingsComponent.setMaxTokensText(String.valueOf(llmService.getMaxTokens()));
-        settingsComponent.setTemperatureText(String.valueOf(llmService.getTemperature()));
-        settingsComponent.setTimeoutText(String.valueOf(llmService.getRequestTimeout()));
-        settingsComponent.setCopyAsMarkdown(llmService.getCopyAsMarkdown());
+    public void reset() {
+        // Reset the settings component with the current state of the LLMService
+        LLMService.State state = llmService.getState();
+        settingsComponent.setHostText(state.ollamaHost);
+        settingsComponent.setPortText(String.valueOf(state.ollamaPort));
+        settingsComponent.setModelText(state.ollamaModel);
+        settingsComponent.setMaxTokensText(String.valueOf(state.maxTokens));
+        settingsComponent.setTemperatureText(String.valueOf(state.temperature));
+        settingsComponent.setTimeoutText(String.valueOf(state.requestTimeout));
+        settingsComponent.setCopyAsMarkdown(state.copyAsMarkdown);
     }
 
     @Override

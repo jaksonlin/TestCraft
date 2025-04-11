@@ -40,6 +40,7 @@ public class InvalidTestCaseSettingsConfigurable implements Configurable {
                 state.enable = mySettingsComponent.isEnableCheck();
                 state.enableCommentCheck = mySettingsComponent.isEnableCommentCheck();
                 state.invalidAssertionText = mySettingsComponent.getInvalidAssertionText();
+                service.loadState(state); // explicitly load the state
             }
         }
     }
