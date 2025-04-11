@@ -43,7 +43,6 @@ public class LLMSuggestionUIComponentViewModel extends ObserverBase implements B
 
 
     public void generateSuggestions(PitestContext context) {
-        notifyObservers("CLEAR_SUGGESTIONS", null);
         notifyObservers("START_LOADING", null);
         llmService.generateUnittestRequest(context.getTestFilePath(), context.getTargetClassFilePath(), context.getMutationResults());
     }
