@@ -6,28 +6,41 @@ import com.github.jaksonlin.pitestintellij.viewmodels.LLMSuggestionUIComponentVi
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.util.ui.JBUI;
+import com.intellij.AbstractBundle;
+import org.jetbrains.annotations.PropertyKey;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.plaf.basic.BasicComboBoxEditor;
 import java.awt.*;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import com.github.jaksonlin.pitestintellij.services.LLMService;
 
 public class LLMSuggestionUIComponent implements BasicEventObserver {
+    private static final String BUNDLE = "messages.MyBundle";
+    private static ResourceBundle ourBundle;
+    
+    public static String message(@PropertyKey(resourceBundle = BUNDLE) String key, Object... params) {
+        return AbstractBundle.message(getBundle(), key, params);
+    }
+    
+    private static ResourceBundle getBundle() {
+        if (ourBundle == null) {
+            ourBundle = ResourceBundle.getBundle(BUNDLE);
+        }
+        return ourBundle;
+    }
+    
     private final LLMSuggestionUIComponentViewModel viewModel;
     private final ChatPanel chatPanel = new ChatPanel();
     private final LLMResponsePanel responsePanel = new LLMResponsePanel(chatPanel);
     private final JPanel mainPanel = new JPanel(new BorderLayout());
     private final DefaultComboBoxModel<FileItem> fileListModel = new DefaultComboBoxModel<>();
     private final JComboBox<FileItem> fileSelector = new ComboBox<>(fileListModel);
-    private final JButton generateButton = new JButton("Generate Suggestions");
-    private final JButton dryRunButton = new JButton("Dry Run");
+    private final JButton generateButton = new JButton(message("llm.generate.suggestions"));
+    private final JButton dryRunButton = new JButton(message("llm.check.prompt"));
     private List<FileItem> allFileItems = new ArrayList<>();
 
     public LLMSuggestionUIComponent(LLMService llmService) {
@@ -132,7 +145,7 @@ public class LLMSuggestionUIComponent implements BasicEventObserver {
 
         // Add components to top panel
         JPanel selectorPanel = new JPanel(new BorderLayout());
-        selectorPanel.add(new JLabel("Select File: "), BorderLayout.WEST);
+        selectorPanel.add(new JLabel(message("llm.select.file") + ": "), BorderLayout.WEST);
         selectorPanel.add(fileSelector, BorderLayout.CENTER);
         topPanel.add(selectorPanel, BorderLayout.CENTER);
         topPanel.add(buttonPanel, BorderLayout.EAST);

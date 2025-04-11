@@ -9,6 +9,8 @@ import org.commonmark.renderer.html.HtmlRenderer;
 import com.intellij.ui.JBColor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.Toolkit;
+import com.intellij.AbstractBundle;
+import org.jetbrains.annotations.PropertyKey;
 
 import javax.swing.*;
 import javax.swing.text.html.HTMLEditorKit;
@@ -18,9 +20,24 @@ import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.List;
+import java.util.ResourceBundle;
 import javax.swing.text.html.HTMLDocument;
 
 public class LLMResponsePanel extends JPanel implements BasicEventObserver {
+    private static final String BUNDLE = "messages.MyBundle";
+    private static ResourceBundle ourBundle;
+    
+    public static String message(@PropertyKey(resourceBundle = BUNDLE) String key, Object... params) {
+        return AbstractBundle.message(getBundle(), key, params);
+    }
+    
+    private static ResourceBundle getBundle() {
+        if (ourBundle == null) {
+            ourBundle = ResourceBundle.getBundle(BUNDLE);
+        }
+        return ourBundle;
+    }
+
     private final JEditorPane outputArea;
     private final ChatPanel chatPanel;
     private boolean isLoading = false;
@@ -72,7 +89,6 @@ public class LLMResponsePanel extends JPanel implements BasicEventObserver {
     }
 
     public void notifyClearButtonClick() {
-        
         for (ResponseActionListener listener : responseActionListeners) {
             listener.onClearButtonClick();
         }
@@ -111,7 +127,7 @@ public class LLMResponsePanel extends JPanel implements BasicEventObserver {
         // Create loading panel
         loadingPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         loadingPanel.setVisible(false);
-        loadingLabel = new JLabel("Thinking");
+        loadingLabel = new JLabel(message("llm.thinking"));
         loadingPanel.add(loadingLabel);
         loadingPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         loadingPanel.setBackground(JBColor.background());
@@ -126,13 +142,13 @@ public class LLMResponsePanel extends JPanel implements BasicEventObserver {
         toolbar.setFloatable(false);
         toolbar.setBorder(JBUI.Borders.empty(2, 2));
 
-        JButton copyButton = new JButton("Copy to Clipboard");
+        JButton copyButton = new JButton(message("llm.copy.to.clipboard"));
         copyButton.addActionListener(e -> {
             notifyCopyButtonClick();
         });
         toolbar.add(copyButton);
 
-        JButton clearButton = new JButton("Clear");
+        JButton clearButton = new JButton(message("llm.clear"));
         clearButton.addActionListener(e -> {
             clearOutput();
             notifyClearButtonClick();
@@ -275,7 +291,7 @@ public class LLMResponsePanel extends JPanel implements BasicEventObserver {
                 }
                 SwingUtilities.invokeLater(() -> {
                     dots = (dots + 1) % 4;
-                    loadingLabel.setText("Thinking" + ".".repeat(dots));
+                    loadingLabel.setText(message("llm.thinking") + ".".repeat(dots));
                 });
             }
         }, 0, 500);
@@ -363,26 +379,26 @@ public class LLMResponsePanel extends JPanel implements BasicEventObserver {
                 break;
             case "CHAT_REQUEST":
                 if (!isLoading) {
-                    appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "user", "User", eventObj.toString()));
+                    appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "user", message("llm.user"), eventObj.toString()));
                     startLoading();
                 }
                 break;
             case "DRY_RUN_PROMPT":
-                appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "system", "System", "Dry Run Prompt\n" + eventObj.toString()));
+                appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "system", message("llm.system"), message("llm.dry.run.prompt") + "\n" + eventObj.toString()));
                 break;
             default:
                 String[] responseType = eventName.split(":");
                 if (responseType.length > 1 && responseType[0].equals("CHAT_RESPONSE")) {
                     switch (responseType[1]) {
                         case "CHAT_MESSAGE":
-                            appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "assistant", "Assistant", eventObj.toString()));
+                            appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "assistant", message("llm.assistant"), eventObj.toString()));
                             break;
                         case "ERROR":
-                            JOptionPane.showMessageDialog(this, "Error: " + eventObj.toString(), "Error", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(this, message("llm.error") + ": " + eventObj.toString(), message("llm.error"), JOptionPane.ERROR_MESSAGE);
                             break;
                         case "UNIT_TEST_REQUEST":
                             clearOutput();
-                            appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "system", "System", "New Unit Test Suggestion\n" + eventObj.toString()));
+                            appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "system", message("llm.system"), message("llm.new.unit.test.suggestion") + "\n" + eventObj.toString()));
                             break;
                     }
                 }
