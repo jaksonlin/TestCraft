@@ -14,9 +14,9 @@ public class ObserverBase {
         observers.remove(observer);
     }
 
-    protected void notifyObservers(Object eventObj) {
+    protected void notifyObservers(String eventName, Object eventObj) {
         for (BasicEventObserver observer : observers) {
-            observer.onEventHappen(eventObj);
+            observer.onEventHappen(eventName, eventObj);
         }
     }
 }

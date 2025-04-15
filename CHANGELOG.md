@@ -6,6 +6,9 @@
 
 # pitest-intellij Changelog
 
+## [Unreleased]
+### Added
+
 ## 1.0.0 - 2024-10-12
 ### Initial Release
 - Run Pitest on your Java Gradle projects

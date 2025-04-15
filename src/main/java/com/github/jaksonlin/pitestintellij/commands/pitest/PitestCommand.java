@@ -2,8 +2,8 @@ package com.github.jaksonlin.pitestintellij.commands.pitest;
 
 import com.github.jaksonlin.pitestintellij.commands.CommandCancellationException;
 import com.github.jaksonlin.pitestintellij.context.PitestContext;
-import com.github.jaksonlin.pitestintellij.services.RunHistoryManager;
-import com.github.jaksonlin.pitestintellij.ui.PitestOutputDialog;
+import com.github.jaksonlin.pitestintellij.services.RunHistoryManagerService;
+import com.github.jaksonlin.pitestintellij.components.PitestOutputDialog;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.project.Project;
@@ -16,12 +16,12 @@ import java.util.concurrent.atomic.AtomicReference;
 public abstract class PitestCommand {
     private final Project project;
     private final PitestContext context;
-    protected final RunHistoryManager runHistoryManager;
+    protected final RunHistoryManagerService runHistoryManager;
 
     public PitestCommand(Project project, PitestContext context) {
         this.project = project;
         this.context = context;
-        this.runHistoryManager = project.getService(RunHistoryManager.class);
+        this.runHistoryManager = project.getService(RunHistoryManagerService.class);
     }
 
     public abstract void execute();

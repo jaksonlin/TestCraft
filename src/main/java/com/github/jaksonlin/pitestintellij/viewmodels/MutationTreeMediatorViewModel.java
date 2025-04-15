@@ -3,7 +3,7 @@ package com.github.jaksonlin.pitestintellij.viewmodels;
 import com.github.jaksonlin.pitestintellij.context.PitestContext;
 import com.github.jaksonlin.pitestintellij.mediators.IMutationMediator;
 import com.github.jaksonlin.pitestintellij.mediators.IMutationReportUI;
-import com.github.jaksonlin.pitestintellij.services.RunHistoryManager;
+import com.github.jaksonlin.pitestintellij.services.RunHistoryManagerService;
 import com.github.jaksonlin.pitestintellij.util.Mutation;
 import com.github.jaksonlin.pitestintellij.util.Pair;
 import com.intellij.icons.AllIcons;
@@ -39,13 +39,13 @@ public class MutationTreeMediatorViewModel implements IMutationReportUI {
     private static final Logger log = LoggerFactory.getLogger(MutationTreeMediatorViewModel.class);
     private final Project project;
     private final IMutationMediator mediator;
-    private final RunHistoryManager runHistoryManager;
+    private final RunHistoryManagerService runHistoryManager;
     protected final HashMap<String, Integer> annotatedNodes = new HashMap<>();
 
     public MutationTreeMediatorViewModel(@NotNull Project project, @NotNull IMutationMediator mediator) {
         this.project = project;
         this.mediator = mediator;
-        this.runHistoryManager = project.getService(RunHistoryManager.class);
+        this.runHistoryManager = project.getService(RunHistoryManagerService.class);
         mediator.register(this);
         registerEditorListener(project);
     }

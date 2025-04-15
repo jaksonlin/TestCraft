@@ -4,7 +4,7 @@ import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextField;
 import org.jetbrains.annotations.NotNull;
 
-import com.github.jaksonlin.pitestintellij.llm.OllamaClient;
+import com.github.jaksonlin.pitestintellij.util.OllamaClient;
 import javax.swing.*;
 import java.awt.*;
 
@@ -16,7 +16,7 @@ public class OllamaSettingsComponent {
     private final JBTextField maxTokensField = new JBTextField();
     private final JBTextField temperatureField = new JBTextField();
     private final JBTextField timeoutField = new JBTextField();
-    private final JButton testConnectionButton;
+    private final JCheckBox copyAsMarkdownCheckbox;
 
     public OllamaSettingsComponent() {
         // Create main panel with a border layout to ensure full width usage
@@ -26,71 +26,74 @@ public class OllamaSettingsComponent {
         // Create content panel with GridBagLayout
         JPanel contentPanel = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
-        c.insets = new Insets(5, 0, 5, 0);
+        c.insets = new Insets(5, 5, 5, 5);
         c.fill = GridBagConstraints.HORIZONTAL;
-        c.gridwidth = GridBagConstraints.REMAINDER;
-        c.weightx = 1.0; // Make components expand horizontally
+        c.anchor = GridBagConstraints.LINE_START;
 
         // Connection Settings Section
+        c.gridwidth = 2;
+        c.gridx = 0;
+        c.gridy = 0;
         JLabel connectionLabel = new JBLabel("<html><body><b>Connection Settings</b></body></html>");
         contentPanel.add(connectionLabel, c);
 
         // Host field
-        JPanel hostPanel = new JPanel(new BorderLayout());
-        hostPanel.add(new JBLabel("Host:"), BorderLayout.WEST);
-        hostField.setToolTipText("The hostname or IP address of your Ollama server");
-        hostPanel.add(hostField, BorderLayout.CENTER);
-        contentPanel.add(hostPanel, c);
+        addLabelAndField(contentPanel, "Host:", hostField, 1,
+                "The hostname or IP address of your Ollama server");
 
         // Port field
-        JPanel portPanel = new JPanel(new BorderLayout());
-        portPanel.add(new JBLabel("Port:"), BorderLayout.WEST);
-        portField.setToolTipText("The port number of your Ollama server");
-        portPanel.add(portField, BorderLayout.CENTER);
-        contentPanel.add(portPanel, c);
+        addLabelAndField(contentPanel, "Port:", portField, 2,
+                "The port number of your Ollama server");
 
         // Model Settings Section
-        c.insets = new Insets(15, 0, 5, 0);
+        c.gridwidth = 2;
+        c.gridx = 0;
+        c.gridy = 3;
+        c.insets = new Insets(15, 5, 5, 5);
         JLabel modelLabel = new JBLabel("<html><body><b>Model Settings</b></body></html>");
         contentPanel.add(modelLabel, c);
 
         // Model field
-        c.insets = new Insets(5, 0, 5, 0);
-        JPanel modelPanel = new JPanel(new BorderLayout());
-        modelPanel.add(new JBLabel("Model:"), BorderLayout.WEST);
-        modelField.setToolTipText("The name of the Ollama model to use");
-        modelPanel.add(modelField, BorderLayout.CENTER);
-        contentPanel.add(modelPanel, c);
+        addLabelAndField(contentPanel, "Model:", modelField, 4,
+                "The name of the Ollama model to use");
 
         // Max Tokens field
-        JPanel maxTokensPanel = new JPanel(new BorderLayout());
-        maxTokensPanel.add(new JBLabel("Max Tokens:"), BorderLayout.WEST);
-        maxTokensField.setToolTipText("Maximum number of tokens in the response");
-        maxTokensPanel.add(maxTokensField, BorderLayout.CENTER);
-        contentPanel.add(maxTokensPanel, c);
+        addLabelAndField(contentPanel, "Max Tokens:", maxTokensField, 5,
+                "Maximum number of tokens in the response");
 
         // Temperature field
-        JPanel temperaturePanel = new JPanel(new BorderLayout());
-        temperaturePanel.add(new JBLabel("Temperature:"), BorderLayout.WEST);
-        temperatureField.setToolTipText("Controls randomness in the response (0.0 to 1.0)");
-        temperaturePanel.add(temperatureField, BorderLayout.CENTER);
-        contentPanel.add(temperaturePanel, c);
+        addLabelAndField(contentPanel, "Temperature:", temperatureField, 6,
+                "Controls randomness in the response (0.0 to 1.0)");
 
         // Timeout field
-        JPanel timeoutPanel = new JPanel(new BorderLayout());
-        timeoutPanel.add(new JBLabel("Timeout (ms):"), BorderLayout.WEST);
-        timeoutField.setToolTipText("Request timeout in milliseconds");
-        timeoutPanel.add(timeoutField, BorderLayout.CENTER);
-        contentPanel.add(timeoutPanel, c);
+        addLabelAndField(contentPanel, "Timeout (ms):", timeoutField, 7,
+                "Request timeout in milliseconds");
+
+        // Output Settings Section
+        c.gridwidth = 2;
+        c.gridx = 0;
+        c.gridy = 8;
+        c.insets = new Insets(15, 5, 5, 5);
+        JLabel outputLabel = new JBLabel("<html><body><b>Output Settings</b></body></html>");
+        contentPanel.add(outputLabel, c);
+
+        // Copy as Markdown checkbox
+        c.gridy = 9;
+        c.insets = new Insets(5, 5, 5, 5);
+        copyAsMarkdownCheckbox = new JCheckBox("Copy output as Markdown");
+        copyAsMarkdownCheckbox.setToolTipText("When enabled, copied output will be in Markdown format. When disabled, copies the rendered output.");
+        contentPanel.add(copyAsMarkdownCheckbox, c);
 
         // Test Connection button
-        c.insets = new Insets(15, 0, 5, 0);
-        testConnectionButton = new JButton("Test Connection");
+        c.gridy = 10;
+        c.insets = new Insets(15, 5, 5, 5);
+        JButton testConnectionButton = new JButton("Test Connection");
         contentPanel.add(testConnectionButton, c);
 
         // Add help text
-        c.insets = new Insets(10, 0, 5, 0);
-        JLabel helpText = new JBLabel("<html><body style='width: 100%'>" +
+        c.gridy = 11;
+        c.insets = new Insets(15, 5, 5, 5);
+        JLabel helpText = new JBLabel("<html><body style='width: 300px'>" +
                 "<p><b>Connection Help:</b></p>" +
                 "<ul>" +
                 "<li>Make sure Ollama is running on your system</li>" +
@@ -107,13 +110,35 @@ public class OllamaSettingsComponent {
         mainPanel.add(contentPanel, BorderLayout.CENTER);
     }
 
+    private void addLabelAndField(JPanel panel, String labelText, JComponent field, int gridy, String tooltip) {
+        GridBagConstraints c = new GridBagConstraints();
+        c.insets = new Insets(5, 5, 5, 5);
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.anchor = GridBagConstraints.LINE_START;
+
+        // Label
+        c.gridx = 0;
+        c.gridy = gridy;
+        c.gridwidth = 1;
+        c.weightx = 0.0;
+        JLabel label = new JBLabel(labelText);
+        label.setPreferredSize(new Dimension(100, label.getPreferredSize().height));
+        panel.add(label, c);
+
+        // Field
+        c.gridx = 1;
+        c.weightx = 1.0;
+        field.setToolTipText(tooltip);
+        panel.add(field, c);
+    }
+
     private void testConnection() {
         // Get the current settings
         String host = hostField.getText();
         String port = portField.getText();
         
         try {
-            OllamaClient client = new OllamaClient(host, Integer.parseInt(port), Integer.parseInt(timeoutField.getText()));
+            OllamaClient client = new OllamaClient(host, "dummy", 100, 0.5f, Integer.parseInt(port), Integer.parseInt(timeoutField.getText()));
             boolean success = client.testConnection();
             if (success) {
                 JOptionPane.showMessageDialog(mainPanel,
@@ -194,5 +219,13 @@ public class OllamaSettingsComponent {
 
     public void setTimeoutText(@NotNull String text) {
         timeoutField.setText(text);
+    }
+
+    public boolean getCopyAsMarkdown() {
+        return copyAsMarkdownCheckbox.isSelected();
+    }
+
+    public void setCopyAsMarkdown(boolean selected) {
+        copyAsMarkdownCheckbox.setSelected(selected);
     }
 } 

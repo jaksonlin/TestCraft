@@ -1,4 +1,4 @@
-package com.github.jaksonlin.pitestintellij.ui;
+package com.github.jaksonlin.pitestintellij.completions;
 
 import com.github.jaksonlin.pitestintellij.annotations.AnnotationFieldType;
 import com.intellij.codeInsight.completion.InsertionContext;
