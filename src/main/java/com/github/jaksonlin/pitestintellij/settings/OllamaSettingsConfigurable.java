@@ -1,6 +1,7 @@
 package com.github.jaksonlin.pitestintellij.settings;
 
 import com.github.jaksonlin.pitestintellij.services.LLMService;
+import com.github.jaksonlin.pitestintellij.MyBundle;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.options.Configurable;
 import org.jetbrains.annotations.Nls;
@@ -15,7 +16,7 @@ public class OllamaSettingsConfigurable implements Configurable {
     @Nls(capitalization = Nls.Capitalization.Title)
     @Override
     public String getDisplayName() {
-        return "LLM Settings";
+        return MyBundle.message("settings.testcraft.llm");
     }
 
     @Override

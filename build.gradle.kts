@@ -133,4 +133,9 @@ tasks {
         // https://plugins.jetbrains.com/docs/intellij/deployment.html#specifying-a-release-channel
         channels = providers.gradleProperty("pluginVersion").map { listOf(it.substringAfter('-', "").substringBefore('.').ifEmpty { "default" }) }
     }
+
+    // Force English locale for development and testing
+    runIde {
+        jvmArgs("-Duser.language=en", "-Duser.country=US")
+    }
 }

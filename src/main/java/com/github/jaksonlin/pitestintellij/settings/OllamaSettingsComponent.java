@@ -2,9 +2,11 @@ package com.github.jaksonlin.pitestintellij.settings;
 
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextField;
+import com.intellij.util.ui.JBUI;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.jaksonlin.pitestintellij.util.OllamaClient;
+import com.github.jaksonlin.pitestintellij.MyBundle;
 import javax.swing.*;
 import java.awt.*;
 
@@ -21,115 +23,122 @@ public class OllamaSettingsComponent {
     public OllamaSettingsComponent() {
         // Create main panel with a border layout to ensure full width usage
         mainPanel = new JPanel(new BorderLayout());
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        mainPanel.setBorder(JBUI.Borders.empty(10));
 
-        // Create content panel with GridBagLayout
-        JPanel contentPanel = new JPanel(new GridBagLayout());
+        // Create content panel with BoxLayout for vertical stacking
+        JPanel contentPanel = new JPanel();
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+
+        // Connection Settings Section
+        JPanel connectionPanel = createSectionPanel(MyBundle.message("llm.settings.connection.title"));
         GridBagConstraints c = new GridBagConstraints();
-        c.insets = new Insets(5, 5, 5, 5);
+        c.insets = JBUI.insets(5);
         c.fill = GridBagConstraints.HORIZONTAL;
         c.anchor = GridBagConstraints.LINE_START;
 
-        // Connection Settings Section
-        c.gridwidth = 2;
-        c.gridx = 0;
-        c.gridy = 0;
-        JLabel connectionLabel = new JBLabel("<html><body><b>Connection Settings</b></body></html>");
-        contentPanel.add(connectionLabel, c);
-
         // Host field
-        addLabelAndField(contentPanel, "Host:", hostField, 1,
-                "The hostname or IP address of your Ollama server");
+        addLabelAndField(connectionPanel, MyBundle.message("llm.settings.host.label"), hostField,
+                MyBundle.message("llm.settings.host.tooltip"));
 
         // Port field
-        addLabelAndField(contentPanel, "Port:", portField, 2,
-                "The port number of your Ollama server");
+        addLabelAndField(connectionPanel, MyBundle.message("llm.settings.port.label"), portField,
+                MyBundle.message("llm.settings.port.tooltip"));
+
+        contentPanel.add(connectionPanel);
+        contentPanel.add(Box.createVerticalStrut(10));
 
         // Model Settings Section
-        c.gridwidth = 2;
-        c.gridx = 0;
-        c.gridy = 3;
-        c.insets = new Insets(15, 5, 5, 5);
-        JLabel modelLabel = new JBLabel("<html><body><b>Model Settings</b></body></html>");
-        contentPanel.add(modelLabel, c);
+        JPanel modelPanel = createSectionPanel(MyBundle.message("llm.settings.model.title"));
 
         // Model field
-        addLabelAndField(contentPanel, "Model:", modelField, 4,
-                "The name of the Ollama model to use");
+        addLabelAndField(modelPanel, MyBundle.message("llm.settings.model.label"), modelField,
+                MyBundle.message("llm.settings.model.tooltip"));
 
         // Max Tokens field
-        addLabelAndField(contentPanel, "Max Tokens:", maxTokensField, 5,
-                "Maximum number of tokens in the response");
+        addLabelAndField(modelPanel, MyBundle.message("llm.settings.maxTokens.label"), maxTokensField,
+                MyBundle.message("llm.settings.maxTokens.tooltip"));
 
         // Temperature field
-        addLabelAndField(contentPanel, "Temperature:", temperatureField, 6,
-                "Controls randomness in the response (0.0 to 1.0)");
+        addLabelAndField(modelPanel, MyBundle.message("llm.settings.temperature.label"), temperatureField,
+                MyBundle.message("llm.settings.temperature.tooltip"));
 
         // Timeout field
-        addLabelAndField(contentPanel, "Timeout (ms):", timeoutField, 7,
-                "Request timeout in milliseconds");
+        addLabelAndField(modelPanel, MyBundle.message("llm.settings.timeout.label"), timeoutField,
+                MyBundle.message("llm.settings.timeout.tooltip"));
+
+        contentPanel.add(modelPanel);
+        contentPanel.add(Box.createVerticalStrut(10));
 
         // Output Settings Section
-        c.gridwidth = 2;
-        c.gridx = 0;
-        c.gridy = 8;
-        c.insets = new Insets(15, 5, 5, 5);
-        JLabel outputLabel = new JBLabel("<html><body><b>Output Settings</b></body></html>");
-        contentPanel.add(outputLabel, c);
+        JPanel outputPanel = createSectionPanel(MyBundle.message("llm.settings.output.title"));
+        copyAsMarkdownCheckbox = new JCheckBox(MyBundle.message("llm.settings.copyMarkdown.label"));
+        copyAsMarkdownCheckbox.setToolTipText(MyBundle.message("llm.settings.copyMarkdown.tooltip"));
+        copyAsMarkdownCheckbox.setAlignmentX(Component.LEFT_ALIGNMENT);
+        outputPanel.add(copyAsMarkdownCheckbox);
 
-        // Copy as Markdown checkbox
-        c.gridy = 9;
-        c.insets = new Insets(5, 5, 5, 5);
-        copyAsMarkdownCheckbox = new JCheckBox("Copy output as Markdown");
-        copyAsMarkdownCheckbox.setToolTipText("When enabled, copied output will be in Markdown format. When disabled, copies the rendered output.");
-        contentPanel.add(copyAsMarkdownCheckbox, c);
+        contentPanel.add(outputPanel);
+        contentPanel.add(Box.createVerticalStrut(10));
 
-        // Test Connection button
-        c.gridy = 10;
-        c.insets = new Insets(15, 5, 5, 5);
-        JButton testConnectionButton = new JButton("Test Connection");
-        contentPanel.add(testConnectionButton, c);
+        // Test Connection Section
+        JPanel testPanel = createSectionPanel(MyBundle.message("llm.settings.test.title"));
+        JButton testConnectionButton = new JButton(MyBundle.message("llm.settings.test.button"));
+        testConnectionButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+        testPanel.add(testConnectionButton);
 
         // Add help text
-        c.gridy = 11;
-        c.insets = new Insets(15, 5, 5, 5);
         JLabel helpText = new JBLabel("<html><body style='width: 300px'>" +
-                "<p><b>Connection Help:</b></p>" +
+                "<p><b>" + MyBundle.message("llm.settings.help.title") + "</b></p>" +
                 "<ul>" +
-                "<li>Make sure Ollama is running on your system</li>" +
-                "<li>Default host is localhost (127.0.0.1)</li>" +
-                "<li>Default port is 11434</li>" +
+                "<li>" + MyBundle.message("llm.settings.help.running") + "</li>" +
+                "<li>" + MyBundle.message("llm.settings.help.host") + "</li>" +
+                "<li>" + MyBundle.message("llm.settings.help.port") + "</li>" +
                 "</ul>" +
                 "</body></html>");
-        contentPanel.add(helpText, c);
+        helpText.setAlignmentX(Component.LEFT_ALIGNMENT);
+        helpText.setBorder(JBUI.Borders.empty(10, 0, 0, 0));
+        testPanel.add(helpText);
+
+        contentPanel.add(testPanel);
 
         // Add action listener to test connection button
         testConnectionButton.addActionListener(e -> testConnection());
 
-        // Add content panel to main panel
-        mainPanel.add(contentPanel, BorderLayout.CENTER);
+        // Add content panel to main panel with scroll pane
+        JScrollPane scrollPane = new JScrollPane(contentPanel);
+        scrollPane.setBorder(null);
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
     }
 
-    private void addLabelAndField(JPanel panel, String labelText, JComponent field, int gridy, String tooltip) {
-        GridBagConstraints c = new GridBagConstraints();
-        c.insets = new Insets(5, 5, 5, 5);
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.anchor = GridBagConstraints.LINE_START;
+    private JPanel createSectionPanel(String title) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(BorderFactory.createCompoundBorder(
+            JBUI.Borders.customLine(UIManager.getColor("Component.borderColor"), 1),
+            JBUI.Borders.empty(10)
+        ));
+        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // Label
-        c.gridx = 0;
-        c.gridy = gridy;
-        c.gridwidth = 1;
-        c.weightx = 0.0;
+        JLabel titleLabel = new JBLabel("<html><body><b>" + title + "</b></body></html>");
+        titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        titleLabel.setBorder(JBUI.Borders.empty(0, 0, 5, 0));
+        panel.add(titleLabel);
+
+        return panel;
+    }
+
+    private void addLabelAndField(JPanel panel, String labelText, JComponent field, String tooltip) {
+        JPanel fieldPanel = new JPanel(new BorderLayout(5, 0));
+        fieldPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
         JLabel label = new JBLabel(labelText);
         label.setPreferredSize(new Dimension(100, label.getPreferredSize().height));
-        panel.add(label, c);
-
-        // Field
-        c.gridx = 1;
-        c.weightx = 1.0;
+        fieldPanel.add(label, BorderLayout.WEST);
+        
         field.setToolTipText(tooltip);
-        panel.add(field, c);
+        fieldPanel.add(field, BorderLayout.CENTER);
+        
+        panel.add(fieldPanel);
+        panel.add(Box.createVerticalStrut(5));
     }
 
     private void testConnection() {
@@ -143,18 +152,18 @@ public class OllamaSettingsComponent {
             if (success) {
                 JOptionPane.showMessageDialog(mainPanel,
                     "Successfully connected to Ollama server!",
-                    "Connection Test",
+                    MyBundle.message("llm.settings.test.title"),
                     JOptionPane.INFORMATION_MESSAGE);
             } else {
                 JOptionPane.showMessageDialog(mainPanel,
-                    "Failed to connect to Ollama server",
-                    "Connection Test",
+                    MyBundle.message("llm.error.connection"),
+                    MyBundle.message("llm.settings.test.title"),
                     JOptionPane.ERROR_MESSAGE);
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(mainPanel,
-                "Error testing connection: " + e.getMessage(),
-                "Connection Test",
+                MyBundle.message("llm.error.connection") + ": " + e.getMessage(),
+                MyBundle.message("llm.settings.test.title"),
                 JOptionPane.ERROR_MESSAGE);
         }
     }
