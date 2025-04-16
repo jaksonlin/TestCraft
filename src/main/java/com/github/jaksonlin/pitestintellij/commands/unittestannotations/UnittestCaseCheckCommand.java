@@ -166,7 +166,7 @@ public abstract class UnittestCaseCheckCommand {
 
     public UnittestCase parseUnittestCaseFromAnnotations(PsiAnnotation annotation) {
         Map<String, Object> annotationValues = parseAnnotationValues(annotation);
-        return context.getParser().parseAnnotation(annotationValues);
+        return context.getParser().parseAnnotation(annotationValues); 
     }
 
 
