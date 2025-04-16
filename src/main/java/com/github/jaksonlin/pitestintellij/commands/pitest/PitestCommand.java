@@ -9,6 +9,7 @@ import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
+import com.github.jaksonlin.pitestintellij.MyBundle;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
@@ -64,7 +65,7 @@ public abstract class PitestCommand {
         ApplicationManager.getApplication().invokeLater(() -> {
             String contextState = PitestContext.dumpPitestContext(context);
             String messageWithContextState = message + "\n\n" + contextState;
-            Messages.showErrorDialog(project, messageWithContextState, "Pitest Error");
+            Messages.showErrorDialog(project, messageWithContextState, MyBundle.message("error.pitest.general.title"));
         });
     }
 }

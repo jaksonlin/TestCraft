@@ -152,6 +152,9 @@ public class LLMChatMediatorImpl implements ILLMChatMediator {
     }
 
     private StringBuilder analyzeMutations(List<Mutation> mutations) {
+        if (mutations == null || mutations.isEmpty()) {
+            return new StringBuilder();
+        }
         // Group mutations by line number
         Map<Integer, List<Mutation>> mutationsByLine = mutations.stream()
                 .collect(Collectors.groupingBy(Mutation::getLineNumber));

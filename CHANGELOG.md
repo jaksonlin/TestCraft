@@ -8,8 +8,7 @@
 
 ## [Unreleased]
 ### Added
-- enhance the dump prompt to use compact prompt
-- i18n enhancement
+
 
 ## 1.0.0 - 2024-10-12
 ### Initial Release
@@ -39,4 +38,9 @@
 
 ## 1.0.6 - 2025-04-09
 - Add ollama access to evaulate the unit test and create new test
+
+## 1.0.7 - 2025-04-16
+- enhance the dump prompt to use compact prompt
+- i18n enhancement
+- bugfixes for no mutation can provide suggestion
 
