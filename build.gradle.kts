@@ -136,6 +136,6 @@ tasks {
 
     // Force English locale for development and testing
     runIde {
-        jvmArgs("-Duser.language=en", "-Duser.country=US")
+        jvmArgs("-Duser.language=zh", "-Duser.country=CN")
     }
 }

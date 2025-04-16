@@ -6,6 +6,7 @@ import com.intellij.ui.EditorTextField;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
 import org.jetbrains.annotations.NotNull;
+import com.github.jaksonlin.pitestintellij.MyBundle;
 
 import javax.swing.*;
 import java.awt.*;
@@ -35,30 +36,30 @@ public class InvalidTestCaseSettingsComponent {
         c.gridx = 0;
         c.gridy = 0;
         c.weighty = 0.0;
-        JLabel validationLabel = new JBLabel("<html><body><b>Test Case Validation Settings</b></body></html>");
+        JLabel validationLabel = new JBLabel("<html><body><b>" + MyBundle.message("settings.invalidTestCase.title") + "</b></body></html>");
         contentPanel.add(validationLabel, c);
 
         // Checkboxes
         c.gridy = 1;
-        enableCheckbox = new JBCheckBox("Enable invalid assertion check");
-        enableCheckbox.setToolTipText("When enabled, test methods will be checked for invalid assertion patterns");
+        enableCheckbox = new JBCheckBox(MyBundle.message("settings.invalidTestCase.enableCheck"));
+        enableCheckbox.setToolTipText(MyBundle.message("settings.invalidTestCase.enableCheck.tooltip"));
         contentPanel.add(enableCheckbox, c);
 
         c.gridy = 2;
-        enableCommentCheckbox = new JBCheckBox("Enable test step comment check");
-        enableCommentCheckbox.setToolTipText("When enabled, test methods will be checked for descriptive comments");
+        enableCommentCheckbox = new JBCheckBox(MyBundle.message("settings.invalidTestCase.enableCommentCheck"));
+        enableCommentCheckbox.setToolTipText(MyBundle.message("settings.invalidTestCase.enableCommentCheck.tooltip"));
         contentPanel.add(enableCommentCheckbox, c);
 
         // Invalid Assertions section
         c.gridy = 3;
         c.insets = new Insets(15, 5, 5, 5);
-        JLabel assertionsLabel = new JBLabel("<html><body><b>Invalid Assertion Patterns</b></body></html>");
+        JLabel assertionsLabel = new JBLabel("<html><body><b>" + MyBundle.message("settings.invalidTestCase.assertions.title") + "</b></body></html>");
         contentPanel.add(assertionsLabel, c);
 
         // Editor description
         c.gridy = 4;
         c.insets = new Insets(5, 5, 5, 5);
-        JLabel editorDesc = new JBLabel("Enter patterns for assertions that should be flagged as invalid (one per line):");
+        JLabel editorDesc = new JBLabel(MyBundle.message("settings.invalidTestCase.assertions.description"));
         contentPanel.add(editorDesc, c);
 
         // Assertion editor
@@ -72,11 +73,11 @@ public class InvalidTestCaseSettingsComponent {
         c.weighty = 0.0; // Reset vertical weight
         c.insets = new Insets(10, 5, 5, 5);
         JLabel helpText = new JBLabel("<html><body style='width: 300px'>" +
-                "<b>Examples of invalid assertions that will be flagged:</b><br>" +
-                "• assertTrue(true) - trivial assertion<br>" +
-                "• assertEquals(1, 1) - comparing same values<br>" +
-                "• assertNotNull(new Object()) - testing newly created object<br>" +
-                "• assertEquals(\"success\", \"success\") - comparing identical strings" +
+                "<b>" + MyBundle.message("settings.invalidTestCase.assertions.examples.title") + "</b><br>" +
+                MyBundle.message("settings.invalidTestCase.assertions.examples.1") + "<br>" +
+                MyBundle.message("settings.invalidTestCase.assertions.examples.2") + "<br>" +
+                MyBundle.message("settings.invalidTestCase.assertions.examples.3") + "<br>" +
+                MyBundle.message("settings.invalidTestCase.assertions.examples.4") +
                 "</body></html>");
         contentPanel.add(helpText, c);
 
