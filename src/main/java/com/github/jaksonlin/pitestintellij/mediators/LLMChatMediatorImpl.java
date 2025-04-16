@@ -53,6 +53,13 @@ public class LLMChatMediatorImpl implements ILLMChatMediator {
                     return;
                 }
                 List<OllamaClient.Message> messages = createPromptOnly(testCodeFile, sourceCodeFile, mutations);
+                if (messages.isEmpty()) {
+                    if (chatClient != null) {
+                        SwingUtilities.invokeLater(() -> chatClient.updateChatResponse("ERROR", 
+                            MyBundle.message("llm.error.no.mutations")));
+                    }
+                    return;
+                }
                 messageHistory.addAll(messages);
                 String rawResponse = ollamaClient.chatCompletion(messageHistory);
                 messageHistory.add(new OllamaClient.Message("assistant", rawResponse));
@@ -144,28 +151,38 @@ public class LLMChatMediatorImpl implements ILLMChatMediator {
         return text;
     }
 
-    private List<OllamaClient.Message> createPromptOnly(String testCodeFile, String sourceCodeFile, List<Mutation> mutations) throws IOException {
-        List<OllamaClient.Message> promptOnlyMessages = new ArrayList<>();
-        // Read source files
-        String sourceCode = Files.readString(Paths.get(sourceCodeFile));
-        String testCode = Files.readString(Paths.get(testCodeFile));
-        
+    private StringBuilder analyzeMutations(List<Mutation> mutations) {
         // Group mutations by line number
         Map<Integer, List<Mutation>> mutationsByLine = mutations.stream()
                 .collect(Collectors.groupingBy(Mutation::getLineNumber));
 
-        // Build the detailed analysis string
         StringBuilder analysisBuilder = new StringBuilder();
         mutationsByLine.forEach((line, lineMutations) -> {
-            analysisBuilder.append(String.format("\nLine %d:\n", line));
-            lineMutations.forEach(mutation -> {
-                analysisBuilder.append(String.format("- Mutation: %s\n  Status: %s\n  Description: %s\n",
-                        mutation.getMutator(),
-                        mutation.getStatus(),
-                        mutation.getDescription()));
-            });
+            // Check if this line has both KILLED and SURVIVED mutations
+            boolean hasKilled = lineMutations.stream().anyMatch(m -> "KILLED".equals(m.getStatus()));
+            boolean hasSurvived = lineMutations.stream().anyMatch(m -> "SURVIVED".equals(m.getStatus()));
+            
+            if (hasKilled && hasSurvived) {
+                analysisBuilder.append(String.format("\nLine %d:\n", line));
+                lineMutations.forEach(mutation -> {
+                    analysisBuilder.append(String.format("- Mutation: %s\n  Status: %s\n  Description: %s\n",
+                            mutation.getMutator(),
+                            mutation.getStatus(),
+                            mutation.getDescription()));
+                });
+            }
         });
+        return analysisBuilder;
+    }
 
+    private List<OllamaClient.Message> createPromptOnly(String testCodeFile, String sourceCodeFile, List<Mutation> mutations) throws IOException {
+        StringBuilder analysisBuilder = analyzeMutations(mutations);
+        if (analysisBuilder.length() == 0) {
+            return new ArrayList<>();
+        }
+
+        List<OllamaClient.Message> promptOnlyMessages = new ArrayList<>();
+        
         // Calculate statistics
         long totalMutations = mutations.size();
         long killedMutations = mutations.stream()
@@ -175,15 +192,51 @@ public class LLMChatMediatorImpl implements ILLMChatMediator {
                 .filter(m -> "SURVIVED".equals(m.getStatus()))
                 .count();
 
+        // System message to set context
+        promptOnlyMessages.add(new OllamaClient.Message("system", MyBundle.message("llm.prompt.system")));
+
+        // Read source files if needed
+        String sourceCode = Files.readString(Paths.get(sourceCodeFile));
+        String testCode = Files.readString(Paths.get(testCodeFile));
+
+        // User message with the structured data
+        String prompt = String.format(MyBundle.message("llm.prompt.user"),
+                    sourceCode,
+                    testCode,
+                    totalMutations,
+                    killedMutations,
+                    (killedMutations * 100.0 / totalMutations),
+                    survivedMutations,
+                    (survivedMutations * 100.0 / totalMutations),
+                    analysisBuilder.toString()
+        );
+        promptOnlyMessages.add(new OllamaClient.Message("user", prompt));
+        return promptOnlyMessages;
+    }
+
+    private List<OllamaClient.Message> createPromptOnlyWithoutCodeContent(String testClassName, String sourceClassName, List<Mutation> mutations) throws IOException {
+        StringBuilder analysisBuilder = analyzeMutations(mutations);
+        if (analysisBuilder.length() == 0) {
+            return new ArrayList<>();
+        }
+        List<OllamaClient.Message> promptOnlyMessages = new ArrayList<>();
         
+        // Calculate statistics
+        long totalMutations = mutations.size();
+        long killedMutations = mutations.stream()
+                .filter(m -> "KILLED".equals(m.getStatus()))
+                .count();
+        long survivedMutations = mutations.stream()
+                .filter(m -> "SURVIVED".equals(m.getStatus()))
+                .count();
 
         // System message to set context
         promptOnlyMessages.add(new OllamaClient.Message("system", MyBundle.message("llm.prompt.system")));
 
         // User message with the structured data
-        String prompt = String.format(MyBundle.message("llm.prompt.user"),
-                sourceCode,
-                testCode,
+        String prompt = String.format(MyBundle.message("llm.prompt.user.compact"),
+                testClassName,
+                sourceClassName,
                 totalMutations,
                 killedMutations,
                 (killedMutations * 100.0 / totalMutations),
@@ -191,14 +244,15 @@ public class LLMChatMediatorImpl implements ILLMChatMediator {
                 (survivedMutations * 100.0 / totalMutations),
                 analysisBuilder.toString()
         );
+        
         promptOnlyMessages.add(new OllamaClient.Message("user", prompt));
         return promptOnlyMessages;
     }
 
     @Override
-    public String dryRunGetPrompt(String testCodeFile, String sourceCodeFile, List<Mutation> mutations) {
+    public String dryRunGetPrompt(String testClassName, String sourceClassName, List<Mutation> mutations) {
         try {   
-            List<OllamaClient.Message> dryRunMessages = createPromptOnly(testCodeFile, sourceCodeFile, mutations);
+            List<OllamaClient.Message> dryRunMessages = createPromptOnlyWithoutCodeContent(testClassName, sourceClassName, mutations);
             
             StringBuilder markdownBuilder = new StringBuilder();
             for (OllamaClient.Message message : dryRunMessages) {

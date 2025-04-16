@@ -58,7 +58,7 @@ public class LLMSuggestionUIComponentViewModel extends ObserverBase implements B
     private String lastDryRunPrompt = "";
 
     public void dryRunGetPrompt(PitestContext context) {
-        lastDryRunPrompt = llmService.dryRunGetPrompt(context.getTestFilePath(), context.getTargetClassFilePath(), context.getMutationResults());
+        lastDryRunPrompt = llmService.dryRunGetPrompt(context.getFullyQualifiedTargetTestClassName(), context.getTargetClassFullyQualifiedName(), context.getMutationResults());
         notifyObservers("DRY_RUN_PROMPT", lastDryRunPrompt);
     }
 

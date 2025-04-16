@@ -8,6 +8,8 @@
 
 ## [Unreleased]
 ### Added
+- enhance the dump prompt to use compact prompt
+- i18n enhancement
 
 ## 1.0.0 - 2024-10-12
 ### Initial Release

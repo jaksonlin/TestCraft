@@ -9,7 +9,7 @@ public interface ILLMChatMediator {
     void setOllamaClient(OllamaClient ollamaClient);
     void generateUnittestRequest(String testCodeFile, String sourceCodeFile, List<Mutation> mutationList);
     void register(ILLMChatClient chatClient);
-    String dryRunGetPrompt(String testCodeFile, String sourceCodeFile, List<Mutation> mutations);
+    String dryRunGetPrompt(String testClassName, String sourceClassName, List<Mutation> mutations);
     void handleChatMessage(String message);
     void clearChat();
     String getChatHistory();

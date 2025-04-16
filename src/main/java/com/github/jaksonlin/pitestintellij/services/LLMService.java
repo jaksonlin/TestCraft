@@ -41,7 +41,7 @@ public final class LLMService
         public int maxTokens = 2000;
         public float temperature = 0.7f;
         public int requestTimeout = 60;  // seconds
-        public boolean copyAsMarkdown = false;
+        public boolean copyAsMarkdown = true;
 
         public State() {
         }
@@ -117,8 +117,8 @@ public final class LLMService
         llmChatMediator.handleChatMessage(message);
     }
 
-    public String dryRunGetPrompt(String testCodeFile, String sourceCodeFile, List<Mutation> mutations) {
-        return llmChatMediator.dryRunGetPrompt(testCodeFile, sourceCodeFile, mutations);
+    public String dryRunGetPrompt(String testClassName, String sourceClassName, List<Mutation> mutations) {
+        return llmChatMediator.dryRunGetPrompt(testClassName, sourceClassName, mutations);
     }
 
     public void onEventHappen(String eventName, Object eventObj) {
