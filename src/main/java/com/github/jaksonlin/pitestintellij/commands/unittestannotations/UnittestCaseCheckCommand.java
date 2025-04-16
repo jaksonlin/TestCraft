@@ -1,5 +1,6 @@
 package com.github.jaksonlin.pitestintellij.commands.unittestannotations;
 
+import com.github.jaksonlin.pitestintellij.MyBundle;
 import com.github.jaksonlin.pitestintellij.annotations.AnnotationSchema;
 import com.github.jaksonlin.pitestintellij.context.CaseCheckContext;
 import com.github.jaksonlin.pitestintellij.context.UnittestCase;
@@ -36,7 +37,7 @@ public abstract class UnittestCaseCheckCommand {
         Messages.showMessageDialog(
                 project,
                 message,
-                "Test Annotation Details",
+                MyBundle.message("test.annotation.details.title"),
                 Messages.getInformationIcon()
         );
     }
@@ -45,7 +46,7 @@ public abstract class UnittestCaseCheckCommand {
         Messages.showMessageDialog(
                 project,
                 "Error parsing annotation: " + message,
-                "Test File Action",
+                MyBundle.message("test.file.action.title"),
                 Messages.getErrorIcon()
         );
     }
@@ -54,7 +55,7 @@ public abstract class UnittestCaseCheckCommand {
         Messages.showMessageDialog(
                 project,
                 "No " + annotationName + " annotation found on this method",
-                "Test File Action",
+                MyBundle.message("test.file.action.title"),
                 Messages.getWarningIcon()
         );
     }
@@ -63,7 +64,7 @@ public abstract class UnittestCaseCheckCommand {
         Messages.showMessageDialog(
                 project,
                 "This method is not a JUnit test method",
-                "Annotation Generation Action",
+                MyBundle.message("test.annotation.generation.title"),
                 Messages.getWarningIcon()
         );
     }
@@ -72,7 +73,7 @@ public abstract class UnittestCaseCheckCommand {
         Messages.showMessageDialog(
                 project,
                 "No methods found in this class",
-                "Annotation Generation Action",
+                MyBundle.message("test.methods.not.found.title"),
                 Messages.getWarningIcon()
         );
     }
@@ -81,7 +82,7 @@ public abstract class UnittestCaseCheckCommand {
         Messages.showMessageDialog(
                 project,
                 "No test methods found in the class that can add annotation.",
-                "No Test Methods Can Add Annotation",
+                MyBundle.message("test.methods.no.annotation.title"),
                 Messages.getInformationIcon()
         );
     }
@@ -90,7 +91,7 @@ public abstract class UnittestCaseCheckCommand {
         Messages.showMessageDialog(
                 project,
                 annotationName + " already exist on this method",
-                "Annotation Generation Action",
+                MyBundle.message("test.annotation.exists.title"),
                 Messages.getWarningIcon()
         );
     }
@@ -166,7 +167,7 @@ public abstract class UnittestCaseCheckCommand {
 
     public UnittestCase parseUnittestCaseFromAnnotations(PsiAnnotation annotation) {
         Map<String, Object> annotationValues = parseAnnotationValues(annotation);
-        return context.getParser().parseAnnotation(annotationValues);
+        return context.getParser().parseAnnotation(annotationValues); 
     }
 
 

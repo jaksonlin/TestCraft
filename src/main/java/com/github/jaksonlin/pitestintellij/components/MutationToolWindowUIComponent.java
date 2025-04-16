@@ -1,7 +1,6 @@
-package com.github.jaksonlin.pitestintellij.ui;
+package com.github.jaksonlin.pitestintellij.components;
 
 import com.github.jaksonlin.pitestintellij.MyBundle;
-import com.github.jaksonlin.pitestintellij.components.ObservableTree;
 import com.github.jaksonlin.pitestintellij.viewmodels.MutationToolWindowViewModel;
 import com.intellij.openapi.project.Project;
 
@@ -14,14 +13,14 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-public class MutationToolWindowUI {
+public class MutationToolWindowUIComponent {
     private final JButton clearButton = new JButton(MyBundle.message("clear.button"));
     private final JTextField searchInput = new JTextField(20);
     protected final ObservableTree resultTree = new ObservableTree();
     private final MutationToolWindowViewModel vm;
     private final JPanel toolWindowPanel;
 
-    public MutationToolWindowUI(Project project) {
+    public MutationToolWindowUIComponent(Project project) {
         this.vm = new MutationToolWindowViewModel(project, resultTree);
         this.toolWindowPanel = createToolWindowPanel();
         registerListeners();

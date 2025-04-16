@@ -7,7 +7,7 @@ TestCraft is a comprehensive testing assistant plugin for IntelliJ IDEA that enh
 ## Features
 
 ### Mutation Testing
-- Run PITest mutation testing on your Java Gradle projects
+- Run PITest mutation testing on your Java **Gradle & Maven** projects
 - View mutation test results in a dedicated tool window
 - Navigate directly to mutated code with inline editor decorations
 - Track mutation testing history and trends

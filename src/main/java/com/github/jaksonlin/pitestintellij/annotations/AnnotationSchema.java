@@ -123,7 +123,7 @@ public class AnnotationSchema {
                     {
                       "name": "testPoints",
                       "type": "STRING_LIST",
-                      "required": true,
+                      "required": false,
                       "valueProvider": {
                         "type": "FIXED_VALUE",
                         "value": ["Functionality"]
@@ -151,9 +151,8 @@ public class AnnotationSchema {
                           "Performance"
                         ],
                         "allowCustomValues": true,
-                        "minLength": 1,
                         "mode": "CONTAINS",
-                        "allowEmpty": false
+                        "allowEmpty": true
                       }
                     },
                     {
@@ -173,23 +172,22 @@ public class AnnotationSchema {
                           "TODO",
                           "IN_PROGRESS",
                           "DONE",
-                          "DEPRECATED",
-                          "BROKEN"
+                          "BLOCKED"
                         ],
-                        "allowCustomValues": true,
-                        "mode": "CONTAINS",
+                        "allowCustomValues": false,
+                        "mode": "EXACT",
                         "allowEmpty": false
                       }
                     },
                     {
                       "name": "description",
                       "type": "STRING",
-                      "required": true,
+                      "required": false,
                       "valueProvider": {
                         "type": "METHOD_NAME_BASED"
                       },
                       "validation": {
-                        "allowEmpty": false
+                        "allowEmpty": true
                       },
                       "defaultValue": {
                         "type": "StringValue",
@@ -205,7 +203,7 @@ public class AnnotationSchema {
                         "value": []
                       },
                       "validation": {
-                        "minLength": 1
+                        "allowEmpty": true
                       }
                     },
                     {
@@ -217,11 +215,11 @@ public class AnnotationSchema {
                         "value": []
                       },
                       "validation": {
-                        "minLength": 1
+                        "allowEmpty": true
                       }
                     },
                     {
-                      "name": "relatedTestCases",
+                      "name": "relatedTestcases",
                       "type": "STRING_LIST",
                       "required": false,
                       "defaultValue": {
@@ -229,7 +227,7 @@ public class AnnotationSchema {
                         "value": []
                       },
                       "validation": {
-                        "minLength": 1
+                        "allowEmpty": true
                       }
                     },
                     {
@@ -241,7 +239,7 @@ public class AnnotationSchema {
                         "value": []
                       },
                       "validation": {
-                        "minLength": 1
+                        "allowEmpty": true
                       }
                     }
                   ]

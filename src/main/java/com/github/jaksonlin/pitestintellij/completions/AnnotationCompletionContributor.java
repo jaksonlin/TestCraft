@@ -4,7 +4,6 @@ import com.github.jaksonlin.pitestintellij.annotations.AnnotationFieldConfig;
 import com.github.jaksonlin.pitestintellij.annotations.AnnotationSchema;
 import com.github.jaksonlin.pitestintellij.annotations.DefaultValue;
 import com.github.jaksonlin.pitestintellij.services.AnnotationConfigService;
-import com.github.jaksonlin.pitestintellij.ui.CustomAnnotationCompletionLookupElement;
 import com.intellij.codeInsight.completion.*;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.lang.java.JavaLanguage;
@@ -16,6 +15,7 @@ import com.intellij.psi.PsiNameValuePair;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ProcessingContext;
 import org.jetbrains.annotations.NotNull;
+
 
 public class AnnotationCompletionContributor extends CompletionContributor {
     private static final Logger LOG = Logger.getInstance(AnnotationCompletionContributor.class);

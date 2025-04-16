@@ -1,34 +1,191 @@
 package com.github.jaksonlin.pitestintellij.components;
 
 import com.github.jaksonlin.pitestintellij.observers.BasicEventObserver;
-import com.github.jaksonlin.pitestintellij.observers.LLMMessageObserver;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
-import com.intellij.util.ui.UIUtil;
+import com.intellij.ui.JBColor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.Toolkit;
+import com.intellij.AbstractBundle;
+import org.jetbrains.annotations.PropertyKey;
 
 import javax.swing.*;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.StyleSheet;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.List;
+import java.util.ResourceBundle;
+import javax.swing.text.html.HTMLDocument;
 
 public class LLMResponsePanel extends JPanel implements BasicEventObserver {
-    private final JEditorPane editorPane = new JEditorPane();
-    private Timer loadingTimer;
-    private int loadingDots = 0;
+    private static final String BUNDLE = "messages.MyBundle";
+    private static ResourceBundle ourBundle;
+    
+    public static String message(@PropertyKey(resourceBundle = BUNDLE) String key, Object... params) {
+        return AbstractBundle.message(getBundle(), key, params);
+    }
+    
+    private static ResourceBundle getBundle() {
+        if (ourBundle == null) {
+            ourBundle = ResourceBundle.getBundle(BUNDLE);
+        }
+        return ourBundle;
+    }
+
+    private final JEditorPane outputArea;
+    private final ChatPanel chatPanel;
     private boolean isLoading = false;
+    private boolean copyAsMarkdown = false;
+    private final StringBuilder chatHistory = new StringBuilder();
+    private final HTMLEditorKit htmlKit;
+    private final StyleSheet styleSheet;
+    private final JPanel loadingPanel;
+    private final Timer loadingTimer;
+    private final JLabel loadingLabel;
+
+    private static final String BASE_HTML_TEMPLATE = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                %s
+            </style>
+        </head>
+        <body>
+            <div id="chat-container">
+                %s
+            </div>
+        </body>
+        </html>
+        """;
+
+    private static final String MESSAGE_TEMPLATE = """
+        <div class="message %s">
+            <div class="message-header">%s</div>
+            <div class="message-content">%s</div>
+        </div>
+        <div class="message-separator"></div>
+        """;
+
+    public interface ResponseActionListener {
+        void onClearButtonClick();
+        void onCopyButtonClick();
+    }
+
+    private List<ResponseActionListener> responseActionListeners = new ArrayList<>();
+
+    public void addResponseActionListener(ResponseActionListener listener) {
+        responseActionListeners.add(listener);
+    }
+
+    public void removeResponseActionListener(ResponseActionListener listener) {
+        responseActionListeners.remove(listener);
+    }
+
+    public void notifyClearButtonClick() {
+        for (ResponseActionListener listener : responseActionListeners) {
+            listener.onClearButtonClick();
+        }
+    }
+
+    public void notifyCopyButtonClick() {
+        for (ResponseActionListener listener : responseActionListeners) {
+            listener.onCopyButtonClick();
+        }
+    }
+
+    public LLMResponsePanel(ChatPanel chatPanel) {
+        this.chatPanel = chatPanel;
+        setLayout(new BorderLayout());
+        setBorder(JBUI.Borders.empty(10));
+
+        // Setup improved JEditorPane for HTML rendering
+        outputArea = new JEditorPane();
+        outputArea.setEditable(false);
+        outputArea.setContentType("text/html");
+        
+        // Configure HTML editor kit with custom style sheet
+        htmlKit = new HTMLEditorKit();
+        styleSheet = htmlKit.getStyleSheet();
+        styleSheet.addRule(getCodeStyle());
+        outputArea.setEditorKit(htmlKit);
+        
+        // Initialize with empty document
+        HTMLDocument doc = (HTMLDocument) htmlKit.createDefaultDocument();
+        outputArea.setDocument(doc);
+        
+        // Enable proper HTML rendering
+        outputArea.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
+        outputArea.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 13));
+        
+        // Create loading panel
+        loadingPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        loadingPanel.setVisible(false);
+        loadingLabel = new JLabel(message("llm.thinking"));
+        loadingPanel.add(loadingLabel);
+        loadingPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        loadingPanel.setBackground(JBColor.background());
+        
+        // Setup loading animation timer
+        loadingTimer = new Timer();
+        
+        JBScrollPane outputScrollPane = new JBScrollPane(outputArea);
+        
+        // Create toolbar
+        JToolBar toolbar = new JToolBar();
+        toolbar.setFloatable(false);
+        toolbar.setBorder(JBUI.Borders.empty(2, 2));
+
+        JButton copyButton = new JButton(message("llm.copy.to.clipboard"));
+        copyButton.addActionListener(e -> {
+            notifyCopyButtonClick();
+        });
+        toolbar.add(copyButton);
+
+        JButton clearButton = new JButton(message("llm.clear"));
+        clearButton.addActionListener(e -> {
+            clearOutput();
+            notifyClearButtonClick();
+        });
+        toolbar.add(clearButton);
+        
+        // Create input panel at the bottom
+        JPanel inputPanel = new JPanel(new BorderLayout());
+        inputPanel.add(chatPanel.getInputPanel(), BorderLayout.CENTER);
+        
+        // Create center panel to hold toolbar, output area, and loading panel
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        centerPanel.add(toolbar, BorderLayout.NORTH);
+        centerPanel.add(outputScrollPane, BorderLayout.CENTER);
+        centerPanel.add(loadingPanel, BorderLayout.SOUTH);
+        
+        // Add components
+        add(centerPanel, BorderLayout.CENTER);
+        add(inputPanel, BorderLayout.SOUTH);
+
+        // add the chatPanel to the responsePanel, and notify update on the responsePanel with user message
+        this.chatPanel.addListener(message -> {
+            onEventHappen("CHAT_REQUEST", message);
+        });
+        
+        // Initialize with empty chat container
+        updateOutputArea();
+    }
 
     private String getCodeStyle() {
-        boolean isDarkTheme = UIUtil.isUnderDarcula();
+        boolean isDarkTheme = !JBColor.isBright();
         String backgroundColor = isDarkTheme ? "#2b2d30" : "#fafafa";
         String textColor = isDarkTheme ? "#bababa" : "#2b2b2b";
         String codeBackground = isDarkTheme ? "#1e1f22" : "#f6f8fa";
         String codeBorder = isDarkTheme ? "#1e1f22" : "#e1e4e8";
         String linkColor = isDarkTheme ? "#589df6" : "#2470B3";
+        String separatorColor = isDarkTheme ? "#3c3f41" : "#e0e0e0";
 
         return String.format("""
             body { 
@@ -39,7 +196,41 @@ public class LLMResponsePanel extends JPanel implements BasicEventObserver {
                 background-color: %s;
                 color: %s;
             }
-            h1, h2, h3 { color: %s; }
+            #chat-container {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5em;
+            }
+            .message {
+                border-radius: 8px;
+                padding: 12px;
+            }
+            .message.user {
+                background-color: %s;
+                margin-left: 20%%;
+            }
+            .message.assistant {
+                background-color: %s;
+                margin-right: 20%%;
+            }
+            .message.system {
+                background-color: %s;
+                text-align: center;
+                font-style: italic;
+            }
+            .message-header {
+                font-weight: bold;
+                margin-bottom: 4px;
+                color: %s;
+            }
+            .message-content {
+                white-space: pre-wrap;
+            }
+            .message-separator {
+                height: 1px;
+                background-color: %s;
+                margin: 10px 0;
+            }
             pre { 
                 background-color: %s; 
                 padding: 16px; 
@@ -65,7 +256,13 @@ public class LLMResponsePanel extends JPanel implements BasicEventObserver {
             .constant { color: %s; }
             .package { color: %s; }
             """,
-            backgroundColor, textColor, textColor, codeBackground, codeBorder, textColor, linkColor,
+            backgroundColor, textColor,
+            isDarkTheme ? "#2d2d2d" : "#e3f2fd",  // user message background
+            isDarkTheme ? "#1e1e1e" : "#f5f5f5",  // assistant message background
+            isDarkTheme ? "#2d2d2d" : "#e8f5e9",  // system message background
+            textColor,
+            separatorColor,  // separator color
+            codeBackground, codeBorder, textColor, linkColor,
             isDarkTheme ? "#cc7832" : "#d73a49",  // keyword
             isDarkTheme ? "#6a8759" : "#032f62",  // string
             isDarkTheme ? "#808080" : "#6a737d",  // comment
@@ -79,144 +276,138 @@ public class LLMResponsePanel extends JPanel implements BasicEventObserver {
         );
     }
 
-    public LLMResponsePanel() {
-        this.setLayout(new BorderLayout());
-        setupUI();
-    }
-
-    private void setupUI() {
-        // Setup editor pane
-        editorPane.setEditable(false);
-        editorPane.setContentType("text/html");
-        editorPane.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
-        editorPane.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 13));
-        editorPane.setBackground(UIUtil.getPanelBackground());
-
-        // Create toolbar
-        JToolBar toolbar = new JToolBar();
-        toolbar.setFloatable(false);
-        toolbar.setBorder(JBUI.Borders.empty(2, 2));
-
-        JButton copyButton = new JButton("Copy to Clipboard");
-        copyButton.addActionListener(e -> copyToClipboard());
-        toolbar.add(copyButton);
-
-        JButton clearButton = new JButton("Clear");
-        clearButton.addActionListener(e -> clearContent());
-        toolbar.add(clearButton);
-
-        // Add components to main panel
-        this.add(toolbar, BorderLayout.NORTH);
-        this.add(new JBScrollPane(editorPane), BorderLayout.CENTER);
-    }
-
-    private String highlightJavaCode(String code) {
-        // Replace special characters first
-        code = code.replace("&", "&amp;")
-                  .replace("<", "&lt;")
-                  .replace(">", "&gt;");
-
-        // Highlight keywords
-        code = code.replaceAll("\\b(public|private|protected|class|interface|void|static|final|if|else|for|while|do|break|continue|return|try|catch|throw|throws|new|extends|implements|import|package|null|true|false|this|super|instanceof|synchronized|volatile|transient|native|strictfp|abstract|default)\\b", "<span class=\"keyword\">$1</span>");
-        
-        // Highlight strings (handling escaped quotes)
-        code = code.replaceAll("\"((?:\\\\.|[^\"])*?)\"", "<span class=\"string\">\"$1\"</span>");
-        
-        // Highlight numbers (including decimals and negative numbers)
-        code = code.replaceAll("\\b(-?\\d*\\.?\\d+)\\b", "<span class=\"number\">$1</span>");
-        
-        // Highlight annotations
-        code = code.replaceAll("(@\\w+(?:\\.[\\w.]+)*)", "<span class=\"annotation\">$1</span>");
-        
-        // Highlight types (including generics)
-        code = code.replaceAll("\\b(String|Integer|Boolean|Double|Float|List|Map|Set|Object|Exception|Error|Throwable|Class|Void|Character|Byte|Short|Long|Thread|Runnable|Override)(?:<[^>]+>)?\\b", "<span class=\"type\">$1</span>");
-        
-        // Highlight method declarations
-        code = code.replaceAll("(?<=\\s)(\\w+)\\s*\\(", "<span class=\"method\">$1</span>(");
-        
-        // Highlight single-line comments
-        code = code.replaceAll("(//[^\n]*)", "<span class=\"comment\">$1</span>");
-        
-        // Highlight multi-line comments
-        code = code.replaceAll("/\\*(.*?)\\*/", "<span class=\"comment\">/*$1*/</span>");
-
-        return code;
-    }
-
-    public void startLoading() {
-        if (loadingTimer != null) {
-            loadingTimer.cancel();
-        }
+    private void startLoading() {
         isLoading = true;
-        loadingDots = 0;
-        loadingTimer = new Timer();
+        loadingPanel.setVisible(true);
+        
+        // Start the loading animation
         loadingTimer.scheduleAtFixedRate(new TimerTask() {
+            private int dots = 0;
             @Override
             public void run() {
                 if (!isLoading) {
-                    loadingTimer.cancel();
+                    cancel();
                     return;
                 }
-                loadingDots = (loadingDots + 1) % 4;
-                String dots = ".".repeat(loadingDots);
-                String loadingText = String.format("Generating suggestions%s", dots);
-                updateContent(loadingText);
+                SwingUtilities.invokeLater(() -> {
+                    dots = (dots + 1) % 4;
+                    loadingLabel.setText(message("llm.thinking") + ".".repeat(dots));
+                });
             }
-        }, 0, 500); // Update every 500ms
+        }, 0, 500);
+        
+        // Disable input while loading
+        chatPanel.setInputEnabled(false);
     }
 
-    public void stopLoading() {
-        isLoading = false;
-        if (loadingTimer != null) {
-            loadingTimer.cancel();
-            loadingTimer = null;
+    private void stopLoading() {
+        if (!isLoading) {
+            return; // Prevent multiple stop calls
         }
+        isLoading = false;
+        loadingPanel.setVisible(false);
+        loadingTimer.purge();
+        
+        // Re-enable input after loading
+        chatPanel.setInputEnabled(true);
     }
 
-    public void updateContent(String markdown) {
+    private void updateOutputArea() {
+        String fullHtml = String.format(BASE_HTML_TEMPLATE, getCodeStyle(), chatHistory.toString());
+        SwingUtilities.invokeLater(() -> {
+            try {
+                // Create a new document each time to avoid state issues
+                HTMLDocument doc = (HTMLDocument) htmlKit.createDefaultDocument();
+                // Set the document first
+                outputArea.setDocument(doc);
+                // Then insert the content
+                htmlKit.insertHTML(doc, 0, fullHtml, 0, 0, null);
+                outputArea.setCaretPosition(doc.getLength());
+            } catch (Exception e) {
+                // Fallback to setText if something goes wrong
+                outputArea.setText(fullHtml);
+            }
+        });
+    }
+
+    private void appendMarkdownToOutput(String markdown) {
         String htmlContent = convertMarkdownToHtml(markdown);
-        editorPane.setText(htmlContent);
-        editorPane.setCaretPosition(0); // Scroll to top
-    }
-
-    private void copyToClipboard() {
-        editorPane.selectAll();
-        editorPane.copy();
-        editorPane.select(0, 0); // Clear selection
-    }
-
-    private void clearContent() {
-        editorPane.setText("");
+        chatHistory.append(htmlContent);
+        updateOutputArea();
     }
 
     private String convertMarkdownToHtml(String markdown) {
         Parser parser = Parser.builder().build();
         Node document = parser.parse(markdown);
         HtmlRenderer renderer = HtmlRenderer.builder().build();
-        String html = renderer.render(document);
+        return renderer.render(document);
+    }
 
-        // Extract code blocks and highlight them
-        Pattern codePattern = Pattern.compile("<pre><code>(.*?)</code></pre>", Pattern.DOTALL);
-        Matcher matcher = codePattern.matcher(html);
-        StringBuffer sb = new StringBuffer();
-        while (matcher.find()) {
-            String code = matcher.group(1);
-            String highlightedCode = highlightJavaCode(code);
-            matcher.appendReplacement(sb, "<pre><code>" + highlightedCode + "</code></pre>");
+    private void clearOutput() {
+        chatHistory.setLength(0);
+        updateOutputArea();
+    }
+
+    
+
+    private void copyToClipboard(Object eventObj) {
+        String currentContentToCopy;
+
+        if (copyAsMarkdown) {
+            currentContentToCopy = eventObj.toString();
+        } else {
+            currentContentToCopy = outputArea.getText();
         }
-        matcher.appendTail(sb);
-        html = sb.toString();
-
-        return "<html><head><style>"
-                + getCodeStyle()
-                + "</style></head><body>"
-                + html
-                + "</body></html>";
+        StringSelection selection = new StringSelection(currentContentToCopy);
+        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
     }
 
     @Override
-    public void onEventHappen(Object eventObj) {
-        String markdown = eventObj.toString();
-        updateContent(markdown);
+    public void onEventHappen(String eventName, Object eventObj) {
+        switch (eventName) {
+            case "START_LOADING":
+                startLoading();
+                break;
+            case "STOP_LOADING":
+                stopLoading();
+                break;
+            case "COPY_CHAT_RESPONSE":
+                copyToClipboard(eventObj);
+                break;
+            case "CONFIG_CHANGE:copyAsMarkdown":
+                copyAsMarkdown = (boolean) eventObj;
+                break;
+            case "CHAT_REQUEST":
+                if (!isLoading) {
+                    appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "user", message("llm.user"), eventObj.toString()));
+                    startLoading();
+                }
+                break;
+            case "DRY_RUN_PROMPT":
+                String dryRunPrompt = (String) eventObj;
+                if (dryRunPrompt.isEmpty()){
+                    JOptionPane.showMessageDialog(this, message("llm.dry.run.prompt.empty"), message("llm.dry.run.prompt"), JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "system", message("llm.system"), message("llm.dry.run.prompt") + "\n" + eventObj.toString()));
+                }
+                break;
+            default:
+                String[] responseType = eventName.split(":");
+                if (responseType.length > 1 && responseType[0].equals("CHAT_RESPONSE")) {
+                    switch (responseType[1]) {
+                        case "CHAT_MESSAGE":
+                            appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "assistant", message("llm.assistant"), eventObj.toString()));
+                            break;
+                        case "ERROR":
+                            JOptionPane.showMessageDialog(this, message("llm.error") + ": " + eventObj.toString(), message("llm.error"), JOptionPane.ERROR_MESSAGE);
+                            break;
+                        case "UNIT_TEST_REQUEST":
+                            clearOutput();
+                            appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "system", message("llm.system"), message("llm.new.unit.test.suggestion") + "\n" + eventObj.toString()));
+                            break;
+                    }
+                }
+                break;
+        }
     }
 }

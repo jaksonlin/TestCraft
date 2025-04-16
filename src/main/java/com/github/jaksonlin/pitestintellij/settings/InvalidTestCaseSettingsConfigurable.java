@@ -28,9 +28,7 @@ public class InvalidTestCaseSettingsConfigurable implements Configurable {
         return mySettingsComponent != null && state != null && (
             mySettingsComponent.isEnableCheck() != state.enable ||
             mySettingsComponent.isEnableCommentCheck() != state.enableCommentCheck ||
-            !mySettingsComponent.getInvalidAssertionText().equals(state.invalidAssertionText) ||
-            mySettingsComponent.isCopyAsMarkdown() != state.copyAsMarkdown ||
-            mySettingsComponent.isCopyPrompt() != state.copyPrompt
+            !mySettingsComponent.getInvalidAssertionText().equals(state.invalidAssertionText)
         );
     }
 
@@ -42,8 +40,7 @@ public class InvalidTestCaseSettingsConfigurable implements Configurable {
                 state.enable = mySettingsComponent.isEnableCheck();
                 state.enableCommentCheck = mySettingsComponent.isEnableCommentCheck();
                 state.invalidAssertionText = mySettingsComponent.getInvalidAssertionText();
-                state.copyAsMarkdown = mySettingsComponent.isCopyAsMarkdown();
-                state.copyPrompt = mySettingsComponent.isCopyPrompt();
+                service.loadState(state); // explicitly load the state
             }
         }
     }
@@ -56,8 +53,6 @@ public class InvalidTestCaseSettingsConfigurable implements Configurable {
                 mySettingsComponent.setEnableCheck(state.enable);
                 mySettingsComponent.setEnableCommentCheck(state.enableCommentCheck);
                 mySettingsComponent.setInvalidAssertionText(state.invalidAssertionText);
-                mySettingsComponent.setCopyAsMarkdown(state.copyAsMarkdown);
-                mySettingsComponent.setCopyPrompt(state.copyPrompt);
             }
         }
     }

@@ -14,8 +14,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,14 +25,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service(Service.Level.PROJECT)
-public final class RunHistoryManager extends ObserverBase {
-    private static final Logger log = LoggerFactory.getLogger(RunHistoryManager.class);
+public final class RunHistoryManagerService extends ObserverBase {
+    private static final Logger log = LoggerFactory.getLogger(RunHistoryManagerService.class);
     private final Project project;
     private final Gson gson = new Gson();
     private final File historyFile;
     private final Map<String, PitestContext> history;
 
-    public RunHistoryManager(@NotNull Project project) {
+    public RunHistoryManagerService(@NotNull Project project) {
         this.project = project;
         this.historyFile = new File(PathManager.getConfigPath(), "run-" + project.getName() + "-history.json");
         this.history = loadRunHistory();
@@ -48,7 +46,8 @@ public final class RunHistoryManager extends ObserverBase {
         List<Pair<String, String>> mappedHistory = history.entrySet().stream()
                 .map(entry -> new Pair<>(entry.getValue().getTargetClassPackageName(), entry.getValue().getTargetClassName()))
                 .collect(Collectors.toList());
-        observer.onEventHappen(mappedHistory);
+        observer.onEventHappen("RUN_HISTORY", mappedHistory);
+        observer.onEventHappen("RUN_HISTORY_LIST", getRunHistory());
     }
 
     @Nullable
@@ -71,7 +70,8 @@ public final class RunHistoryManager extends ObserverBase {
         if (historyFile.exists()) {
             historyFile.delete();
         }
-        notifyObservers(null);
+        notifyObservers("RUN_HISTORY", null);
+        notifyObservers("RUN_HISTORY_LIST", null);
     }
 
     @NotNull
@@ -85,7 +85,8 @@ public final class RunHistoryManager extends ObserverBase {
             String json = gson.toJson(history);
             Files.write(historyFile.toPath(), json.getBytes());
             // this should be a Pair<String, String>>
-            notifyObservers(new Pair<String, String>(entry.getTargetClassPackageName(), entry.getTargetClassName()));
+            notifyObservers("RUN_HISTORY", new Pair<String, String>(entry.getTargetClassPackageName(), entry.getTargetClassName()));
+            notifyObservers("RUN_HISTORY_LIST", getRunHistory());
         } catch (IOException e) {
             // Handle the exception appropriately, e.g., log an error
             log.error("Error saving run history", e);

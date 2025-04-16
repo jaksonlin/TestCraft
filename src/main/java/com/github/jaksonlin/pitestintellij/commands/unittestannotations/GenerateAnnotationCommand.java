@@ -7,7 +7,7 @@ import com.github.jaksonlin.pitestintellij.annotations.AnnotationSchema;
 import com.github.jaksonlin.pitestintellij.annotations.DefaultValue;
 import com.github.jaksonlin.pitestintellij.context.CaseCheckContext;
 import com.github.jaksonlin.pitestintellij.services.AnnotationConfigService;
-import com.github.jaksonlin.pitestintellij.services.ValueProviderService;
+import com.github.jaksonlin.pitestintellij.services.AnnotationValueProviderService;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.command.WriteCommandAction;
@@ -35,14 +35,14 @@ import java.util.stream.Collectors;
 public class GenerateAnnotationCommand extends UnittestCaseCheckCommand {
     private final PsiElementFactory psiElementFactory;
     private final AnnotationConfigService configService;
-    private final ValueProviderService valueProviderService;
+    private final AnnotationValueProviderService valueProviderService;
     private static final Logger LOG = Logger.getInstance(GenerateAnnotationCommand.class);
 
     public GenerateAnnotationCommand(Project project, CaseCheckContext context) {
         super(project, context);
         this.psiElementFactory = JavaPsiFacade.getInstance(project).getElementFactory();
         this.configService = ApplicationManager.getApplication().getService(AnnotationConfigService.class);
-        this.valueProviderService = project.getService(ValueProviderService.class);
+        this.valueProviderService = project.getService(AnnotationValueProviderService.class);
     }
 
     @Override
@@ -52,7 +52,9 @@ public class GenerateAnnotationCommand extends UnittestCaseCheckCommand {
             public void run(ProgressIndicator indicator) {
                 indicator.setIndeterminate(true);
 
-                if (getContext().getPsiClass().getMethods().length == 0) {
+                PsiMethod[] methods = ReadAction.compute(() -> getContext().getPsiClass().getMethods());
+                
+                if (methods.length == 0) {
                     ApplicationManager.getApplication().invokeLater(() -> showNoMethodMessage(getProject()));
                     return;
                 }
@@ -62,11 +64,13 @@ public class GenerateAnnotationCommand extends UnittestCaseCheckCommand {
     }
 
     private void generateAnnotationForSelectedMethod(ProgressIndicator indicator) {
-        PsiClass psiClass = getContext().getPsiClass();
-        PsiMethod[] allMethods = psiClass.getMethods();
-        List<PsiMethod> testMethods = Arrays.stream(allMethods)
-                .filter(this::canAddAnnotation)
-                .collect(Collectors.toList());
+        List<PsiMethod> testMethods = ReadAction.compute(() -> {
+            PsiClass psiClass = getContext().getPsiClass();
+            PsiMethod[] allMethods = psiClass.getMethods();
+            return Arrays.stream(allMethods)
+                    .filter(this::canAddAnnotation)
+                    .collect(Collectors.toList());
+        });
 
         if (testMethods.isEmpty()) {
             ApplicationManager.getApplication().invokeLater(() -> showNoTestMethodCanAddMessage(getProject()));
@@ -156,7 +160,7 @@ public class GenerateAnnotationCommand extends UnittestCaseCheckCommand {
                                 if (selected[i]) {
                                     int finalI = i;
                                     ApplicationManager.getApplication().executeOnPooledThread(() -> {
-                                        try{
+                                        try {
                                             generateAnnotation(testMethods.get(finalI), getContext().getSchema());
                                         } catch (Exception e) {
                                             LOG.error("Failed to generate annotation", e);
@@ -171,11 +175,9 @@ public class GenerateAnnotationCommand extends UnittestCaseCheckCommand {
                             } catch (InterruptedException e) {
                                 LOG.error("Interrupted while waiting for latch", e);
                             }
-
                         }
                     });
                 }
-
             }
         });
     }

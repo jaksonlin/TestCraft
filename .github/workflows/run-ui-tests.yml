@@ -22,12 +22,15 @@ jobs:
           - os: ubuntu-latest
             runIde: |
               export DISPLAY=:99.0
+              export LANG=en_US.UTF-8
+              export LANGUAGE=en_US:en
+              export LC_ALL=en_US.UTF-8
               Xvfb -ac :99 -screen 0 1920x1080x16 &
-              gradle runIdeForUiTests &
+              gradle runIdeForUiTests -Duser.language=en -Duser.country=US &
           - os: windows-latest
-            runIde: start gradlew.bat runIdeForUiTests
+            runIde: start gradlew.bat runIdeForUiTests -Duser.language=en -Duser.country=US
           - os: macos-latest
-            runIde: ./gradlew runIdeForUiTests &
+            runIde: LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 ./gradlew runIdeForUiTests -Duser.language=en -Duser.country=US &
 
     steps:
 
@@ -62,4 +65,4 @@ jobs:
 
       # Run tests
       - name: Tests
-        run: ./gradlew test
+        run: ./gradlew test -Duser.language=en -Duser.country=US

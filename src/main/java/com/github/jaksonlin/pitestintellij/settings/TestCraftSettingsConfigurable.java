@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.jaksonlin.pitestintellij.MyBundle;
 import javax.swing.*;
 
 public class TestCraftSettingsConfigurable implements SearchableConfigurable.Parent {
@@ -16,7 +17,7 @@ public class TestCraftSettingsConfigurable implements SearchableConfigurable.Par
 
     @Override
     public String getDisplayName() {
-        return "TestCraft";
+        return MyBundle.message("settings.testcraft.title");
     }
 
     @Override
@@ -24,12 +25,12 @@ public class TestCraftSettingsConfigurable implements SearchableConfigurable.Par
         // Create a panel with a brief description of TestCraft settings
         JPanel panel = new JPanel();
         panel.add(new JLabel("<html><body style='width: 300px; padding: 10px;'>" +
-                "<h2>TestCraft Settings</h2>" +
-                "<p>Configure various aspects of TestCraft:</p>" +
+                "<h2>" + MyBundle.message("settings.testcraft.title") + "</h2>" +
+                "<p>" + MyBundle.message("settings.testcraft.description") + "</p>" +
                 "<ul>" +
-                "<li><b>Test Annotations</b> - Configure test case annotation schema and validation</li>" +
-                "<li><b>Assert Validation</b> - Set up rules for validating test assertions</li>" +
-                "<li><b>LLM Settings</b> - Configure Ollama LLM integration for test suggestions</li>" +
+                "<li><b>" + MyBundle.message("settings.testcraft.annotations") + "</b> - " + MyBundle.message("settings.testcraft.annotations.description") + "</li>" +
+                "<li><b>" + MyBundle.message("settings.testcraft.asserts") + "</b> - " + MyBundle.message("settings.testcraft.asserts.description") + "</li>" +
+                "<li><b>" + MyBundle.message("settings.testcraft.llm") + "</b> - " + MyBundle.message("settings.testcraft.llm.description") + "</li>" +
                 "</ul>" +
                 "</body></html>"));
         return panel;
