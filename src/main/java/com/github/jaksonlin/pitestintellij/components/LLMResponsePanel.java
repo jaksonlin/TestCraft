@@ -384,7 +384,12 @@ public class LLMResponsePanel extends JPanel implements BasicEventObserver {
                 }
                 break;
             case "DRY_RUN_PROMPT":
-                appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "system", message("llm.system"), message("llm.dry.run.prompt") + "\n" + eventObj.toString()));
+                String dryRunPrompt = (String) eventObj;
+                if (dryRunPrompt.isEmpty()){
+                    JOptionPane.showMessageDialog(this, message("llm.dry.run.prompt.empty"), message("llm.dry.run.prompt"), JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "system", message("llm.system"), message("llm.dry.run.prompt") + "\n" + eventObj.toString()));
+                }
                 break;
             default:
                 String[] responseType = eventName.split(":");
