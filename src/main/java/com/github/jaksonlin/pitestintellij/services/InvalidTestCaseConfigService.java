@@ -14,19 +14,20 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-
 @Service(Service.Level.APP)
 @State(
-        name = "InvalidAssertionConfig",
-        storages = {@Storage("pitestInvalidAssertion.xml")}
+        name = "InvalidTestCaseConfig",
+        storages = {@Storage("pitestInvalidTestCase.xml")}
 )
-public final class InvalidAssertionConfigService  implements PersistentStateComponent<InvalidAssertionConfigService.State> {
-    private static final Logger LOG = Logger.getInstance(InvalidAssertionConfigService.class);
+public final class InvalidTestCaseConfigService implements PersistentStateComponent<InvalidTestCaseConfigService.State> {
+    private static final Logger LOG = Logger.getInstance(InvalidTestCaseConfigService.class);
 
     public static class State {
-        public String invalidAssertionText =  InvalidAssertionConfigService.getBuiltInInvalidAssertionText();
-
+        public String invalidAssertionText = InvalidTestCaseConfigService.getBuiltInInvalidAssertionText();
         public boolean enable = false;
+        public boolean enableCommentCheck = false;
+        public boolean copyAsMarkdown = true;
+        public boolean copyPrompt = false;
 
         public State() {
         }
@@ -35,20 +36,21 @@ public final class InvalidAssertionConfigService  implements PersistentStateComp
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            InvalidAssertionConfigService.State state = (InvalidAssertionConfigService.State) o;
+            State state = (State) o;
             return enable == state.enable &&
-                    Objects.equals(invalidAssertionText, state.invalidAssertionText);
+                   enableCommentCheck == state.enableCommentCheck &&
+                   copyAsMarkdown == state.copyAsMarkdown &&
+                   copyPrompt == state.copyPrompt &&
+                   Objects.equals(invalidAssertionText, state.invalidAssertionText);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(invalidAssertionText, enable);
+            return Objects.hash(invalidAssertionText, enable, enableCommentCheck, copyAsMarkdown, copyPrompt);
         }
     }
 
-
-
-    private InvalidAssertionConfigService.State myState = new InvalidAssertionConfigService.State();
+    private State myState = new State();
 
     public List<String> getInvalidAssertions() {
         return myState.invalidAssertionText == null ? new ArrayList<>() : Arrays.asList(myState.invalidAssertionText.split("\n"));
@@ -62,15 +64,39 @@ public final class InvalidAssertionConfigService  implements PersistentStateComp
         myState.enable = enable;
     }
 
+    public boolean isEnableCommentCheck() {
+        return myState.enableCommentCheck;
+    }
+
+    public void setEnableCommentCheck(boolean enable) {
+        myState.enableCommentCheck = enable;
+    }
+
+    public boolean isCopyAsMarkdown() {
+        return myState.copyAsMarkdown;
+    }
+
+    public void setCopyAsMarkdown(boolean copyAsMarkdown) {
+        myState.copyAsMarkdown = copyAsMarkdown;
+    }
+
+    public boolean isCopyPrompt() {
+        return myState.copyPrompt;
+    }
+
+    public void setCopyPrompt(boolean copyPrompt) {
+        myState.copyPrompt = copyPrompt;
+    }
+
     @Nullable
     @Override
-    public InvalidAssertionConfigService.State getState() {
+    public State getState() {
         return myState;
     }
 
     @Override
-    public void loadState(@NotNull InvalidAssertionConfigService.State state) {
-        LOG.info("Loading invalid assertion config: " + state.invalidAssertionText);
+    public void loadState(@NotNull State state) {
+        LOG.info("Loading invalid test case config: " + state.invalidAssertionText);
         myState = state;
     }
 

@@ -2,7 +2,7 @@ package com.github.jaksonlin.pitestintellij.commands.unittestannotations;
 
 import com.github.jaksonlin.pitestintellij.context.CaseCheckContext;
 import com.github.jaksonlin.pitestintellij.services.AnnotationConfigService;
-import com.github.jaksonlin.pitestintellij.services.InvalidAssertionConfigService;
+import com.github.jaksonlin.pitestintellij.services.InvalidTestCaseConfigService;
 import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.openapi.application.ApplicationManager;
@@ -20,9 +20,9 @@ import java.util.Stack;
 
 public class UnittestFileInspectorCommand extends UnittestCaseCheckCommand {
     private final ProblemsHolder holder;
-
-    private final InvalidAssertionConfigService invalidAssertionConfigService = ApplicationManager.getApplication().getService(InvalidAssertionConfigService.class);
+    private final InvalidTestCaseConfigService invalidTestCaseConfigService = ApplicationManager.getApplication().getService(InvalidTestCaseConfigService.class);
     private final AnnotationConfigService annotationConfigService = ApplicationManager.getApplication().getService(AnnotationConfigService.class);
+
     public UnittestFileInspectorCommand(ProblemsHolder holder, Project project, CaseCheckContext context) {
         super(project, context);
         this.holder = holder;
@@ -30,13 +30,20 @@ public class UnittestFileInspectorCommand extends UnittestCaseCheckCommand {
 
     @Override
     public void execute() {
-        if (annotationConfigService.shouldCheckAnnotation()){
+        if (annotationConfigService.shouldCheckAnnotation()) {
             checkAnnotationSchema(getContext().getPsiMethod());
         }
-        if (invalidAssertionConfigService.isEnable()) {
-            checkIfCommentHasStepAndAssert(getContext().getPsiMethod());
+
+        // Only proceed with assertion and comment checks if the service is enabled
+        if (invalidTestCaseConfigService.isEnable()) {
+            // Check for assertion statements
             checkIfthereIsAssertionStatement(getContext().getPsiMethod());
             checkIfValidAssertionStatement(getContext().getPsiMethod());
+
+            // Check for comments only if comment check is enabled
+            if (invalidTestCaseConfigService.isEnableCommentCheck()) {
+                checkIfCommentHasStepAndAssert(getContext().getPsiMethod());
+            }
         }
     }
 
@@ -49,7 +56,7 @@ public class UnittestFileInspectorCommand extends UnittestCaseCheckCommand {
             }
             parseUnittestCaseFromAnnotations(annotation);
         } catch (Exception e) {
-            holder.registerProblem(getContext().getPsiMethod(), e.getMessage() != null ? e.getMessage() : "Unknown error", ProblemHighlightType.ERROR);
+            holder.registerProblem(getContext().getPsiMethod(), e.getMessage() != null ? e.getMessage() : "Unknown error", ProblemHighlightType.WARNING);
         }
     }
 
@@ -65,7 +72,7 @@ public class UnittestFileInspectorCommand extends UnittestCaseCheckCommand {
             }
         }
         if (!hasStep || !hasAssert) {
-            holder.registerProblem(psiMethod, "Method should contains both step and assert comment", ProblemHighlightType.ERROR);
+            holder.registerProblem(psiMethod, "Method should contains both step and assert comment", ProblemHighlightType.WARNING);
         }
     }
 
@@ -114,7 +121,9 @@ public class UnittestFileInspectorCommand extends UnittestCaseCheckCommand {
             for (PsiMethodCallExpression methodCall : PsiTreeUtil.findChildrenOfType(method, PsiMethodCallExpression.class)) {
                 // 2. check if the method is assert statement
                 String methodName = methodCall.getMethodExpression().getReferenceName();
-                if (methodName != null && (methodName.toLowerCase().contains("assert") || methodName.toLowerCase().contains("verify"))) {
+                if (methodName != null && (methodName.toLowerCase().contains("assert")
+                        || methodName.toLowerCase().contains("verify")
+                        || methodName.toLowerCase().contains("fail"))) {
                     // which means the method contains assert statement
                     return Optional.of(method);
                 } else {
@@ -139,14 +148,14 @@ public class UnittestFileInspectorCommand extends UnittestCaseCheckCommand {
 
         return Optional.empty();
     }
-    
+
 
     private void checkIfValidAssertionStatement(PsiMethod psiMethod) {
         // check method call statement to see if there's any assert statement that is not valid (listed in invalidAssertions)
         Optional<PsiMethod> assertionMethod = getAssertionMethodFromTestMethod(psiMethod);
         // use method call as assertion statement, check the method content
         if (assertionMethod.isPresent()) {
-            List<String> invalidAssertions = invalidAssertionConfigService.getInvalidAssertions();
+            List<String> invalidAssertions = invalidTestCaseConfigService.getInvalidAssertions();
             String methodText = assertionMethod.get().getText();
             for (String invalidAssertion : invalidAssertions) {
                 if (methodText.contains(invalidAssertion)) {

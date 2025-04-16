@@ -22,6 +22,8 @@ kotlin {
 // Configure project's dependencies
 repositories {
     mavenCentral()
+    maven { url = uri("https://www.jetbrains.com/intellij-repository/releases") }
+    maven { url = uri("https://cache-redirector.jetbrains.com/intellij-dependencies") }
 }
 
 intellij {
@@ -31,15 +33,6 @@ intellij {
 
     plugins.set(providers.gradleProperty("platformBundledPlugins")
         .map { it.split(',').map(String::trim).filter(String::isNotEmpty) }
-        .map { plugins ->
-            val untilBuild = providers.gradleProperty("pluginUntilBuild").get()
-            println("untilBuild: $untilBuild")
-            if (untilBuild.startsWith("251")) {
-                plugins + "com.intellij.modules.json"
-            } else {
-                plugins
-            }
-        }
     )
 }
 
@@ -53,6 +46,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.18.0")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.18.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2") // Use latest version
+    implementation("org.commonmark:commonmark:0.21.0")
 }
 
 // Configure Gradle Changelog Plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin

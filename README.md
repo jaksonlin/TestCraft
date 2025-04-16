@@ -1,101 +1,99 @@
-# TestCraft Pro
+# TestCraft
 
 <!-- Plugin description -->
-TestCraft Pro is a comprehensive Java testing toolkit for IntelliJ IDEA that enhances test quality through mutation testing, test case management, and assertion validation.
+TestCraft is a comprehensive testing assistant plugin for IntelliJ IDEA that enhances your testing workflow with mutation testing, test case management, and AI-powered test analysis. Originally focused on PITest integration, TestCraft has evolved to provide a complete suite of testing tools.
 <!-- Plugin description end -->
 
 ## Features
 
-### 1. Mutation Testing
-- Run PITest mutation testing on both Java Gradle and Maven projects
+### Mutation Testing
+- Run PITest mutation testing on your Java Gradle projects
 - View mutation test results in a dedicated tool window
-- Navigate directly to mutated source code
-- Visual decoration of mutation results in the code editor
+- Navigate directly to mutated code with inline editor decorations
+- Track mutation testing history and trends
 
-### 2. Test Case Management
-- Automated test case annotation generation
-- Test case annotation validation and inspection
-- Configurable annotation schemas through settings
-- Smart code completion for test annotations
+### Test Case Management
+- Manage test cases with structured annotations
+- Validate test assertions to prevent trivial or redundant tests
+- Enforce test documentation standards with comment validation
+- Track test cases across your codebase
 
-### 3. Test Quality Assurance
-- Inspection of test assertions
-- Detection of missing assertions in test methods
-- Validation of assertion statements
-- Configurable assertion checking rules
+### AI-Powered Testing Assistant
+- Get intelligent suggestions for test improvements
+- Analyze test coverage and quality
+- Copy responses in markdown format for documentation
+- Integration with local LLM services (e.g., Ollama) for privacy
 
 ## Installation
 
-1. Open IntelliJ IDEA
-2. Go to `Settings/Preferences` → `Plugins` → `Marketplace`
-3. Search for "TestCraft Pro"
-4. Click `Install`
-
-Alternatively, you can download the latest release from the [releases page]() and install manually:
-1. Go to `Settings/Preferences` → `Plugins` → `⚙️` → `Install Plugin from Disk...`
-2. Select the downloaded `.zip` file
+1. Download the latest release from the [releases page]()
+2. Open IntelliJ IDEA
+3. Go to `File` -> `Settings` -> `Plugins` -> `Install Plugin from Disk...`
+4. Select the downloaded `.zip` file
 
 ## Usage
 
-### Running Mutation Tests
-1. Open your JUnit test file
-2. Right-click and select `Unittest Helpers` → `Run PIT Mutation Test`
-3. Input the target class name (e.g., `com.example.MyClass` or `MyClass`)
-4. View results in the `MutationTestHistory` tool window
+### Mutation Testing
+1. Open your JUnit test file and ensure it passes
+2. Right-click on the test file and select `Run Mutation Test` in the `TestCraft` menu
+3. Input the target class (e.g., `com.example.MyClass` or `MyClass`)
+4. View results in the `Mutation Test History` tool window
 
 ### Test Case Management
-1. Configure annotation settings in `Settings` → `Unittest Annotation Configuration`
-2. Use the annotation inspection to identify missing or incorrect test annotations
-3. Right-click in a test file and select `Unittest Helpers` to access annotation tools
-4. Use code completion (Ctrl+Space) for quick annotation insertion
+1. Configure test annotations in `Settings` -> `TestCraft` -> `Test Annotations`
+2. Set up assertion validation rules in `Settings` -> `TestCraft` -> `Test Case Validation`
+3. Add required annotations to your test methods
+4. TestCraft will validate your tests as you write them
 
-### Assertion Validation
-1. Configure assertion rules in `Settings` → `Unittest Assert Check Configuration`
-2. The plugin will automatically inspect your test files for:
-   - Missing assertions
-   - Invalid assertion usage
-   - Proper test step documentation
-
-## Configuration
-
-### Annotation Settings
-- Go to `Settings` → `Unittest Annotation Configuration`
-- Configure custom annotation schemas
-- Enable/disable automatic import of annotations
-- Set annotation validation rules
-
-### Assertion Settings
-- Go to `Settings` → `Unittest Assert Check Configuration`
-- Configure assertion validation rules
-- Enable/disable specific assertion checks
-- Set custom assertion patterns
+### AI Testing Assistant
+1. Configure LLM settings in `Settings` -> `TestCraft` -> `LLM Settings`
+2. Right-click on a test method and select `Analyze Test` for AI suggestions
+3. View suggestions in the `LLM Suggestions` tool window
+4. Copy suggestions as markdown for documentation
 
 ## Screenshots
 
-![Run TestCraft Pro](./screenshots/1.png)
-*Running mutation tests from context menu*
+### Mutation Testing
+![run mutation test](./screenshots/1.png)
+*Running a mutation test on a target class*
 
-![Mutation Results](./screenshots/4.png)
-*Viewing mutation test results*
+![mutation results](./screenshots/4.png)
+*Detailed mutation test results with browser view option*
 
-![Test History](./screenshots/5.png)
-*MutationTestHistory tool window with search capabilities*
+![mutation history](./screenshots/5.png)
+*Mutation Test History with searchable interface*
 
-## Contributing
+### Test Case Management
+[Add screenshots for test case management features]
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+### AI Testing Assistant
+[Add screenshots for AI testing features]
+
+## Configuration
+
+### Test Annotations
+Configure test case management annotations in `Settings` -> `TestCraft` -> `Test Annotations`:
+- Define required fields
+- Set validation rules
+- Configure auto-import behavior
+
+### Test Validation
+Set up test validation rules in `Settings` -> `TestCraft` -> `Test Case Validation`:
+- Define invalid assertion patterns
+- Configure comment requirements
+- Set validation severity levels
+
+### LLM Settings
+Configure AI integration in `Settings` -> `TestCraft` -> `LLM Settings`:
+- Set up Ollama endpoint
+- Configure model parameters
+- Manage response formatting
+
+
+## Plugin Compatibility
+
+TestCraft is compatible with IntelliJ IDEA versions 2020.1 through latest published (not rc/eap). 
 
 ## License
 
-This project is licensed under the [Apache 2.0 License](LICENSE).
-
-## Third-Party Licenses
-
-This project uses the following open-source libraries:
-
-- JavaParser (Apache License 2.0)
-- Jackson Libraries (Apache License 2.0)
-- Kotlinx Serialization (Apache License 2.0)
-- JUnit (Eclipse Public License 1.0)
-
-For full license texts, see the NOTICE file in the project root.
+TestCraft is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.

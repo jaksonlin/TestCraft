@@ -64,21 +64,50 @@
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
-    <depends>com.intellij.modules.json</depends>
+    <depends>com.intellij.modules.lang</depends>
+    <depends optional="true" config-file="withJson.xml">com.intellij.modules.json</depends>
     <depends>Git4Idea</depends>
 
     <resource-bundle>messages.MyBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="com.github.jaksonlin.testcraftpro.toolWindow.MutationToolWindowFactory" id="MutationTestHistory" icon="/pitestHistoryWindowIcon.svg"/>
+        <toolWindow factoryClass="com.github.jaksonlin.pitestintellij.toolWindow.MutationToolWindowFactory" id="MutationTestHistory" icon="/pitestHistoryWindowIcon.svg"/>
+        <toolWindow id="LLM Suggestions" 
+                    secondary="true"
+                    icon="AllIcons.General.Add"
+                    anchor="right"
+                    factoryClass="com.github.jaksonlin.pitestintellij.toolWindow.LLMSuggestionsToolWindowFactory"/>
+
+        <!-- Settings Group -->
         <applicationConfigurable
-            instance="com.github.jaksonlin.testcraftpro.ui.AnnotationConfigurable"
-            id="com.github.jaksonlin.testcraftpro.settings.annotations"
-            displayName="Unittest Annotation Configuration"/>
+                parentId="root"
+                id="com.github.jaksonlin.pitestintellij.settings"
+                displayName="TestCraft"
+                instance="com.github.jaksonlin.pitestintellij.settings.TestCraftSettingsConfigurable"/>
+                
         <applicationConfigurable
-                instance="com.github.jaksonlin.testcraftpro.ui.InvalidAssertConfigurable"
-                id="com.github.jaksonlin.testcraftpro.settings.asserts"
-                displayName="Unittest Assert Check Configuration"/>
+                parentId="com.github.jaksonlin.pitestintellij.settings"
+                instance="com.github.jaksonlin.pitestintellij.settings.AnnotationSettingsConfigurable"
+                id="com.github.jaksonlin.pitestintellij.settings.annotations"
+                displayName="Test Annotations"/>
+                
+        <applicationConfigurable
+                parentId="com.github.jaksonlin.pitestintellij.settings"
+                instance="com.github.jaksonlin.pitestintellij.settings.InvalidTestCaseSettingsConfigurable"
+                id="com.github.jaksonlin.pitestintellij.settings.asserts"
+                displayName="Test Case Validation"/>
+                
+        <applicationConfigurable
+                parentId="com.github.jaksonlin.pitestintellij.settings"
+                instance="com.github.jaksonlin.pitestintellij.settings.OllamaSettingsConfigurable"
+                id="com.github.jaksonlin.pitestintellij.settings.ollama"
+                displayName="LLM Settings"/>
+                
+        <!-- Services -->
+        <applicationService serviceImplementation="com.github.jaksonlin.pitestintellij.settings.OllamaSettingsState"/>
+        <applicationService serviceImplementation="com.github.jaksonlin.pitestintellij.services.AnnotationConfigService"/>
+        <applicationService serviceImplementation="com.github.jaksonlin.pitestintellij.services.InvalidTestCaseConfigService"/>
+        <applicationService serviceImplementation="com.github.jaksonlin.pitestintellij.services.LLMResponseService"/>
         <localInspection
             shortName="UnittestCaseAnnotationInspection"
             language="JAVA"
@@ -88,9 +117,12 @@
             groupName="Java"
             order="LAST"
         />
+        
         <completion.contributor
                 language="JAVA"
-                implementationClass="com.github.jaksonlin.testcraftpro.completions.AnnotationCompletionContributor"/>
+                implementationClass="com.github.jaksonlin.pitestintellij.completions.AnnotationCompletionContributor"/>
+                
+        
 
     </extensions>
 
@@ -122,6 +154,7 @@
                     id="GenerateAnnotationCommandAction"
                     text="Generate Annotation Command On Method">
             </action>
+
         </group>
     </actions>
 </idea-plugin>
