@@ -1,0 +1,20 @@
+
+<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background circle -->
+    <circle cx="12" cy="12" r="10" fill="#4A90E2" fill-opacity="0.1"/>
+    
+    <!-- AI brain/neural network representation -->
+    <path d="M12 6C8.69 6 6 8.69 6 12C6 15.31 8.69 18 12 18C15.31 18 18 15.31 18 12C18 8.69 15.31 6 12 6Z" 
+          stroke="#4A90E2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- Neural connections -->
+    <path d="M12 8V16" stroke="#4A90E2" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M8 10L16 14" stroke="#4A90E2" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M16 10L8 14" stroke="#4A90E2" stroke-width="1.5" stroke-linecap="round"/>
+    
+    <!-- Light bulb/suggestion indicator -->
+    <path d="M12 4L12 2" stroke="#4A90E2" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M12 20L12 22" stroke="#4A90E2" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M4 12L2 12" stroke="#4A90E2" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M20 12L22 12" stroke="#4A90E2" stroke-width="1.5" stroke-linecap="round"/>
+</svg> 

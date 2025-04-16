@@ -41,7 +41,7 @@
         <toolWindow factoryClass="com.github.jaksonlin.pitestintellij.toolWindow.MutationToolWindowFactory" id="MutationTestHistory" icon="/pitestHistoryWindowIcon.svg"/>
         <toolWindow id="LLM Suggestions" 
                     secondary="true"
-                    icon="AllIcons.General.Add"
+                    icon="/llm-suggestions.svg"
                     anchor="right"
                     factoryClass="com.github.jaksonlin.pitestintellij.toolWindow.LLMSuggestionsToolWindowFactory"/>
 
