@@ -1,33 +1,66 @@
 <idea-plugin>
     <description><![CDATA[
-        PIT Mutation Testing (pitest.org) for Gradle Project
-        <br/>
-        Bundled with PIT 1.16.1
-        <br/><br/>
-        Adds a 'Unittest Helpers' menu to the right-click context menu in the editor, and the `Run Mutation Test` action to the submenu.
-        <br/>
-        Adds a 'Mutation Test History' tool window to display the history of mutation tests for each of the `mutated` classes.
-        <br/>
-        You can navigate to the source code of the mutated class by searching on the class name with enter key.
-        <br/>
-        Adds rendering of the mutation test result on the code editor.
-        <br/>
-        Automatic detection of the classpath dependencies for running the mutation test, making use of the Gradle API from the IntelliJ IDEA.
-        <br/>
-        Support long classpath for running the mutation test, especially for enterprise projects when there are thousands of classes in the classpath; and even jar files from other locations.
-        <br/>
-        Additional classes in resource directory (marked as resource in IDE) are added to the classpath for mutation testing.
-        <br/><br/>
-        <b>Usage:</b> Right-click on a JUnit test file and select `Unittest Helpers` -> `Run Mutation Test` to run PIT mutation testing on the test file.
-        <br/><br/>
-      ]]></description>
+        TestCraft Pro is a comprehensive Java testing toolkit that enhances test quality through multiple features:
+        
+        <ul>
+            <li><b>Mutation Testing</b>
+                <ul>
+                    <li>Run PITest on both Gradle and Maven projects</li>
+                    <li>Visual results in dedicated tool window</li>
+                    <li>Source code navigation and decoration</li>
+                </ul>
+            </li>
+            <li><b>Test Case Management</b>
+                <ul>
+                    <li>Automated test case annotation generation</li>
+                    <li>Annotation validation and inspection</li>
+                    <li>Smart code completion for annotations</li>
+                </ul>
+            </li>
+            <li><b>Test Quality Assurance</b>
+                <ul>
+                    <li>Assertion statement validation</li>
+                    <li>Missing assertion detection</li>
+                    <li>Test documentation verification</li>
+                </ul>
+            </li>
+        </ul>
+
+        <p>Originally evolved from pitest-gradle, TestCraft Pro has expanded to become a complete testing toolkit while maintaining all mutation testing capabilities.</p>
+    ]]></description>
+
+    <change-notes><![CDATA[
+        <h3>1.0.5 - 2025-04-01</h3>
+        <ul>
+            <li>Added assertion statement validation</li>
+            <li>Enhanced test quality checks</li>
+            <li>Added compatibility with IDE version 251</li>
+        </ul>
+
+        <h3>1.0.4 - 2025-01-16</h3>
+        <ul>
+            <li>Added compatibility to IDE version 251</li>
+        </ul>
+
+        <h3>1.0.3 - 2024-11-14</h3>
+        <ul>
+            <li>Added unit test annotation generation</li>
+            <li>Added unit test annotation inspection</li>
+        </ul>
+
+        <h3>Previous Versions</h3>
+        <ul>
+            <li>Initial PITest integration</li>
+            <li>Bug fixes and stability improvements</li>
+        </ul>
+    ]]></change-notes>
 
     <version>1.0.1-beta</version>
 
     <vendor email="jaksonlin [at] gmail.com">Jason Lam</vendor>
-    <id>com.github.jaksonlin.pitestintellij</id>
-    <name>Pitest-Gradle</name>
-    <vendor>jaksonlin</vendor>
+    <id>com.github.jaksonlin.testcraftpro</id>
+    <name>TestCraft Pro</name>
+    <vendor>Jakson Lin</vendor>
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
@@ -78,7 +111,7 @@
         <localInspection
             shortName="UnittestCaseAnnotationInspection"
             language="JAVA"
-            implementationClass="com.github.jaksonlin.pitestintellij.inspectors.UnittestInspector"
+            implementationClass="com.github.jaksonlin.testcraftpro.inspectors.UnittestInspector"
             displayName="Unit test case comment and assert check"
             enabledByDefault="true"
             groupName="Java"
@@ -94,7 +127,7 @@
     </extensions>
 
     <applicationListeners>
-        <listener class="com.github.jaksonlin.pitestintellij.listeners.MyApplicationActivationListener" topic="com.intellij.openapi.application.ApplicationActivationListener"/>
+        <listener class="com.github.jaksonlin.testcraftpro.listeners.MyApplicationActivationListener" topic="com.intellij.openapi.application.ApplicationActivationListener"/>
     </applicationListeners>
 
     <!-- Add right-click entry to run Pitest on a JUnit test file -->
@@ -109,15 +142,15 @@
             <add-to-group group-id="UnittestHelperToolMenu" anchor="last"/>
             <!-- Action inside the submenu -->
             <action
-                    class="com.github.jaksonlin.pitestintellij.actions.RunPitestAction"
+                    class="com.github.jaksonlin.testcraftpro.actions.RunPitestAction"
                     id="RunPitestAction"
                     text="Run Mutation Test">
             </action>
-            <action class="com.github.jaksonlin.pitestintellij.actions.RunCaseAnnoationCheckAction"
+            <action class="com.github.jaksonlin.testcraftpro.actions.RunCaseAnnoationCheckAction"
                     id="RunCaseAnnoationCheckAction"
                     text="Run Current Method Annotation Check">
             </action>
-            <action class="com.github.jaksonlin.pitestintellij.actions.GenerateAnnotationCommandAction"
+            <action class="com.github.jaksonlin.testcraftpro.actions.GenerateAnnotationCommandAction"
                     id="GenerateAnnotationCommandAction"
                     text="Generate Annotation Command On Method">
             </action>
