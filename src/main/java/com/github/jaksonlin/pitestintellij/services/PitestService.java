@@ -11,7 +11,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.ui.components.JBScrollPane;
 import org.jetbrains.annotations.NotNull;
-
+import com.github.jaksonlin.pitestintellij.MyBundle;
 import javax.swing.*;
 import java.awt.*;
 import java.io.PrintWriter;
@@ -40,7 +40,7 @@ public final class PitestService {
                     for (PitestCommand command : commands) {
                         if (indicator.isCanceled()) {
                             ApplicationManager.getApplication().invokeLater(() ->
-                                    Messages.showInfoMessage("Pitest run was canceled", "Canceled")
+                                Messages.showInfoMessage(MyBundle.message("pitest.run.canceled"), MyBundle.message("pitest.run.canceled.title"))
                             );
                             break;
                         }
@@ -49,7 +49,7 @@ public final class PitestService {
                 } catch (Exception e) {
                     if (e.getCause() instanceof CommandCancellationException) {
                         ApplicationManager.getApplication().invokeLater(() ->
-                                Messages.showInfoMessage("Pitest run was canceled", "Canceled")
+                            Messages.showInfoMessage(MyBundle.message("pitest.run.canceled"), MyBundle.message("pitest.run.canceled.title"))
                         );
                     } else {
                         showErrorDialog(e, context);
@@ -64,7 +64,7 @@ public final class PitestService {
         e.printStackTrace(new PrintWriter(sw));
         String stackTrace = sw.toString();
         String contextInformation = PitestContext.dumpPitestContext(context);
-        String errorMessage = "Error executing Pitest command: " + e.getMessage() + "; " + contextInformation + "\n" + stackTrace;
+        String errorMessage = MyBundle.message("error.pitest.general.title") + ": " + e.getMessage() + "; " + contextInformation + "\n" + stackTrace;
 
         JTextArea textArea = new JTextArea(errorMessage);
         textArea.setEditable(false);

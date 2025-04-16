@@ -13,6 +13,7 @@ import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.github.jaksonlin.pitestintellij.MyBundle;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -116,7 +117,7 @@ public class PrepareEnvironmentCommand extends PitestCommand {
     }
 
     private void collectTargetClassThatWeTest(List<String> sourceRoots) {
-        String targetClass = showInputDialog("Please enter the name of the class that you want to test", "Enter target class");
+        String targetClass = showInputDialog(MyBundle.message("dialog.target.class.message"), MyBundle.message("dialog.target.class.title"));
         if (targetClass == null || targetClass.isEmpty()) {
             try {
                 throw new CommandCancellationException("User cancelled the operation");
@@ -209,7 +210,7 @@ public class PrepareEnvironmentCommand extends PitestCommand {
         }
         dependencies.addAll(resourceDirectories);
         if (dependencies.isEmpty()) {
-            Messages.showErrorDialog("Cannot find pitest dependencies", "Error");
+            Messages.showErrorDialog(MyBundle.message("error.pitest.dependencies"), MyBundle.message("error.pitest.title"));
             throw new IllegalStateException("Cannot find pitest dependencies");
         }
         getContext().setPitestDependencies(String.join(File.pathSeparator, dependencies));
