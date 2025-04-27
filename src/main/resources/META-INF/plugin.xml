@@ -1,33 +1,78 @@
 <idea-plugin>
     <description><![CDATA[
-        PIT Mutation Testing (pitest.org) for Gradle Project
-        <br/>
-        Bundled with PIT 1.16.1
-        <br/><br/>
-        Adds a 'Unittest Helpers' menu to the right-click context menu in the editor, and the `Run Mutation Test` action to the submenu.
-        <br/>
-        Adds a 'Mutation Test History' tool window to display the history of mutation tests for each of the `mutated` classes.
-        <br/>
-        You can navigate to the source code of the mutated class by searching on the class name with enter key.
-        <br/>
-        Adds rendering of the mutation test result on the code editor.
-        <br/>
-        Automatic detection of the classpath dependencies for running the mutation test, making use of the Gradle API from the IntelliJ IDEA.
-        <br/>
-        Support long classpath for running the mutation test, especially for enterprise projects when there are thousands of classes in the classpath; and even jar files from other locations.
-        <br/>
-        Additional classes in resource directory (marked as resource in IDE) are added to the classpath for mutation testing.
-        <br/><br/>
-        <b>Usage:</b> Right-click on a JUnit test file and select `Unittest Helpers` -> `Run Mutation Test` to run PIT mutation testing on the test file.
-        <br/><br/>
-      ]]></description>
+        TestCraft Pro is a comprehensive Java testing toolkit that enhances test quality through multiple features:
+        
+        <ul>
+            <li><b>Mutation Testing</b>
+                <ul>
+                    <li>Run PITest on both Gradle and Maven projects</li>
+                    <li>Visual results in dedicated tool window</li>
+                    <li>Source code navigation and decoration</li>
+                </ul>
+            </li>
+            <li><b>Test Case Management</b>
+                <ul>
+                    <li>Automated test case annotation generation</li>
+                    <li>Annotation validation and inspection</li>
+                    <li>Smart code completion for annotations</li>
+                </ul>
+            </li>
+            <li><b>Test Quality Assurance</b>
+                <ul>
+                    <li>Assertion statement validation</li>
+                    <li>Missing assertion detection</li>
+                    <li>Test documentation verification</li>
+                </ul>
+            </li>
+        </ul>
 
-    <version>1.0.1-beta</version>
+        <p>Originally evolved from pitest-gradle, TestCraft Pro has expanded to become a complete testing toolkit while maintaining all mutation testing capabilities.</p>
+    ]]></description>
+
+    <change-notes><![CDATA[
+        <h2>Change Notes</h2>
+        <h3>1.0.7 - 2025-04-16</h3>
+        <ul>
+            <li>enhance the dump prompt to use compact prompt</li>
+            <li>i18n enhancement</li>
+            <li>bugfixes for no mutation can provide suggestions</li>
+        </ul>
+        <h3>1.0.6 - 2025-04-09</h3>
+        <ul>
+            <li>Add ollama access to evaulate the unit test and create new test</li>
+        </ul>
+
+        <h3>1.0.5 - 2025-04-01</h3>
+        <ul>
+            <li>Added assertion statement validation</li>
+            <li>Enhanced test quality checks</li>
+            <li>Added compatibility with IDE version 251</li>
+        </ul>
+
+        <h3>1.0.4 - 2025-01-16</h3>
+        <ul>
+            <li>Added compatibility to IDE version 251</li>
+        </ul>
+
+        <h3>1.0.3 - 2024-11-14</h3>
+        <ul>
+            <li>Added unit test annotation generation</li>
+            <li>Added unit test annotation inspection</li>
+        </ul>
+
+        <h3>Previous Versions</h3>
+        <ul>
+            <li>Initial PITest integration</li>
+            <li>Bug fixes and stability improvements</li>
+        </ul>
+    ]]></change-notes>
+
+    <version>1.0.7</version>
 
     <vendor email="jaksonlin [at] gmail.com">Jason Lam</vendor>
-    <id>com.github.jaksonlin.pitestintellij</id>
-    <name>Pitest-Gradle</name>
-    <vendor>jaksonlin</vendor>
+    <id>com.github.jaksonlin.testcraftpro</id>
+    <name>TestCraft Pro</name>
+    <vendor>Jakson Lin</vendor>
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
@@ -38,46 +83,46 @@
     <resource-bundle>messages.MyBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="com.github.jaksonlin.pitestintellij.toolWindow.MutationToolWindowFactory" id="MutationTestHistory" icon="/pitestHistoryWindowIcon.svg"/>
+        <toolWindow factoryClass="com.github.jaksonlin.testcraft.toolWindow.MutationToolWindowFactory" id="MutationTestHistory" icon="/pitestHistoryWindowIcon.svg"/>
         <toolWindow id="LLM Suggestions" 
                     secondary="true"
                     icon="/llm-suggestions.svg"
                     anchor="right"
-                    factoryClass="com.github.jaksonlin.pitestintellij.toolWindow.LLMSuggestionsToolWindowFactory"/>
+                    factoryClass="com.github.jaksonlin.testcraft.toolWindow.LLMSuggestionsToolWindowFactory"/>
 
         <!-- Settings Group -->
         <applicationConfigurable
                 parentId="root"
-                id="com.github.jaksonlin.pitestintellij.settings"
+                id="com.github.jaksonlin.testcraft.settings"
                 displayName="TestCraft"
-                instance="com.github.jaksonlin.pitestintellij.settings.TestCraftSettingsConfigurable"/>
+                instance="com.github.jaksonlin.testcraft.settings.TestCraftSettingsConfigurable"/>
                 
         <applicationConfigurable
-                parentId="com.github.jaksonlin.pitestintellij.settings"
-                instance="com.github.jaksonlin.pitestintellij.settings.AnnotationSettingsConfigurable"
-                id="com.github.jaksonlin.pitestintellij.settings.annotations"
+                parentId="com.github.jaksonlin.testcraft.settings"
+                instance="com.github.jaksonlin.testcraft.settings.AnnotationSettingsConfigurable"
+                id="com.github.jaksonlin.testcraft.settings.annotations"
                 displayName="Test Annotations"/>
                 
         <applicationConfigurable
-                parentId="com.github.jaksonlin.pitestintellij.settings"
-                instance="com.github.jaksonlin.pitestintellij.settings.InvalidTestCaseSettingsConfigurable"
-                id="com.github.jaksonlin.pitestintellij.settings.asserts"
+                parentId="com.github.jaksonlin.testcraft.settings"
+                instance="com.github.jaksonlin.testcraft.settings.InvalidTestCaseSettingsConfigurable"
+                id="com.github.jaksonlin.testcraft.settings.asserts"
                 displayName="Test Case Validation"/>
                 
         <applicationConfigurable
-                parentId="com.github.jaksonlin.pitestintellij.settings"
-                instance="com.github.jaksonlin.pitestintellij.settings.OllamaSettingsConfigurable"
-                id="com.github.jaksonlin.pitestintellij.settings.ollama"
+                parentId="com.github.jaksonlin.testcraft.settings"
+                instance="com.github.jaksonlin.testcraft.settings.OllamaSettingsConfigurable"
+                id="com.github.jaksonlin.testcraft.settings.ollama"
                 displayName="LLM Settings"/>
                 
         <!-- Services -->
-        <applicationService serviceImplementation="com.github.jaksonlin.pitestintellij.services.AnnotationConfigService"/>
-        <applicationService serviceImplementation="com.github.jaksonlin.pitestintellij.services.InvalidTestCaseConfigService"/>
-        <applicationService serviceImplementation="com.github.jaksonlin.pitestintellij.services.LLMService"/>
+        <applicationService serviceImplementation="com.github.jaksonlin.testcraft.services.AnnotationConfigService"/>
+        <applicationService serviceImplementation="com.github.jaksonlin.testcraft.services.InvalidTestCaseConfigService"/>
+        <applicationService serviceImplementation="com.github.jaksonlin.testcraft.services.LLMService"/>
         <localInspection
             shortName="UnittestCaseAnnotationInspection"
             language="JAVA"
-            implementationClass="com.github.jaksonlin.pitestintellij.inspectors.UnittestInspector"
+            implementationClass="com.github.jaksonlin.testcraft.inspectors.UnittestInspector"
             displayName="Unit test case comment and assert check"
             enabledByDefault="true"
             groupName="Java"
@@ -86,14 +131,14 @@
         
         <completion.contributor
                 language="JAVA"
-                implementationClass="com.github.jaksonlin.pitestintellij.completions.AnnotationCompletionContributor"/>
+                implementationClass="com.github.jaksonlin.testcraft.completions.AnnotationCompletionContributor"/>
                 
         
 
     </extensions>
 
     <applicationListeners>
-        <listener class="com.github.jaksonlin.pitestintellij.listeners.MyApplicationActivationListener" topic="com.intellij.openapi.application.ApplicationActivationListener"/>
+        <listener class="com.github.jaksonlin.testcraft.listeners.MyApplicationActivationListener" topic="com.intellij.openapi.application.ApplicationActivationListener"/>
     </applicationListeners>
 
     <!-- Add right-click entry to run Pitest on a JUnit test file -->
@@ -108,15 +153,15 @@
             <add-to-group group-id="UnittestHelperToolMenu" anchor="last"/>
             <!-- Action inside the submenu -->
             <action
-                    class="com.github.jaksonlin.pitestintellij.actions.RunPitestAction"
+                    class="com.github.jaksonlin.testcraft.actions.RunPitestAction"
                     id="RunPitestAction"
                     text="$action.RunPitestAction.text">
             </action>
-            <action class="com.github.jaksonlin.pitestintellij.actions.RunCaseAnnoationCheckAction"
+            <action class="com.github.jaksonlin.testcraft.actions.RunCaseAnnoationCheckAction"
                     id="RunCaseAnnoationCheckAction"
                     text="$action.RunCaseAnnoationCheckAction.text">
             </action>
-            <action class="com.github.jaksonlin.pitestintellij.actions.GenerateAnnotationCommandAction"
+            <action class="com.github.jaksonlin.testcraft.actions.GenerateAnnotationCommandAction"
                     id="GenerateAnnotationCommandAction"
                     text="$action.GenerateAnnotationCommandAction.text">
             </action>

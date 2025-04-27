@@ -1,0 +1,13 @@
+TestCraft Pro
+Copyright 2024 Jakson Lin
+
+This product includes software developed by:
+- The Apache Software Foundation (http://www.apache.org/)
+- JetBrains s.r.o. (IntelliJ Platform)
+- JavaParser (https://javaparser.org)
+- FasterXML, LLC (Jackson Project)
+- JUnit Team (JUnit Library)
+
+This product is a derivative work that evolved from pitest-gradle.
+The original pitest-gradle was licensed under MIT and has been rewritten
+and relicensed as TestCraft Pro under Apache License 2.0. 
