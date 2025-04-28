@@ -8,10 +8,11 @@ import java.io.StringWriter;
 import java.util.List;
 
 public class ProcessExecutor {
-    public static ProcessResult executeProcess(List<String> command) {
+    public static ProcessResult executeProcess(List<String> command, String workingDirectory) {
         try {
             ProcessBuilder builder = new ProcessBuilder(command);
             builder.environment().put("GRADLE_OPTS", "-Dorg.gradle.daemon=false -Dorg.gradle.debug=true");
+            builder.directory(workingDirectory != null ? new java.io.File(workingDirectory) : null);
             Process process = builder.start();
             StringBuilder output = new StringBuilder();
             StringBuilder errorOutput = new StringBuilder();

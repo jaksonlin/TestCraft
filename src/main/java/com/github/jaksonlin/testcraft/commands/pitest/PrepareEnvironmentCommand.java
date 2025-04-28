@@ -16,6 +16,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.github.jaksonlin.testcraft.MyBundle;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,7 @@ public class PrepareEnvironmentCommand extends PitestCommand {
         collectJavaInfo(testVirtualFile);
         collectSourceRoots();
         collectResourceDirectories();
+        setWorkingDirectory();
 
         if (getContext().getSourceRoots() != null) {
             collectTargetClassThatWeTest(getContext().getSourceRoots());
@@ -109,6 +111,31 @@ public class PrepareEnvironmentCommand extends PitestCommand {
             return roots;
         });
         getContext().setSourceRoots(sourceRoots);
+    }
+
+    private void setWorkingDirectory() {
+        List<String> sourceRoots = getContext().getSourceRoots();
+
+        // get the test file path
+        String testFilePathWithoutSrc = getContext().getTestFilePath().split("src/test/java")[0];
+        // normalize the test file path
+        Path normalizedPath = Paths.get(testFilePathWithoutSrc).normalize();
+        // normalized path 
+        testFilePathWithoutSrc = normalizedPath.toString();
+        // get the source root that contains the test file
+        String sourceRoot = null;
+        for (String root : sourceRoots) {
+            if (testFilePathWithoutSrc.equals(root)) {
+                sourceRoot = root;
+                break;
+            }
+        }
+        if (sourceRoot == null) {
+            showError("Cannot find source root as working directory to run pitest for test file, expected source root: " + testFilePathWithoutSrc);
+            throw new IllegalStateException("Cannot find source root for test file");
+        }
+        // set the working directory to the source root
+        getContext().setWorkingDirectory(sourceRoot);
     }
 
     private void collectResourceDirectories() {
@@ -192,15 +219,12 @@ public class PrepareEnvironmentCommand extends PitestCommand {
     }
 
     private void setupPitestLibDependencies(List<String> resourceDirectories) {
-        String pluginLibDir = ReadAction.compute(() -> PathManager.getPluginsPath() + "/pitest-gradle/lib");
+        String pluginLibDir = ReadAction.compute(() -> PathManager.getPluginsPath() + "/TestCraft-Pro/lib");
         List<String> dependencies = new ArrayList<>();
         File libDir = new File(pluginLibDir);
         File[] files = libDir.listFiles();
         if (files != null) {
             for (File file : files) {
-                if (file.getName().startsWith("pitest-gradle-")) {
-                    continue;
-                }
                 if (file.getName().endsWith(".jar")) {
                     if (file.getName().startsWith("pitest") || file.getName().startsWith("commons")) {
                         dependencies.add(file.getAbsolutePath());
