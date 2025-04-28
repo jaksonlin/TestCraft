@@ -31,6 +31,12 @@
 
     <change-notes><![CDATA[
         <h2>Change Notes</h2>
+        <h3>1.0.8 - 2025-04-28</h3>
+        <ul>
+            <li>Run pitest in the test file's source root as the process working directory</li>
+            <li>Dump pitest context into report directory for issue debug</li>
+            <li>Enhance output information for issue debug</li>
+        </ul>
         <h3>1.0.7 - 2025-04-16</h3>
         <ul>
             <li>enhance the dump prompt to use compact prompt</li>

@@ -6,28 +6,6 @@
 
 # TestCraft Pro Changelog
 
-## [1.0.0] - 2025-04-01
-### Project Launch
-- Complete rebranding and expansion of functionality
-- Migration from MIT to Apache 2.0 License
-- New comprehensive test management features
-
-### Added
-- Enhanced test case management system
-- Annotation validation and generation
-- Assertion statement verification
-- Support for both Gradle and Maven projects
-- Configurable test quality rules
-
-### Carried Forward
-- All PITest mutation testing capabilities
-- Results visualization and navigation
-- Editor integration features
-
-### Changed
-- Project name from pitest-gradle to TestCraft Pro
-- License from MIT to Apache 2.0
-- Expanded plugin scope beyond mutation testing
 
 ## [Unreleased]
 ### Added
@@ -66,4 +44,27 @@
 - enhance the dump prompt to use compact prompt
 - i18n enhancement
 - bugfixes for no mutation can provide suggestion
+
+## 1.0.8 - 2025-04-28
+### Project Launch
+- Complete rebranding and expansion of functionality
+- Migration from MIT to Apache 2.0 License
+- New test management features
+
+### Added
+- Enhanced test case management system
+- Annotation validation and generation
+- Assertion statement verification
+- Support for both Gradle and Maven projects
+- Configurable test quality rules
+
+### Carried Forward
+- All PITest mutation testing capabilities
+- Results visualization and navigation
+- Editor integration features
+
+### Functionality Changed
+- Run pitest in the test file's source root as the process working directory
+- Dump pitest context into report directory for issue debug
+- Enhance output information for issue debug
 

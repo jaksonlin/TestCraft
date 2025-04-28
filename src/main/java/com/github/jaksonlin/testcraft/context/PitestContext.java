@@ -27,6 +27,15 @@ public class PitestContext {
     private List<String> resourceDirectories;
     private final long timestamp;
     private List<Mutation> mutationResults;
+    private String workingDirectory;
+
+    public String getWorkingDirectory() {
+        return workingDirectory;
+    }
+
+    public void setWorkingDirectory(String workingDirectory) {
+        this.workingDirectory = workingDirectory;
+    }
 
     // this will also init the fielid mutationResults
     public List<Mutation> collectMutationsResults() throws Exception {
@@ -202,6 +211,7 @@ public class PitestContext {
                 command: %s
                 processResult: %s
                 pitestDependencies: %s
+                workingDirectory: %s
                 """,
                 context.getTestFilePath(),
                 context.getFullyQualifiedTargetTestClassName(),
@@ -213,7 +223,8 @@ public class PitestContext {
                 context.getClasspathFile(),
                 context.getCommand(),
                 context.getProcessResult(),
-                context.getPitestDependencies()
+                context.getPitestDependencies(),
+                context.getWorkingDirectory()
         );
     }
 }

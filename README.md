@@ -1,8 +1,20 @@
 # TestCraft
 
 <!-- Plugin description -->
-TestCraft is a comprehensive testing assistant plugin for IntelliJ IDEA that enhances your testing workflow with mutation testing, test case management, and AI-powered test analysis. Originally focused on PITest integration, TestCraft has evolved to provide a complete suite of testing tools.
+TestCraft is the evolution of the [pitest-gradle](https://plugins.jetbrains.com/plugin/25546-pitest-gradle) plugin, expanding its capabilities beyond Gradle-based PITest mutation testing. While the original plugin focused on running PITest mutation testing for Java Gradle projects, TestCraft now offers a comprehensive testing suite that includes:
+
+- PITest mutation testing support for both Gradle and Maven projects
+- Advanced test case management features
+- AI-powered test analysis capabilities
+
+The plugin has been renamed to TestCraft to better represent its expanded functionality and modern testing features. Current version: 1.0.8 (continuing from the last pitest-gradle version).
+
 <!-- Plugin description end -->
+
+## Migration from pitest-gradle
+
+- uninstall pitest-gradle
+- install TestCraft plugin
 
 ## Features
 

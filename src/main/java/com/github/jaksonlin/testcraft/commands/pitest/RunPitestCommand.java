@@ -30,12 +30,14 @@ public class RunPitestCommand extends PitestCommand {
         try {
             File commandFile = new File(Paths.get(getContext().getClasspathFileDirectory(), "command.txt").toString());
             java.nio.file.Files.write(commandFile.toPath(), String.join(" ", command).getBytes());
+            File contextFile = new File(Paths.get(getContext().getClasspathFileDirectory(), "context.txt").toString());
+            java.nio.file.Files.write(contextFile.toPath(), PitestContext.dumpPitestContext(getContext()).getBytes());
         } catch (IOException e) {
             log.warn("Error writing command to file: " + e.getMessage());
             // Not throwing exception here as it's not critical for the process execution
         }
 
-        ProcessResult processResult = ProcessExecutor.executeProcess(command);
+        ProcessResult processResult = ProcessExecutor.executeProcess(command, getContext().getWorkingDirectory());
         getContext().setProcessResult(processResult);
         try {
             List<Mutation> mutations = getContext().collectMutationsResults();
