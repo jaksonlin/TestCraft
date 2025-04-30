@@ -11,6 +11,11 @@ plugins {
     alias(libs.plugins.kover) // Gradle Kover Plugin
 }
 
+// utf-8
+tasks.withType<JavaCompile> {
+    options.encoding = "UTF-8"
+}
+
 group = providers.gradleProperty("pluginGroup").get()
 version = providers.gradleProperty("pluginVersion").get()
 
@@ -63,6 +68,9 @@ dependencies {
         plugins(providers.gradleProperty("platformPlugins").map { it.split(',') })
 
         testFramework(TestFrameworkType.Platform)
+
+        bundledPlugin("com.intellij.modules.json")
+
     }
 }
 
