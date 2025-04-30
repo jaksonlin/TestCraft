@@ -31,6 +31,11 @@
 
     <change-notes><![CDATA[
         <h2>Change Notes</h2>
+        <h3>1.0.9 - 2025-04-30</h3>
+        <ul>
+            <li>bugfix, backward compatibility to JDK1.8 support to run in older IntelliJ IDEA version</li>
+            <li>upload to pitest-gradle also, for pitest-gradle user, please uninstall pitest-gradle plugin and reinstall the new one manged in [testcraft](https://plugins.jetbrains.com/plugin/27221-testcraft-pro).</li>
+        </ul>
         <h3>1.0.8 - 2025-04-28</h3>
         <ul>
             <li>Run pitest in the test file's source root as the process working directory</li>
@@ -83,7 +88,7 @@
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
     <depends>com.intellij.modules.lang</depends>
-    <depends optional="true" config-file="withJson.xml">com.intellij.modules.json</depends>
+    <depends>com.intellij.modules.json</depends>
     <depends>Git4Idea</depends>
 
     <resource-bundle>messages.MyBundle</resource-bundle>

@@ -199,32 +199,17 @@ public class PitestContext {
     }
 
     public static String dumpPitestContext(PitestContext context) {
-        return String.format("""
-                testVirtualFile: %s
-                fullyQualifiedTargetTestClassName: %s
-                javaHome: %s
-                sourceRoots: %s
-                fullyQualifiedTargetClassName: %s
-                targetClassSourceRoot: %s
-                reportDirectory: %s
-                classpathFile: %s
-                command: %s
-                processResult: %s
-                pitestDependencies: %s
-                workingDirectory: %s
-                """,
-                context.getTestFilePath(),
-                context.getFullyQualifiedTargetTestClassName(),
-                context.getJavaHome(),
-                context.getSourceRoots(),
-                context.getTargetClassFullyQualifiedName(),
-                context.getTargetClassSourceRoot(),
-                context.getReportDirectory(),
-                context.getClasspathFile(),
-                context.getCommand(),
-                context.getProcessResult(),
-                context.getPitestDependencies(),
-                context.getWorkingDirectory()
-        );
+        return "testVirtualFile: " + context.getTestFilePath() + "\n" +
+                "fullyQualifiedTargetTestClassName: " + context.getFullyQualifiedTargetTestClassName() + "\n" +
+                "javaHome: " + context.getJavaHome() + "\n" +
+                "sourceRoots: " + context.getSourceRoots() + "\n" +
+                "fullyQualifiedTargetClassName: " + context.getTargetClassFullyQualifiedName() + "\n" +
+                "targetClassSourceRoot: " + context.getTargetClassSourceRoot() + "\n" +
+                "reportDirectory: " + context.getReportDirectory() + "\n" +
+                "classpathFile: " + context.getClasspathFile() + "\n" +
+                "command: " + context.getCommand() + "\n" +
+                "processResult: " + context.getProcessResult() + "\n" +
+                "pitestDependencies: " + context.getPitestDependencies() + "\n" +
+                "workingDirectory: " + context.getWorkingDirectory();
     }
 }

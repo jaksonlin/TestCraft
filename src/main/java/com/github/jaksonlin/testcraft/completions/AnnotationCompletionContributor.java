@@ -27,7 +27,7 @@ public class AnnotationCompletionContributor extends CompletionContributor {
                 PlatformPatterns.psiElement()
                         .inside(PsiAnnotation.class)
                         .withLanguage(JavaLanguage.INSTANCE),
-                new CompletionProvider<>() {
+                new CompletionProvider<CompletionParameters>() {
                     @Override
                     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
                         PsiAnnotation annotation = PsiTreeUtil.getParentOfType(parameters.getPosition(), PsiAnnotation.class);

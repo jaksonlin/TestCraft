@@ -68,3 +68,6 @@
 - Dump pitest context into report directory for issue debug
 - Enhance output information for issue debug
 
+## 1.0.9 - 2025-04-30
+- bugfix, backward compatibility to JDK1.8 support to run in older IntelliJ IDEA version
+- upload to pitest-gradle also, for pitest-gradle user, please uninstall pitest-gradle plugin and reinstall the new one manged in [testcraft](https://plugins.jetbrains.com/plugin/27221-testcraft-pro).
