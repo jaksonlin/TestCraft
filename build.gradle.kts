@@ -25,7 +25,7 @@ java {
     }
     sourceCompatibility = JavaVersion.VERSION_1_8 // Generate bytecode for Java 11
     targetCompatibility = JavaVersion.VERSION_1_8
-}S
+}
 
 // Configure project's dependencies
 repositories {
