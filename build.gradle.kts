@@ -11,6 +11,11 @@ plugins {
     alias(libs.plugins.kover) // Gradle Kover Plugin
 }
 
+// utf-8
+tasks.withType<JavaCompile> {
+    options.encoding = "UTF-8"
+}
+
 group = providers.gradleProperty("pluginGroup").get()
 version = providers.gradleProperty("pluginVersion").get()
 
@@ -23,7 +28,7 @@ java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(21)) // Use JDK 21
     }
-    sourceCompatibility = JavaVersion.VERSION_1_8 // Generate bytecode for Java 11
+    sourceCompatibility = JavaVersion.VERSION_1_8 // Generate bytecode for Java 8
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
@@ -63,6 +68,9 @@ dependencies {
         plugins(providers.gradleProperty("platformPlugins").map { it.split(',') })
 
         testFramework(TestFrameworkType.Platform)
+
+        bundledPlugin("com.intellij.modules.json")
+
     }
 }
 
