@@ -49,29 +49,27 @@ public class LLMResponsePanel extends JPanel implements BasicEventObserver {
     private final Timer loadingTimer;
     private final JLabel loadingLabel;
 
-    private static final String BASE_HTML_TEMPLATE = """
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <style>
-                %s
-            </style>
-        </head>
-        <body>
-            <div id="chat-container">
-                %s
-            </div>
-        </body>
-        </html>
-        """;
+    private static final String BASE_HTML_TEMPLATE =
+            "<!DOCTYPE html>\n" +
+                    "<html>\n" +
+                    "<head>\n" +
+                    "    <style>\n" +
+                    "        %s\n" +
+                    "    </style>\n" +
+                    "</head>\n" +
+                    "<body>\n" +
+                    "    <div id=\"chat-container\">\n" +
+                    "        %s\n" +
+                    "    </div>\n" +
+                    "</body>\n" +
+                    "</html>";
 
-    private static final String MESSAGE_TEMPLATE = """
-        <div class="message %s">
-            <div class="message-header">%s</div>
-            <div class="message-content">%s</div>
-        </div>
-        <div class="message-separator"></div>
-        """;
+    private static final String MESSAGE_TEMPLATE =
+            "<div class=\"message %s\">\n" +
+                    "    <div class=\"message-header\">%s</div>\n" +
+                    "    <div class=\"message-content\">%s</div>\n" +
+                    "</div>\n" +
+                    "<div class=\"message-separator\"></div>";
 
     public interface ResponseActionListener {
         void onClearButtonClick();
@@ -187,93 +185,63 @@ public class LLMResponsePanel extends JPanel implements BasicEventObserver {
         String linkColor = isDarkTheme ? "#589df6" : "#2470B3";
         String separatorColor = isDarkTheme ? "#3c3f41" : "#e0e0e0";
 
-        return String.format("""
-            body { 
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
-                font-size: 13pt; 
-                margin: 10px; 
-                line-height: 1.4;
-                background-color: %s;
-                color: %s;
-            }
-            #chat-container {
-                display: flex;
-                flex-direction: column;
-                gap: 0.5em;
-            }
-            .message {
-                border-radius: 8px;
-                padding: 12px;
-            }
-            .message.user {
-                background-color: %s;
-                margin-left: 20%%;
-            }
-            .message.assistant {
-                background-color: %s;
-                margin-right: 20%%;
-            }
-            .message.system {
-                background-color: %s;
-                text-align: center;
-                font-style: italic;
-            }
-            .message-header {
-                font-weight: bold;
-                margin-bottom: 4px;
-                color: %s;
-            }
-            .message-content {
-                white-space: pre-wrap;
-            }
-            .message-separator {
-                height: 1px;
-                background-color: %s;
-                margin: 10px 0;
-            }
-            pre { 
-                background-color: %s; 
-                padding: 16px; 
-                border-radius: 6px; 
-                margin: 1em 0; 
-                border: 1px solid %s;
-                overflow: auto;
-            }
-            code { 
-                font-family: "JetBrains Mono", "Fira Code", Consolas, Monaco, "Courier New", monospace;
-                font-size: 12pt;
-                color: %s;
-            }
-            a { color: %s; }
-            .keyword { color: %s; }
-            .string { color: %s; }
-            .comment { color: %s; font-style: italic; }
-            .number { color: %s; }
-            .annotation { color: %s; }
-            .type { color: %s; }
-            .method { color: %s; }
-            .field { color: %s; }
-            .constant { color: %s; }
-            .package { color: %s; }
-            """,
-            backgroundColor, textColor,
-            isDarkTheme ? "#2d2d2d" : "#e3f2fd",  // user message background
-            isDarkTheme ? "#1e1e1e" : "#f5f5f5",  // assistant message background
-            isDarkTheme ? "#2d2d2d" : "#e8f5e9",  // system message background
-            textColor,
-            separatorColor,  // separator color
-            codeBackground, codeBorder, textColor, linkColor,
-            isDarkTheme ? "#cc7832" : "#d73a49",  // keyword
-            isDarkTheme ? "#6a8759" : "#032f62",  // string
-            isDarkTheme ? "#808080" : "#6a737d",  // comment
-            isDarkTheme ? "#6897bb" : "#005cc5",  // number
-            isDarkTheme ? "#bbb529" : "#e36209",  // annotation
-            isDarkTheme ? "#ffc66d" : "#6f42c1",  // type
-            isDarkTheme ? "#ffc66d" : "#6f42c1",  // method
-            isDarkTheme ? "#9876aa" : "#005cc5",  // field
-            isDarkTheme ? "#9876aa" : "#005cc5",  // constant
-            isDarkTheme ? "#a9b7c6" : "#22863a"   // package
-        );
+        return "body {\n" +
+                "    font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif;\n" +
+                "    font-size: 13pt;\n" +
+                "    margin: 10px;\n" +
+                "    line-height: 1.4;\n" +
+                "    background-color: " + backgroundColor + ";\n" +
+                "    color: " + textColor + ";\n" +
+                "}\n" +
+                "#chat-container {\n" +
+                "    display: flex;\n" +
+                "    flex-direction: column;\n" +
+                "    gap: 0.5em;\n" +
+                "}\n" +
+                ".message {\n" +
+                "    border-radius: 8px;\n" +
+                "    padding: 12px;\n" +
+                "}\n" +
+                ".message.user {\n" +
+                "    background-color: " + (isDarkTheme ? "#2d2d2d" : "#e3f2fd") + ";\n" +
+                "    margin-left: 20%;\n" +
+                "}\n" +
+                ".message.assistant {\n" +
+                "    background-color: " + (isDarkTheme ? "#1e1e1e" : "#f5f5f5") + ";\n" +
+                "    margin-right: 20%;\n" +
+                "}\n" +
+                ".message.system {\n" +
+                "    background-color: " + (isDarkTheme ? "#2d2d2d" : "#e8f5e9") + ";\n" +
+                "    text-align: center;\n" +
+                "    font-style: italic;\n" +
+                "}\n" +
+                ".message-header {\n" +
+                "    font-weight: bold;\n" +
+                "    margin-bottom: 4px;\n" +
+                "    color: " + textColor + ";\n" +
+                "}\n" +
+                ".message-content {\n" +
+                "    white-space: pre-wrap;\n" +
+                "}\n" +
+                ".message-separator {\n" +
+                "    height: 1px;\n" +
+                "    background-color: " + separatorColor + ";\n" +
+                "    margin: 10px 0;\n" +
+                "}\n" +
+                "pre {\n" +
+                "    background-color: " + codeBackground + ";\n" +
+                "    padding: 16px;\n" +
+                "    border-radius: 6px;\n" +
+                "    margin: 1em 0;\n" +
+                "    border: 1px solid " + codeBorder + ";\n" +
+                "    overflow: auto;\n" +
+                "}\n" +
+                "code {\n" +
+                "    font-family: \"JetBrains Mono\", \"Fira Code\", Consolas, Monaco, \"Courier New\", monospace;\n" +
+                "    font-size: 12pt;\n" +
+                "    color: " + textColor + ";\n" +
+                "}\n" +
+                "a { color: " + linkColor + "; }\n";
     }
 
     private void startLoading() {

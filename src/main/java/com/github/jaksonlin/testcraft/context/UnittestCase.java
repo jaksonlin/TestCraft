@@ -18,7 +18,8 @@ public class UnittestCase {
 
     public List<String> getStringList(String key) {
         Object value = values.get(key);
-        if (value instanceof List<?> list) {
+        if (value instanceof List<?>) {
+            List<?> list = (List<?>) value;
             if (list.isEmpty() || list.get(0) instanceof String) {
                 return (List<String>) value;
             }

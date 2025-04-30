@@ -19,6 +19,14 @@ kotlin {
     jvmToolchain(21)
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21)) // Use JDK 21
+    }
+    sourceCompatibility = JavaVersion.VERSION_1_8 // Generate bytecode for Java 11
+    targetCompatibility = JavaVersion.VERSION_1_8
+}S
+
 // Configure project's dependencies
 repositories {
     mavenCentral()
