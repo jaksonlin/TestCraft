@@ -1,7 +1,7 @@
 package com.github.jaksonlin.testcraft.inspectors;
 
 import com.github.jaksonlin.testcraft.MyBundle;
-import com.github.jaksonlin.testcraft.commands.unittestannotations.UnittestFileInspectorCommand;
+import com.github.jaksonlin.testcraft.commands.testscan.UnittestFileInspectorCommand;
 import com.github.jaksonlin.testcraft.context.CaseCheckContext;
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
 import com.intellij.codeInspection.ProblemsHolder;

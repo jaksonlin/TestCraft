@@ -1,5 +1,6 @@
 package com.github.jaksonlin.testcraft.commands.unittestannotations;
 
+import com.github.jaksonlin.testcraft.commands.testscan.UnittestCaseCheckCommand;
 import com.github.jaksonlin.testcraft.context.CaseCheckContext;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiAnnotation;

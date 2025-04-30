@@ -2,6 +2,7 @@ package com.github.jaksonlin.testcraft.commands.unittestannotations;
 
 import com.github.jaksonlin.testcraft.annotations.AnnotationFieldType;
 import com.github.jaksonlin.testcraft.annotations.AnnotationSchema;
+import com.github.jaksonlin.testcraft.commands.testscan.UnittestCaseCheckCommand;
 import com.github.jaksonlin.testcraft.context.CaseCheckContext;
 import com.github.jaksonlin.testcraft.context.UnittestCase;
 import com.intellij.openapi.project.Project;

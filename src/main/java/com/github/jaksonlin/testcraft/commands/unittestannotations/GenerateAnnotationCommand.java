@@ -5,6 +5,7 @@ import com.github.jaksonlin.testcraft.annotations.AnnotationFieldConfig;
 import com.github.jaksonlin.testcraft.annotations.AnnotationFieldType;
 import com.github.jaksonlin.testcraft.annotations.AnnotationSchema;
 import com.github.jaksonlin.testcraft.annotations.DefaultValue;
+import com.github.jaksonlin.testcraft.commands.testscan.UnittestCaseCheckCommand;
 import com.github.jaksonlin.testcraft.context.CaseCheckContext;
 import com.github.jaksonlin.testcraft.services.AnnotationConfigService;
 import com.github.jaksonlin.testcraft.services.AnnotationValueProviderService;

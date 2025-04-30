@@ -28,7 +28,7 @@ java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(21)) // Use JDK 21
     }
-    sourceCompatibility = JavaVersion.VERSION_1_8 // Generate bytecode for Java 11
+    sourceCompatibility = JavaVersion.VERSION_1_8 // Generate bytecode for Java 8
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 

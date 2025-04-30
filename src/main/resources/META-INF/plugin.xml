@@ -160,7 +160,7 @@
         </group>
 
         <!-- Second Level Submenu -->
-        <group id="UnittestHelperSubMenu" text="Unittest Helper Tools">
+        <group id="UnittestHelperSubMenu" text="TestCraft Unittest Helper Tools">
             <add-to-group group-id="UnittestHelperToolMenu" anchor="last"/>
             <!-- Action inside the submenu -->
             <action
@@ -176,7 +176,13 @@
                     id="GenerateAnnotationCommandAction"
                     text="$action.GenerateAnnotationCommandAction.text">
             </action>
-
         </group>
+
+        <!-- Project View Actions -->
+        <action class="com.github.jaksonlin.testcraft.actions.CheckInvalidTestCasesAction"
+                id="CheckInvalidTestCasesAction"
+                text="$action.CheckInvalidTestCasesAction.text">
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
+        </action>
     </actions>
 </idea-plugin>

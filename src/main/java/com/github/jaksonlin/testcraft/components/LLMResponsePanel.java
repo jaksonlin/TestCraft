@@ -244,6 +244,14 @@ public class LLMResponsePanel extends JPanel implements BasicEventObserver {
                 "a { color: " + linkColor + "; }\n";
     }
 
+    private String repeatString(String str, int count) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < count; i++) {
+            sb.append(str);
+        }
+        return sb.toString();
+    }
+
     private void startLoading() {
         isLoading = true;
         loadingPanel.setVisible(true);
@@ -259,7 +267,7 @@ public class LLMResponsePanel extends JPanel implements BasicEventObserver {
                 }
                 SwingUtilities.invokeLater(() -> {
                     dots = (dots + 1) % 4;
-                    loadingLabel.setText(message("llm.thinking") + ".".repeat(dots));
+                    loadingLabel.setText(message("llm.thinking") + repeatString(".", dots));
                 });
             }
         }, 0, 500);
@@ -315,8 +323,6 @@ public class LLMResponsePanel extends JPanel implements BasicEventObserver {
         chatHistory.setLength(0);
         updateOutputArea();
     }
-
-    
 
     private void copyToClipboard(Object eventObj) {
         String currentContentToCopy;

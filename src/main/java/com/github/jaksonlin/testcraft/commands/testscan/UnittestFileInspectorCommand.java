@@ -1,4 +1,4 @@
-package com.github.jaksonlin.testcraft.commands.unittestannotations;
+package com.github.jaksonlin.testcraft.commands.testscan;
 
 import com.github.jaksonlin.testcraft.context.CaseCheckContext;
 import com.github.jaksonlin.testcraft.services.AnnotationConfigService;
@@ -18,6 +18,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Stack;
 
+// this is inspector command for unittest file scan
 public class UnittestFileInspectorCommand extends UnittestCaseCheckCommand {
     private final ProblemsHolder holder;
     private final InvalidTestCaseConfigService invalidTestCaseConfigService = ApplicationManager.getApplication().getService(InvalidTestCaseConfigService.class);
@@ -26,6 +27,13 @@ public class UnittestFileInspectorCommand extends UnittestCaseCheckCommand {
     public UnittestFileInspectorCommand(ProblemsHolder holder, Project project, CaseCheckContext context) {
         super(project, context);
         this.holder = holder;
+    }
+
+    private void reportError(String message, ProblemHighlightType highlightType) {
+        if (holder == null) {
+            return;
+        }
+        holder.registerProblem(getContext().getPsiMethod(), message, highlightType);
     }
 
     @Override
@@ -51,12 +59,12 @@ public class UnittestFileInspectorCommand extends UnittestCaseCheckCommand {
         try {
             PsiAnnotation annotation = findTargetAnnotation(psiMethod, getContext().getSchema());
             if (annotation == null) {
-                holder.registerProblem(getContext().getPsiMethod(), "No unittest case management annotation found", ProblemHighlightType.WARNING);
+                reportError("No unittest case management annotation found", ProblemHighlightType.WARNING);
                 return;
             }
             parseUnittestCaseFromAnnotations(annotation);
         } catch (Exception e) {
-            holder.registerProblem(getContext().getPsiMethod(), e.getMessage() != null ? e.getMessage() : "Unknown error", ProblemHighlightType.WARNING);
+            reportError(e.getMessage() != null ? e.getMessage() : "Unknown error", ProblemHighlightType.WARNING);
         }
     }
 
@@ -72,7 +80,7 @@ public class UnittestFileInspectorCommand extends UnittestCaseCheckCommand {
             }
         }
         if (!hasStep || !hasAssert) {
-            holder.registerProblem(psiMethod, "Method should contains both step and assert comment", ProblemHighlightType.WARNING);
+            reportError("Method should contains both step and assert comment", ProblemHighlightType.WARNING);
         }
     }
 
@@ -88,7 +96,7 @@ public class UnittestFileInspectorCommand extends UnittestCaseCheckCommand {
             return;
         }
 
-        holder.registerProblem(psiMethod, "Method should contains assert statement", ProblemHighlightType.ERROR);
+        reportError("Method should contains assert statement", ProblemHighlightType.ERROR);
 
     }
 
@@ -159,7 +167,7 @@ public class UnittestFileInspectorCommand extends UnittestCaseCheckCommand {
             String methodText = assertionMethod.get().getText();
             for (String invalidAssertion : invalidAssertions) {
                 if (methodText.contains(invalidAssertion)) {
-                    holder.registerProblem(psiMethod, "Method should contains valid assert statement", ProblemHighlightType.ERROR);
+                    reportError( "Method should contains valid assert statement", ProblemHighlightType.ERROR);
                     return;
                 }
             }

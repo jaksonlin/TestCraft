@@ -1,4 +1,4 @@
-package com.github.jaksonlin.testcraft.commands.unittestannotations;
+package com.github.jaksonlin.testcraft.commands.testscan;
 
 import com.github.jaksonlin.testcraft.MyBundle;
 import com.github.jaksonlin.testcraft.annotations.AnnotationSchema;
