@@ -12,12 +12,11 @@ import javax.swing.tree.TreePath;
 import java.util.Enumeration;
 
 public class MutationToolWindowViewModel {
-    private final RunHistoryManagerService runHistoryManager;
+    private final RunHistoryManagerService runHistoryManager = RunHistoryManagerService.getInstance();
     private final IMutationMediator mutationReportMediator = new MutationMediatorImpl();
     private final MutationTreeMediatorViewModel mutationTreeMediatorVM;
 
     public MutationToolWindowViewModel(Project project, ObservableTree mutationTree) {
-        this.runHistoryManager = RunHistoryManagerService.getInstance();
         this.mutationTreeMediatorVM = new MutationTreeMediatorViewModel(project, mutationReportMediator);
         runHistoryManager.addObserver(mutationTree);
     }

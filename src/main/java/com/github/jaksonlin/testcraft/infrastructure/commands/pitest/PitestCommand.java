@@ -22,7 +22,7 @@ public abstract class PitestCommand {
     public PitestCommand(Project project, PitestContext context) {
         this.project = project;
         this.context = context;
-        this.runHistoryManager = project.getService(RunHistoryManagerService.class);
+        this.runHistoryManager = RunHistoryManagerService.getInstance();
     }
 
     public abstract void execute();

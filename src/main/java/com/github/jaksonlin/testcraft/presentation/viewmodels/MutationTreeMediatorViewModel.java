@@ -40,7 +40,7 @@ public class MutationTreeMediatorViewModel implements IMutationReportUI {
     private static final Logger log = LoggerFactory.getLogger(MutationTreeMediatorViewModel.class);
     private final Project project;
     private final IMutationMediator mediator;
-    private final RunHistoryManagerService runHistoryManager;
+    private final RunHistoryManagerService runHistoryManager = RunHistoryManagerService.getInstance();
     protected final HashMap<String, Integer> annotatedNodes = new HashMap<>();
     private final TypedEventObserver<MutationEvent> mutationObserver = new TypedEventObserver<MutationEvent>(MutationEvent.class) {
         @Override
@@ -55,7 +55,6 @@ public class MutationTreeMediatorViewModel implements IMutationReportUI {
     public MutationTreeMediatorViewModel(@NotNull Project project, @NotNull IMutationMediator mediator) {
         this.project = project;
         this.mediator = mediator;
-        this.runHistoryManager = project.getService(RunHistoryManagerService.class);
         mediator.register(this);
         registerEditorListener(project);
     }
