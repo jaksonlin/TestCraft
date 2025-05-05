@@ -1,6 +1,7 @@
 package com.github.jaksonlin.testcraft.application.actions;
 
 import com.github.jaksonlin.testcraft.infrastructure.commands.unittestannotations.CheckAnnotationCommand;
+import com.github.jaksonlin.testcraft.infrastructure.services.system.I18nService;
 import com.github.jaksonlin.testcraft.domain.context.CaseCheckContext;
 import com.github.jaksonlin.testcraft.util.Pair;
 import com.github.jaksonlin.testcraft.util.PsiUtil;
@@ -26,6 +27,12 @@ public class RunCaseAnnoationCheckAction extends AnAction {
             CheckAnnotationCommand command = new CheckAnnotationCommand(project, context);
             command.execute();
         }
+    }
+
+    @Override
+    public void update(@NotNull AnActionEvent e) {
+        super.update(e);
+        e.getPresentation().setText(I18nService.getInstance().message("action.RunCaseAnnoationCheckAction.text"));
     }
 
 }

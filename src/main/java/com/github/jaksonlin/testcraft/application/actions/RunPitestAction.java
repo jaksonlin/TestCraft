@@ -33,6 +33,15 @@ public class RunPitestAction extends AnAction {
     }
 
     @Override
+    public void update(@NotNull AnActionEvent e) {
+        super.update(e);
+        // You can change the text here
+        e.getPresentation().setText(I18nService.getInstance().message("action.RunPitestAction.text"));
+        
+        
+    }
+
+    @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         Project targetProject = e.getProject();
         if (targetProject == null) {

@@ -1,6 +1,7 @@
 package com.github.jaksonlin.testcraft.application.actions;
 
 import com.github.jaksonlin.testcraft.infrastructure.commands.unittestannotations.GenerateAnnotationCommand;
+import com.github.jaksonlin.testcraft.infrastructure.services.system.I18nService;
 import com.github.jaksonlin.testcraft.domain.context.CaseCheckContext;
 import com.github.jaksonlin.testcraft.util.Pair;
 import com.github.jaksonlin.testcraft.util.PsiUtil;
@@ -12,6 +13,12 @@ import com.intellij.psi.PsiMethod;
 import org.jetbrains.annotations.NotNull;
 
 public class GenerateAnnotationCommandAction extends AnAction {
+
+    @Override
+    public void update(@NotNull AnActionEvent e) {
+        super.update(e);
+        e.getPresentation().setText(I18nService.getInstance().message("action.GenerateAnnotationCommandAction.text"));
+    }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {

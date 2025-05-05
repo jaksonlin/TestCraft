@@ -2,6 +2,7 @@ package com.github.jaksonlin.testcraft.application.actions;
 
 import com.github.jaksonlin.testcraft.infrastructure.commands.testscan.UnittestFileBatchScanCommand;
 import com.github.jaksonlin.testcraft.infrastructure.services.config.InvalidTestCaseConfigService;
+import com.github.jaksonlin.testcraft.infrastructure.services.system.I18nService;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
@@ -10,6 +11,12 @@ import com.intellij.openapi.ui.Messages;
 import org.jetbrains.annotations.NotNull;
 
 public class CheckInvalidTestCasesAction extends AnAction {
+
+    @Override
+    public void update(@NotNull AnActionEvent e) {
+        super.update(e);
+        e.getPresentation().setText(I18nService.getInstance().message("action.CheckInvalidTestCasesAction.text"));
+    }
 
 
     @Override
