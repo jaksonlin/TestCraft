@@ -1,81 +1,85 @@
 package com.github.jaksonlin.testcraft.presentation.components;
 
 import com.github.jaksonlin.testcraft.domain.context.PitestContext;
-import com.github.jaksonlin.testcraft.infrastructure.messaging.events.BasicEventObserver;
 import com.github.jaksonlin.testcraft.infrastructure.messaging.events.RunHistoryEvent;
-import com.github.jaksonlin.testcraft.infrastructure.services.system.EventBusService;
+import com.github.jaksonlin.testcraft.infrastructure.messaging.events.ChatEvent;
+import com.github.jaksonlin.testcraft.infrastructure.messaging.events.TypedEventObserver;
+import com.github.jaksonlin.testcraft.infrastructure.services.system.I18nService;
 import com.github.jaksonlin.testcraft.presentation.viewmodels.LLMSuggestionUIComponentViewModel;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.util.ui.JBUI;
-import com.intellij.AbstractBundle;
-import org.jetbrains.annotations.PropertyKey;
 
-import javax.swing.*;
+import javax.swing.JPanel;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import javax.swing.JComboBox;
 import javax.swing.plaf.basic.BasicComboBoxEditor;
-import java.awt.*;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.ComboBoxEditor;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.ResourceBundle;
 
-public class LLMSuggestionUIComponent extends BasicEventObserver {
-    private static final String BUNDLE = "messages.MyBundle";
-    private static ResourceBundle ourBundle;
+public class LLMSuggestionUIComponent  {
+
+    private final TypedEventObserver<ChatEvent> chatEventObserver;
+    private final TypedEventObserver<RunHistoryEvent> runHistoryEventObserver;
+
     
-    public static String message(@PropertyKey(resourceBundle = BUNDLE) String key, Object... params) {
-        return AbstractBundle.message(getBundle(), key, params);
-    }
-    
-    private static ResourceBundle getBundle() {
-        if (ourBundle == null) {
-            ourBundle = ResourceBundle.getBundle(BUNDLE);
-        }
-        return ourBundle;
-    }
+    private final ChatPanelComponent chatPanel = new ChatPanelComponent();
+    private final LLMResponseComponent responsePanel = new LLMResponseComponent(chatPanel);
     
     private final LLMSuggestionUIComponentViewModel viewModel;
-    private final ChatPanel chatPanel = new ChatPanel();
-    private final LLMResponsePanel responsePanel = new LLMResponsePanel(chatPanel);
+
     private final JPanel mainPanel = new JPanel(new BorderLayout());
     private final DefaultComboBoxModel<FileItem> fileListModel = new DefaultComboBoxModel<>();
     private final JComboBox<FileItem> fileSelector = new ComboBox<>(fileListModel);
-    private final JButton generateButton = new JButton(message("llm.generate.suggestions"));
-    private final JButton dryRunButton = new JButton(message("llm.check.prompt"));
+    private final JButton generateButton = new JButton(I18nService.getInstance().message("llm.generate.suggestions"));
+    private final JButton dryRunButton = new JButton(I18nService.getInstance().message("llm.check.prompt"));
     private List<FileItem> allFileItems = new ArrayList<>();
 
     public LLMSuggestionUIComponent() {
         setupUI();
+        
+        chatEventObserver = new TypedEventObserver<ChatEvent>(ChatEvent.class) {
+            @Override
+            public void onTypedEvent(ChatEvent event) {
+                switch (event.getEventType()) {
+                    case ChatEvent.START_LOADING:
+                        generateButton.setEnabled(false);
+                        dryRunButton.setEnabled(false);
+                        break;
+                    case ChatEvent.STOP_LOADING:
+                        generateButton.setEnabled(true);
+                        dryRunButton.setEnabled(true);
+                        break;
+                }
+            }
+        };
+        runHistoryEventObserver = new TypedEventObserver<RunHistoryEvent>(RunHistoryEvent.class) {
+            @Override
+            public void onTypedEvent(RunHistoryEvent event) {
+                switch (event.getEventType()) {
+                    case RunHistoryEvent.RUN_HISTORY_LIST:
+                        ApplicationManager.getApplication().invokeLater(() -> loadFileHistory(event.getPayload()));
+                        break;
+                }
+            }
+        };
         // setup message routing
         viewModel = new LLMSuggestionUIComponentViewModel();
-        EventBusService.getInstance().register(this);
-        EventBusService.getInstance().register(responsePanel);
-
         // propagate the config change
         viewModel.propagateConfigChange();
-        
     }
 
 
-    
-    @Override
-    public void onEventHappen(String eventName, Object eventObj) {
-        switch (eventName) {
-            case "START_LOADING":
-                generateButton.setEnabled(false);
-                dryRunButton.setEnabled(false);
-                break;
-            case "STOP_LOADING":
-                generateButton.setEnabled(true);
-                dryRunButton.setEnabled(true);
-                break;
-            case RunHistoryEvent.RUN_HISTORY_LIST:
-                ApplicationManager.getApplication().invokeLater(() -> loadFileHistory(eventObj));
-                break;
-            default:
-                break;
-        }
-    }
 
     public JPanel getPanel() {
         return this.mainPanel;
@@ -129,14 +133,14 @@ public class LLMSuggestionUIComponent extends BasicEventObserver {
 
         // Add components to top panel
         JPanel selectorPanel = new JPanel(new BorderLayout());
-        selectorPanel.add(new JLabel(message("llm.select.file") + ": "), BorderLayout.WEST);
+        selectorPanel.add(new JLabel(I18nService.getInstance().message("llm.select.file") + ": "), BorderLayout.WEST);
         selectorPanel.add(fileSelector, BorderLayout.CENTER);
         topPanel.add(selectorPanel, BorderLayout.CENTER);
         topPanel.add(buttonPanel, BorderLayout.EAST);
 
         // Add panels to main panel
         mainPanel.add(topPanel, BorderLayout.NORTH);
-        mainPanel.add(responsePanel, BorderLayout.CENTER);
+        mainPanel.add(responsePanel.getMasterPanel(), BorderLayout.CENTER);
     }
 
 

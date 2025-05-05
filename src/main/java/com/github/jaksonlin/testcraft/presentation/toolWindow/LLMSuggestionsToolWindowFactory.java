@@ -18,7 +18,6 @@ public class LLMSuggestionsToolWindowFactory implements ToolWindowFactory {
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
         // create a new LLMSuggestionUIComponent
-        LLMConfigService llmService = ApplicationManager.getApplication().getService(LLMConfigService.class);
         LLMSuggestionUIComponent uiComponent = new LLMSuggestionUIComponent();
         // add the uiComponent to the toolWindow through the content manager
         JPanel toolWindowPanel = uiComponent.getPanel();
@@ -26,8 +25,7 @@ public class LLMSuggestionsToolWindowFactory implements ToolWindowFactory {
         Content content = new ContentImpl(toolWindowPanel, "TestCraft - LLM Suggestions Tool Window", false); // Directly create ContentImpl
         contentManager.addContent(content);
         // register the uiComponent to the runHistoryManagerService to sync the run history
-        RunHistoryManagerService runHistoryManagerService = RunHistoryManagerService.getInstance();
-        runHistoryManagerService.register(uiComponent);
+        RunHistoryManagerService.getInstance().addObserver(uiComponent);
         
     }
 } 

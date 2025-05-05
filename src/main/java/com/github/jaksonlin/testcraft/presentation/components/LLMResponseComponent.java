@@ -1,8 +1,9 @@
 package com.github.jaksonlin.testcraft.presentation.components;
 
-import com.github.jaksonlin.testcraft.infrastructure.messaging.events.BasicEventObserver;
 import com.github.jaksonlin.testcraft.infrastructure.messaging.events.ChatEvent;
+import com.github.jaksonlin.testcraft.infrastructure.messaging.events.TypedEventObserver;
 import com.github.jaksonlin.testcraft.infrastructure.services.system.EventBusService;
+import com.github.jaksonlin.testcraft.infrastructure.services.system.I18nService;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
 import org.commonmark.node.Node;
@@ -11,8 +12,6 @@ import org.commonmark.renderer.html.HtmlRenderer;
 import com.intellij.ui.JBColor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.Toolkit;
-import com.intellij.AbstractBundle;
-import org.jetbrains.annotations.PropertyKey;
 
 import javax.swing.*;
 import javax.swing.text.html.HTMLEditorKit;
@@ -20,34 +19,29 @@ import javax.swing.text.html.StyleSheet;
 import java.awt.*;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.ResourceBundle;
 import javax.swing.text.html.HTMLDocument;
 
-public class LLMResponsePanel extends JPanel {
-    private static final String BUNDLE = "messages.MyBundle";
-    private static ResourceBundle ourBundle;
+public class LLMResponseComponent  {
+    private final TypedEventObserver<ChatEvent> eventObserver;
+    
     private final JEditorPane outputArea;
-    private final ChatPanel chatPanel;
     private boolean isLoading = false;
     private boolean copyAsMarkdown = false;
-    private final StringBuilder chatHistory = new StringBuilder();
+   
     private final HTMLEditorKit htmlKit;
     private final StyleSheet styleSheet;
+    private final JPanel masterPanel;
     private final JPanel loadingPanel;
     private final Timer loadingTimer;
     private final JLabel loadingLabel;
-    private final BasicEventObserver eventObserver;
+    
 
-    public static String message(@PropertyKey(resourceBundle = BUNDLE) String key, Object... params) {
-        return AbstractBundle.message(getBundle(), key, params);
+    private final StringBuilder chatHistory = new StringBuilder();
+
+    public JPanel getMasterPanel() {
+        return masterPanel;
     }
     
-    private static ResourceBundle getBundle() {
-        if (ourBundle == null) {
-            ourBundle = ResourceBundle.getBundle(BUNDLE);
-        }
-        return ourBundle;
-    }
 
     private static final String BASE_HTML_TEMPLATE =
             "<!DOCTYPE html>\n" +
@@ -80,16 +74,15 @@ public class LLMResponsePanel extends JPanel {
         EventBusService.getInstance().post(new ChatEvent(ChatEvent.COPY_CHAT_RESPONSE, chatHistory));
     }
 
-    public LLMResponsePanel(ChatPanel chatPanel) {
-        this.chatPanel = chatPanel;
-        setLayout(new BorderLayout());
-        setBorder(JBUI.Borders.empty(10));
+    public LLMResponseComponent(ChatPanelComponent chatPanelComponent) {
+        masterPanel = new JPanel(new BorderLayout());
+        masterPanel.setBorder(JBUI.Borders.empty(10));
 
         // Create event observer
-        this.eventObserver = new BasicEventObserver() {
+        this.eventObserver = new TypedEventObserver<ChatEvent>(ChatEvent.class) {
             @Override
-            public void onEventHappen(String eventName, Object eventObj) {
-                switch (eventName) {
+            public void onTypedEvent(ChatEvent event) {
+                switch (event.getEventType()) {
                     case ChatEvent.START_LOADING:
                         startLoading();
                         break;
@@ -98,29 +91,32 @@ public class LLMResponsePanel extends JPanel {
                         break;
                     case ChatEvent.CHAT_REQUEST:
                         if (!isLoading) {
-                            appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "user", message("llm.user"), eventObj.toString()));
+                            appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "user", I18nService.getInstance().message("llm.user"), event.getPayload().toString()));
                             startLoading();
                         }
                         break;
                     case ChatEvent.CHAT_RESPONSE:
-                        appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "assistant", message("llm.assistant"), eventObj.toString()));
+                        if (isLoading) {
+                            stopLoading();
+                        }
+                        appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "assistant", I18nService.getInstance().message("llm.assistant"), event.getPayload().toString()));
                         break;
                     case ChatEvent.COPY_CHAT_RESPONSE:
-                        copyToClipboard(eventObj);
+                        copyToClipboard(event.getPayload());
                         break;
                     case ChatEvent.CONFIG_CHANGE_COPY_AS_MARKDOWN:
-                        copyAsMarkdown = (boolean) eventObj;
+                        copyAsMarkdown = (boolean) event.getPayload();
                         break;
                     case ChatEvent.DRY_RUN_PROMPT:
-                        String dryRunPrompt = (String) eventObj;
+                        String dryRunPrompt = (String) event.getPayload();
                         if (dryRunPrompt.isEmpty()){
-                            JOptionPane.showMessageDialog(LLMResponsePanel.this, message("llm.dry.run.prompt.empty"), message("llm.dry.run.prompt"), JOptionPane.INFORMATION_MESSAGE);
+                            JOptionPane.showMessageDialog(masterPanel, I18nService.getInstance().message("llm.dry.run.prompt.empty"), I18nService.getInstance().message("llm.dry.run.prompt"), JOptionPane.INFORMATION_MESSAGE);
                         } else {
-                            appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "system", message("llm.system"), message("llm.dry.run.prompt") + "\n" + eventObj.toString()));
+                            appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "system", I18nService.getInstance().message("llm.system"), I18nService.getInstance().message("llm.dry.run.prompt") + "\n" + event.getPayload().toString()));
                         }
                         break;
                     case ChatEvent.ERROR:
-                        JOptionPane.showMessageDialog(LLMResponsePanel.this, message("llm.error") + ": " + eventObj.toString(), message("llm.error"), JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(masterPanel, I18nService.getInstance().message("llm.error") + ": " + event.getPayload().toString(), I18nService.getInstance().message("llm.error"), JOptionPane.ERROR_MESSAGE);
                         break;
                 }
             }
@@ -151,7 +147,7 @@ public class LLMResponsePanel extends JPanel {
         // Create loading panel
         loadingPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         loadingPanel.setVisible(false);
-        loadingLabel = new JLabel(message("llm.thinking"));
+        loadingLabel = new JLabel(I18nService.getInstance().message("llm.thinking"));
         loadingPanel.add(loadingLabel);
         loadingPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         loadingPanel.setBackground(JBColor.background());
@@ -166,13 +162,13 @@ public class LLMResponsePanel extends JPanel {
         toolbar.setFloatable(false);
         toolbar.setBorder(JBUI.Borders.empty(2, 2));
 
-        JButton copyButton = new JButton(message("llm.copy.to.clipboard"));
+        JButton copyButton = new JButton(I18nService.getInstance().message("llm.copy.to.clipboard"));
         copyButton.addActionListener(e -> {
             notifyCopyButtonClick();
         });
         toolbar.add(copyButton);
 
-        JButton clearButton = new JButton(message("llm.clear"));
+        JButton clearButton = new JButton(I18nService.getInstance().message("llm.clear"));
         clearButton.addActionListener(e -> {
             clearOutput();
             notifyClearButtonClick();
@@ -181,7 +177,7 @@ public class LLMResponsePanel extends JPanel {
         
         // Create input panel at the bottom
         JPanel inputPanel = new JPanel(new BorderLayout());
-        inputPanel.add(chatPanel.getInputPanel(), BorderLayout.CENTER);
+        inputPanel.add(chatPanelComponent.getInputPanel(), BorderLayout.CENTER);
         
         // Create center panel to hold toolbar, output area, and loading panel
         JPanel centerPanel = new JPanel(new BorderLayout());
@@ -190,8 +186,8 @@ public class LLMResponsePanel extends JPanel {
         centerPanel.add(loadingPanel, BorderLayout.SOUTH);
         
         // Add components
-        add(centerPanel, BorderLayout.CENTER);
-        add(inputPanel, BorderLayout.SOUTH);
+        masterPanel.add(centerPanel, BorderLayout.CENTER);
+        masterPanel.add(inputPanel, BorderLayout.SOUTH);
 
         
         // Initialize with empty chat container
@@ -278,13 +274,11 @@ public class LLMResponsePanel extends JPanel {
                 }
                 SwingUtilities.invokeLater(() -> {
                     dots = (dots + 1) % 4;
-                    loadingLabel.setText(message("llm.thinking") + repeatString(".", dots));
+                    loadingLabel.setText(I18nService.getInstance().message("llm.thinking") + repeatString(".", dots));
                 });
             }
         }, 0, 500);
         
-        // Disable input while loading
-        chatPanel.setInputEnabled(false);
     }
 
     private void stopLoading() {
@@ -294,9 +288,6 @@ public class LLMResponsePanel extends JPanel {
         isLoading = false;
         loadingPanel.setVisible(false);
         loadingTimer.purge();
-        
-        // Re-enable input after loading
-        chatPanel.setInputEnabled(true);
     }
 
     private void updateOutputArea() {

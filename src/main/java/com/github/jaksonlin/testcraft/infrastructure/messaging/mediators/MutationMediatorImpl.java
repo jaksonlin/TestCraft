@@ -1,5 +1,7 @@
 package com.github.jaksonlin.testcraft.infrastructure.messaging.mediators;
 
+import com.github.jaksonlin.testcraft.infrastructure.messaging.events.MutationEvent;
+import com.github.jaksonlin.testcraft.infrastructure.services.system.EventBusService;
 import com.github.jaksonlin.testcraft.util.Mutation;
 import com.github.jaksonlin.testcraft.util.Pair;
 
@@ -14,13 +16,14 @@ import java.util.concurrent.Executors;
 public class MutationMediatorImpl implements IMutationMediator {
     protected IMutationReportUI clientUI;
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private final EventBusService eventBusService = EventBusService.getInstance();
 
     @Override
     public void processMutationResult(String mutationTargetClassFilePath, List<Mutation> mutations) {
         executorService.submit(() -> {
             Map<Integer, Pair<String, Boolean>> renderedFormat = convertResultToUIRenderFormat(mutations);
             if (clientUI != null) {
-                SwingUtilities.invokeLater(() -> clientUI.updateMutationResult(mutationTargetClassFilePath, renderedFormat));
+                eventBusService.post(new MutationEvent(MutationEvent.MUTATION_RESULT, new Pair<String, Map<Integer, Pair<String, Boolean>>>(mutationTargetClassFilePath, renderedFormat)));
             }
         });
     }

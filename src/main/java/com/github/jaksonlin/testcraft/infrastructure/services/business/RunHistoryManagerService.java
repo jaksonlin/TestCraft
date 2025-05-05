@@ -1,8 +1,8 @@
 package com.github.jaksonlin.testcraft.infrastructure.services.business;
 
 import com.github.jaksonlin.testcraft.domain.context.PitestContext;
-import com.github.jaksonlin.testcraft.infrastructure.services.system.EventBusService;
 import com.github.jaksonlin.testcraft.infrastructure.messaging.events.RunHistoryEvent;
+import com.github.jaksonlin.testcraft.infrastructure.services.system.EventBusService;
 import com.github.jaksonlin.testcraft.util.Pair;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -10,7 +10,6 @@ import com.google.gson.reflect.TypeToken;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.components.Service;
-import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -33,17 +32,17 @@ public final class RunHistoryManagerService {
     private final File historyFile;
     private final Map<String, PitestContext> history;
 
+    public static RunHistoryManagerService getInstance() {
+        return ApplicationManager.getApplication().getService(RunHistoryManagerService.class);
+    }
+
+
     public RunHistoryManagerService() {
         this.historyFile = new File(PathManager.getConfigPath(), "run-history.json");
         this.history = loadRunHistory();
     }
 
-    public static RunHistoryManagerService getInstance() {
-        return ApplicationManager.getApplication().getService(RunHistoryManagerService.class);
-    }
-
-    public void register(Object observer) {
-
+    public void addObserver(Object observer) {
         eventBusService.register(observer);
         // when observer is added, pass current value of history to observer, force it to update
         List<Pair<String, String>> mappedHistory = history.entrySet().stream()

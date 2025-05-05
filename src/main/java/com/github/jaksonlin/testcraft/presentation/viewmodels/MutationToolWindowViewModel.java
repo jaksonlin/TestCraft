@@ -19,7 +19,7 @@ public class MutationToolWindowViewModel {
     public MutationToolWindowViewModel(Project project, ObservableTree mutationTree) {
         this.runHistoryManager = RunHistoryManagerService.getInstance();
         this.mutationTreeMediatorVM = new MutationTreeMediatorViewModel(project, mutationReportMediator);
-        runHistoryManager.register(mutationTree);
+        runHistoryManager.addObserver(mutationTree);
     }
 
     public void handleOpenSelectedNode(DefaultMutableTreeNode selectedNode) {

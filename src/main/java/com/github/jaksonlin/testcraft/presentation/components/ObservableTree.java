@@ -1,7 +1,7 @@
 package com.github.jaksonlin.testcraft.presentation.components;
 
-import com.github.jaksonlin.testcraft.infrastructure.messaging.events.BasicEventObserver;
 import com.github.jaksonlin.testcraft.infrastructure.messaging.events.RunHistoryEvent;
+import com.github.jaksonlin.testcraft.infrastructure.messaging.events.TypedEventObserver;
 import com.github.jaksonlin.testcraft.infrastructure.services.system.EventBusService;
 import com.github.jaksonlin.testcraft.util.MyBundle;
 import com.github.jaksonlin.testcraft.util.Pair;
@@ -17,21 +17,21 @@ import java.util.Objects;
 
 public class ObservableTree extends JTree  {
 
-    private final BasicEventObserver eventObserver = new BasicEventObserver() {
+    private final TypedEventObserver<RunHistoryEvent> eventObserver = new TypedEventObserver<RunHistoryEvent>(RunHistoryEvent.class) {
         @Override
-        public void onEventHappen(String eventName, Object eventObj) {
-            if (!eventName.equals(RunHistoryEvent.RUN_HISTORY)) {
+        public void onTypedEvent(RunHistoryEvent event) {
+            if (!event.getEventType().equals(RunHistoryEvent.RUN_HISTORY)) {
                 return;
             }
-            if (eventObj == null) {
+            if (event.getPayload() == null) {
                 initializeMutationTree(Collections.emptyList());
-            } else if (eventObj instanceof Pair) {
-                Pair<?, ?> pair = (Pair<?, ?>) eventObj;
+            } else if (event.getPayload() instanceof Pair) {
+                Pair<?, ?> pair = (Pair<?, ?>) event.getPayload();
                 if (pair.getFirst() instanceof String && pair.getSecond() instanceof String) {
                     updateMutationTree(new Pair<>((String) pair.getFirst(), (String) pair.getSecond()));
                 }
-            } else if (eventObj instanceof List) {
-                List<?> list = (List<?>) eventObj;
+            } else if (event.getPayload() instanceof List) {
+                List<?> list = (List<?>) event.getPayload();
                 if (list.isEmpty()) {
                     initializeMutationTree(Collections.emptyList());
                 } else if (list.get(0) instanceof Pair) {

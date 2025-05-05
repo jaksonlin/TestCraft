@@ -1,5 +1,6 @@
 package com.github.jaksonlin.testcraft.presentation.components;
 
+import com.github.jaksonlin.testcraft.infrastructure.services.system.I18nService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 
@@ -38,7 +39,7 @@ public class PitestOutputDialog extends DialogWrapper {
         panel.add(scrollPane, BorderLayout.CENTER);
 
         if (reportFile != null) {
-            JButton viewReportButton = new JButton("HTML Report");
+            JButton viewReportButton = new JButton(I18nService.getInstance().message("pitest.view.report"));
             viewReportButton.addActionListener(e -> {
                 try {
                     Desktop.getDesktop().browse(reportFile.toURI());

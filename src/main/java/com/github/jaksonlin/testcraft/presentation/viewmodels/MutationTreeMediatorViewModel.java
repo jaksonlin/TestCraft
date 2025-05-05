@@ -33,6 +33,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import com.github.jaksonlin.testcraft.infrastructure.messaging.events.MutationEvent;
+import com.github.jaksonlin.testcraft.infrastructure.messaging.events.TypedEventObserver;
 
 public class MutationTreeMediatorViewModel implements IMutationReportUI {
     private static final Logger log = LoggerFactory.getLogger(MutationTreeMediatorViewModel.class);
@@ -40,6 +42,15 @@ public class MutationTreeMediatorViewModel implements IMutationReportUI {
     private final IMutationMediator mediator;
     private final RunHistoryManagerService runHistoryManager;
     protected final HashMap<String, Integer> annotatedNodes = new HashMap<>();
+    private final TypedEventObserver<MutationEvent> mutationObserver = new TypedEventObserver<MutationEvent>(MutationEvent.class) {
+        @Override
+        public void onTypedEvent(MutationEvent event) {
+            if (event.getEventType().equals(MutationEvent.MUTATION_RESULT)) {
+                Pair<String, Map<Integer, Pair<String, Boolean>>> payload = (Pair<String, Map<Integer, Pair<String, Boolean>>>) event.getPayload();
+                SwingUtilities.invokeLater(() -> updateMutationResult(payload.getFirst(), payload.getSecond()));
+            }
+        }
+    };
 
     public MutationTreeMediatorViewModel(@NotNull Project project, @NotNull IMutationMediator mediator) {
         this.project = project;
@@ -62,7 +73,6 @@ public class MutationTreeMediatorViewModel implements IMutationReportUI {
         });
     }
 
-    @Override
     public void updateMutationResult(String mutationClassFilePath, Map<Integer, Pair<String, Boolean>> mutationTestResult) {
         VirtualFile virtualFile = LocalFileSystem.getInstance().findFileByPath(mutationClassFilePath);
         if (virtualFile != null) {
