@@ -42,9 +42,6 @@ public class ObservableTree extends JTree  {
         }
     };
 
-    public ObservableTree() {
-        EventBusService.getInstance().register(eventObserver);
-    }
       
 
     private void initializeMutationTree(@NotNull List<Pair<String, String>> nodeNameList) {

@@ -1,6 +1,7 @@
 package com.github.jaksonlin.testcraft.presentation.components;
 
 import com.github.jaksonlin.testcraft.infrastructure.messaging.events.ChatEvent;
+import com.github.jaksonlin.testcraft.infrastructure.messaging.events.LLMConfigEvent;
 import com.github.jaksonlin.testcraft.infrastructure.messaging.events.TypedEventObserver;
 import com.github.jaksonlin.testcraft.infrastructure.services.system.EventBusService;
 import com.github.jaksonlin.testcraft.infrastructure.services.system.I18nService;
@@ -22,8 +23,56 @@ import java.util.TimerTask;
 import javax.swing.text.html.HTMLDocument;
 
 public class LLMResponseComponent  {
-    private final TypedEventObserver<ChatEvent> eventObserver;
-    
+    private final TypedEventObserver<ChatEvent> eventObserver = new TypedEventObserver<ChatEvent>(ChatEvent.class) {
+        @Override
+        public void onTypedEvent(ChatEvent event) {
+            switch (event.getEventType()) {
+                case ChatEvent.START_LOADING:
+                    startLoading();
+                    break;
+                case ChatEvent.STOP_LOADING:
+                    stopLoading();
+                    break;
+                case ChatEvent.CHAT_REQUEST:
+                    if (!isLoading) {
+                        appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "user", I18nService.getInstance().message("llm.user"), event.getPayload().toString()));
+                        startLoading();
+                    }
+                    break;
+                case ChatEvent.CHAT_RESPONSE:
+                    if (isLoading) {
+                        stopLoading();
+                    }
+                    appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "assistant", I18nService.getInstance().message("llm.assistant"), event.getPayload().toString()));
+                    break;
+                case ChatEvent.COPY_CHAT_RESPONSE:
+                    copyToClipboard(event.getPayload());
+                    break;
+                case ChatEvent.DRY_RUN_PROMPT:
+                    String dryRunPrompt = (String) event.getPayload();
+                    if (dryRunPrompt.isEmpty()){
+                        JOptionPane.showMessageDialog(masterPanel, I18nService.getInstance().message("llm.dry.run.prompt.empty"), I18nService.getInstance().message("llm.dry.run.prompt"), JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "system", I18nService.getInstance().message("llm.system"), I18nService.getInstance().message("llm.dry.run.prompt") + "\n" + event.getPayload().toString()));
+                    }
+                    break;
+                case ChatEvent.ERROR:
+                    JOptionPane.showMessageDialog(masterPanel, I18nService.getInstance().message("llm.error") + ": " + event.getPayload().toString(), I18nService.getInstance().message("llm.error"), JOptionPane.ERROR_MESSAGE);
+                    break;
+            }
+        }
+    };
+
+    private final TypedEventObserver<LLMConfigEvent> llmConfigObserver = new TypedEventObserver<LLMConfigEvent>(LLMConfigEvent.class) {
+        @Override
+        public void onTypedEvent(LLMConfigEvent event) {
+            switch (event.getEventType()) {
+                case LLMConfigEvent.CONFIG_CHANGE_COPY_AS_MARKDOWN:
+                    copyAsMarkdown = (boolean) event.getPayload();
+                    break;
+            }
+        }
+    };
     private final JEditorPane outputArea;
     private boolean isLoading = false;
     private boolean copyAsMarkdown = false;
@@ -71,59 +120,13 @@ public class LLMResponseComponent  {
     }
 
     public void notifyCopyButtonClick() {
-        EventBusService.getInstance().post(new ChatEvent(ChatEvent.COPY_CHAT_RESPONSE, chatHistory));
+        EventBusService.getInstance().post(new ChatEvent(ChatEvent.REQUEST_COPY_CHAT_RESPONSE, null));
     }
 
     public LLMResponseComponent(ChatPanelComponent chatPanelComponent) {
         masterPanel = new JPanel(new BorderLayout());
         masterPanel.setBorder(JBUI.Borders.empty(10));
 
-        // Create event observer
-        this.eventObserver = new TypedEventObserver<ChatEvent>(ChatEvent.class) {
-            @Override
-            public void onTypedEvent(ChatEvent event) {
-                switch (event.getEventType()) {
-                    case ChatEvent.START_LOADING:
-                        startLoading();
-                        break;
-                    case ChatEvent.STOP_LOADING:
-                        stopLoading();
-                        break;
-                    case ChatEvent.CHAT_REQUEST:
-                        if (!isLoading) {
-                            appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "user", I18nService.getInstance().message("llm.user"), event.getPayload().toString()));
-                            startLoading();
-                        }
-                        break;
-                    case ChatEvent.CHAT_RESPONSE:
-                        if (isLoading) {
-                            stopLoading();
-                        }
-                        appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "assistant", I18nService.getInstance().message("llm.assistant"), event.getPayload().toString()));
-                        break;
-                    case ChatEvent.COPY_CHAT_RESPONSE:
-                        copyToClipboard(event.getPayload());
-                        break;
-                    case ChatEvent.CONFIG_CHANGE_COPY_AS_MARKDOWN:
-                        copyAsMarkdown = (boolean) event.getPayload();
-                        break;
-                    case ChatEvent.DRY_RUN_PROMPT:
-                        String dryRunPrompt = (String) event.getPayload();
-                        if (dryRunPrompt.isEmpty()){
-                            JOptionPane.showMessageDialog(masterPanel, I18nService.getInstance().message("llm.dry.run.prompt.empty"), I18nService.getInstance().message("llm.dry.run.prompt"), JOptionPane.INFORMATION_MESSAGE);
-                        } else {
-                            appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "system", I18nService.getInstance().message("llm.system"), I18nService.getInstance().message("llm.dry.run.prompt") + "\n" + event.getPayload().toString()));
-                        }
-                        break;
-                    case ChatEvent.ERROR:
-                        JOptionPane.showMessageDialog(masterPanel, I18nService.getInstance().message("llm.error") + ": " + event.getPayload().toString(), I18nService.getInstance().message("llm.error"), JOptionPane.ERROR_MESSAGE);
-                        break;
-                }
-            }
-        };
-
-        // Register with event bus
-        EventBusService.getInstance().register(eventObserver);
 
         // Setup improved JEditorPane for HTML rendering
         outputArea = new JEditorPane();

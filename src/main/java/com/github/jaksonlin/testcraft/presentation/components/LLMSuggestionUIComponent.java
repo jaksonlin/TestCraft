@@ -29,14 +29,37 @@ import java.util.Map;
 
 public class LLMSuggestionUIComponent  {
 
-    private final TypedEventObserver<ChatEvent> chatEventObserver;
-    private final TypedEventObserver<RunHistoryEvent> runHistoryEventObserver;
+    private final TypedEventObserver<ChatEvent> chatEventObserver = new TypedEventObserver<ChatEvent>(ChatEvent.class) {
+        @Override
+        public void onTypedEvent(ChatEvent event) {
+            switch (event.getEventType()) {
+                case ChatEvent.START_LOADING:
+                    generateButton.setEnabled(false);
+                    dryRunButton.setEnabled(false);
+                    break;
+                case ChatEvent.STOP_LOADING:
+                    generateButton.setEnabled(true);
+                    dryRunButton.setEnabled(true);
+                    break;
+            }
+        }
+    };
+    private final TypedEventObserver<RunHistoryEvent> runHistoryEventObserver = new TypedEventObserver<RunHistoryEvent>(RunHistoryEvent.class) {
+        @Override
+        public void onTypedEvent(RunHistoryEvent event) {
+            switch (event.getEventType()) {
+                case RunHistoryEvent.RUN_HISTORY_LIST:
+                    ApplicationManager.getApplication().invokeLater(() -> loadFileHistory(event.getPayload()));
+                    break;
+            }
+        }
+    };;
 
     
     private final ChatPanelComponent chatPanel = new ChatPanelComponent();
     private final LLMResponseComponent responsePanel = new LLMResponseComponent(chatPanel);
     
-    private final LLMSuggestionUIComponentViewModel viewModel;
+    private final LLMSuggestionUIComponentViewModel viewModel = new LLMSuggestionUIComponentViewModel();
 
     private final JPanel mainPanel = new JPanel(new BorderLayout());
     private final DefaultComboBoxModel<FileItem> fileListModel = new DefaultComboBoxModel<>();
@@ -47,34 +70,6 @@ public class LLMSuggestionUIComponent  {
 
     public LLMSuggestionUIComponent() {
         setupUI();
-        
-        chatEventObserver = new TypedEventObserver<ChatEvent>(ChatEvent.class) {
-            @Override
-            public void onTypedEvent(ChatEvent event) {
-                switch (event.getEventType()) {
-                    case ChatEvent.START_LOADING:
-                        generateButton.setEnabled(false);
-                        dryRunButton.setEnabled(false);
-                        break;
-                    case ChatEvent.STOP_LOADING:
-                        generateButton.setEnabled(true);
-                        dryRunButton.setEnabled(true);
-                        break;
-                }
-            }
-        };
-        runHistoryEventObserver = new TypedEventObserver<RunHistoryEvent>(RunHistoryEvent.class) {
-            @Override
-            public void onTypedEvent(RunHistoryEvent event) {
-                switch (event.getEventType()) {
-                    case RunHistoryEvent.RUN_HISTORY_LIST:
-                        ApplicationManager.getApplication().invokeLater(() -> loadFileHistory(event.getPayload()));
-                        break;
-                }
-            }
-        };
-        // setup message routing
-        viewModel = new LLMSuggestionUIComponentViewModel();
         // propagate the config change
         viewModel.propagateConfigChange();
     }
