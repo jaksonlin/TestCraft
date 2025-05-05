@@ -9,7 +9,7 @@ import com.intellij.openapi.components.Service;
 import com.intellij.openapi.application.ApplicationManager;
 
 @Service(Service.Level.APP)
-public class I18nService {
+public final class I18nService {
     private final String BUNDLE = "messages.MyBundle";
     private ResourceBundle ourBundle;
     public String message(@PropertyKey(resourceBundle = BUNDLE) String key, Object... params) {
