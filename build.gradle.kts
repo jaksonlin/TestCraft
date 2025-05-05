@@ -55,7 +55,7 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.18.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2") // Use latest version
     implementation("org.commonmark:commonmark:0.21.0")
-
+    implementation("org.apache.httpcomponents:httpclient:4.5.13")
 
     // IntelliJ Platform Gradle Plugin Dependencies Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
     intellijPlatform {

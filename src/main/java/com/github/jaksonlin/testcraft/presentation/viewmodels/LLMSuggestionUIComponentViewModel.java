@@ -1,36 +1,30 @@
 package com.github.jaksonlin.testcraft.presentation.viewmodels;
 
-import com.github.jaksonlin.testcraft.core.context.PitestContext;
-import com.github.jaksonlin.testcraft.messaging.observers.BasicEventObserver;
-import com.github.jaksonlin.testcraft.messaging.observers.ObserverBase;
-import com.github.jaksonlin.testcraft.core.services.LLMService;
+import com.github.jaksonlin.testcraft.domain.context.PitestContext;
+import com.github.jaksonlin.testcraft.infrastructure.messaging.events.BasicEventObserver;
+import com.github.jaksonlin.testcraft.infrastructure.messaging.events.ChatEvent;
+import com.github.jaksonlin.testcraft.infrastructure.services.config.LLMConfigService;
+import com.github.jaksonlin.testcraft.infrastructure.services.system.EventBusService;
 
-public class LLMSuggestionUIComponentViewModel extends ObserverBase implements BasicEventObserver {
 
-    private final LLMService llmService;
-    
-
-    public LLMSuggestionUIComponentViewModel(LLMService llmService) {
-        this.llmService = llmService;
-        llmService.addObserver(this); // as hub to forward events
-        this.addObserver(llmService);
+public class LLMSuggestionUIComponentViewModel extends BasicEventObserver {
+    private final EventBusService eventBusService = EventBusService.getInstance();
+    private final LLMConfigService llmConfigService = LLMConfigService.getInstance();
+    public LLMSuggestionUIComponentViewModel() {
+        eventBusService.register(this);
     }
 
     public void propagateConfigChange() {
-        llmService.propagateConfigChange();
-    }
-
-    public void clearChat() {
-        notifyObservers("CLEAR_CHAT", null);
+        llmConfigService.propagateConfigChange();
     }
 
     public void copyChat() {
-        String chatHistory = llmService.getChatHistory();
+        String chatHistory = llmConfigService.getChatHistory();
         // when chatHistory is empty, use the lastDryRunPrompt
         if (chatHistory.isEmpty()) {
             chatHistory = lastDryRunPrompt;
         }
-        notifyObservers("COPY_CHAT_RESPONSE", chatHistory);
+        eventBusService.post(new ChatEvent(ChatEvent.COPY_CHAT_RESPONSE, chatHistory));
     }
 
 
@@ -42,27 +36,26 @@ public class LLMSuggestionUIComponentViewModel extends ObserverBase implements B
             default:
                 // if have chat response, stop loading
                 if (eventName.contains("CHAT_RESPONSE:")) {
-                    notifyObservers("STOP_LOADING", null);
+                    eventBusService.post(new ChatEvent(ChatEvent.STOP_LOADING, null));
                 }
-                notifyObservers(eventName, eventObj);
-                break;
+                eventBusService.post(new ChatEvent(eventName, eventObj));
         }
     }
 
 
     public void generateSuggestions(PitestContext context) {
-        notifyObservers("START_LOADING", null);
-        llmService.generateUnittestRequest(context.getTestFilePath(), context.getTargetClassFilePath(), context.getMutationResults());
+        eventBusService.post(new ChatEvent(ChatEvent.START_LOADING, null));
+        llmConfigService.generateUnittestRequest(context.getTestFilePath(), context.getTargetClassFilePath(), context.getMutationResults());
     }
 
     private String lastDryRunPrompt = "";
 
     public void dryRunGetPrompt(PitestContext context) {
-        lastDryRunPrompt = llmService.dryRunGetPrompt(context.getFullyQualifiedTargetTestClassName(), context.getTargetClassFullyQualifiedName(), context.getMutationResults());
-        notifyObservers("DRY_RUN_PROMPT", lastDryRunPrompt);
+        lastDryRunPrompt = llmConfigService.dryRunGetPrompt(context.getFullyQualifiedTargetTestClassName(), context.getTargetClassFullyQualifiedName(), context.getMutationResults());
+        eventBusService.post(new ChatEvent(ChatEvent.DRY_RUN_PROMPT, lastDryRunPrompt));
     }
 
     public void handleChatMessage(String message) {
-        llmService.handleChatMessage(message);
+        llmConfigService.handleChatMessage(message);
     }
 }

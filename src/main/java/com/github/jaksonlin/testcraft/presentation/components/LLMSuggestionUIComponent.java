@@ -1,7 +1,9 @@
 package com.github.jaksonlin.testcraft.presentation.components;
 
-import com.github.jaksonlin.testcraft.core.context.PitestContext;
-import com.github.jaksonlin.testcraft.messaging.observers.BasicEventObserver;
+import com.github.jaksonlin.testcraft.domain.context.PitestContext;
+import com.github.jaksonlin.testcraft.infrastructure.messaging.events.BasicEventObserver;
+import com.github.jaksonlin.testcraft.infrastructure.messaging.events.RunHistoryEvent;
+import com.github.jaksonlin.testcraft.infrastructure.services.system.EventBusService;
 import com.github.jaksonlin.testcraft.presentation.viewmodels.LLMSuggestionUIComponentViewModel;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.ui.ComboBox;
@@ -16,9 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
-import com.github.jaksonlin.testcraft.core.services.LLMService;
 
-public class LLMSuggestionUIComponent implements BasicEventObserver {
+public class LLMSuggestionUIComponent extends BasicEventObserver {
     private static final String BUNDLE = "messages.MyBundle";
     private static ResourceBundle ourBundle;
     
@@ -43,31 +44,14 @@ public class LLMSuggestionUIComponent implements BasicEventObserver {
     private final JButton dryRunButton = new JButton(message("llm.check.prompt"));
     private List<FileItem> allFileItems = new ArrayList<>();
 
-    public LLMSuggestionUIComponent(LLMService llmService) {
+    public LLMSuggestionUIComponent() {
         setupUI();
         // setup message routing
-        viewModel = new LLMSuggestionUIComponentViewModel(llmService);
-        viewModel.addObserver(this);
-        viewModel.addObserver(responsePanel);
+        viewModel = new LLMSuggestionUIComponentViewModel();
+        EventBusService.getInstance().register(this);
+        EventBusService.getInstance().register(responsePanel);
 
-        // add the chatPanel to the mainPanel
-        chatPanel.addListener(message -> {
-            viewModel.handleChatMessage(message);
-        });
-
-        // add the reponse listener to the responsePanel
-        responsePanel.addResponseActionListener(new LLMResponsePanel.ResponseActionListener() {
-            @Override
-            public void onClearButtonClick() {
-                viewModel.clearChat();
-            }
-
-            @Override
-            public void onCopyButtonClick() {
-                viewModel.copyChat();
-            }
-        });
-
+        // propagate the config change
         viewModel.propagateConfigChange();
         
     }
@@ -85,7 +69,7 @@ public class LLMSuggestionUIComponent implements BasicEventObserver {
                 generateButton.setEnabled(true);
                 dryRunButton.setEnabled(true);
                 break;
-            case "RUN_HISTORY_LIST":
+            case RunHistoryEvent.RUN_HISTORY_LIST:
                 ApplicationManager.getApplication().invokeLater(() -> loadFileHistory(eventObj));
                 break;
             default:

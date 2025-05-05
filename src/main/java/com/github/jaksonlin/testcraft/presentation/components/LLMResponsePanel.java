@@ -1,6 +1,8 @@
 package com.github.jaksonlin.testcraft.presentation.components;
 
-import com.github.jaksonlin.testcraft.messaging.observers.BasicEventObserver;
+import com.github.jaksonlin.testcraft.infrastructure.messaging.events.BasicEventObserver;
+import com.github.jaksonlin.testcraft.infrastructure.messaging.events.ChatEvent;
+import com.github.jaksonlin.testcraft.infrastructure.services.system.EventBusService;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
 import org.commonmark.node.Node;
@@ -16,28 +18,14 @@ import javax.swing.*;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.List;
 import java.util.ResourceBundle;
 import javax.swing.text.html.HTMLDocument;
 
-public class LLMResponsePanel extends JPanel implements BasicEventObserver {
+public class LLMResponsePanel extends JPanel {
     private static final String BUNDLE = "messages.MyBundle";
     private static ResourceBundle ourBundle;
-    
-    public static String message(@PropertyKey(resourceBundle = BUNDLE) String key, Object... params) {
-        return AbstractBundle.message(getBundle(), key, params);
-    }
-    
-    private static ResourceBundle getBundle() {
-        if (ourBundle == null) {
-            ourBundle = ResourceBundle.getBundle(BUNDLE);
-        }
-        return ourBundle;
-    }
-
     private final JEditorPane outputArea;
     private final ChatPanel chatPanel;
     private boolean isLoading = false;
@@ -48,6 +36,18 @@ public class LLMResponsePanel extends JPanel implements BasicEventObserver {
     private final JPanel loadingPanel;
     private final Timer loadingTimer;
     private final JLabel loadingLabel;
+    private final BasicEventObserver eventObserver;
+
+    public static String message(@PropertyKey(resourceBundle = BUNDLE) String key, Object... params) {
+        return AbstractBundle.message(getBundle(), key, params);
+    }
+    
+    private static ResourceBundle getBundle() {
+        if (ourBundle == null) {
+            ourBundle = ResourceBundle.getBundle(BUNDLE);
+        }
+        return ourBundle;
+    }
 
     private static final String BASE_HTML_TEMPLATE =
             "<!DOCTYPE html>\n" +
@@ -71,37 +71,63 @@ public class LLMResponsePanel extends JPanel implements BasicEventObserver {
                     "</div>\n" +
                     "<div class=\"message-separator\"></div>";
 
-    public interface ResponseActionListener {
-        void onClearButtonClick();
-        void onCopyButtonClick();
-    }
-
-    private List<ResponseActionListener> responseActionListeners = new ArrayList<>();
-
-    public void addResponseActionListener(ResponseActionListener listener) {
-        responseActionListeners.add(listener);
-    }
-
-    public void removeResponseActionListener(ResponseActionListener listener) {
-        responseActionListeners.remove(listener);
-    }
-
+    
     public void notifyClearButtonClick() {
-        for (ResponseActionListener listener : responseActionListeners) {
-            listener.onClearButtonClick();
-        }
+        EventBusService.getInstance().post(new ChatEvent(ChatEvent.CLEAR_CHAT, null));
     }
 
     public void notifyCopyButtonClick() {
-        for (ResponseActionListener listener : responseActionListeners) {
-            listener.onCopyButtonClick();
-        }
+        EventBusService.getInstance().post(new ChatEvent(ChatEvent.COPY_CHAT_RESPONSE, chatHistory));
     }
 
     public LLMResponsePanel(ChatPanel chatPanel) {
         this.chatPanel = chatPanel;
         setLayout(new BorderLayout());
         setBorder(JBUI.Borders.empty(10));
+
+        // Create event observer
+        this.eventObserver = new BasicEventObserver() {
+            @Override
+            public void onEventHappen(String eventName, Object eventObj) {
+                switch (eventName) {
+                    case ChatEvent.START_LOADING:
+                        startLoading();
+                        break;
+                    case ChatEvent.STOP_LOADING:
+                        stopLoading();
+                        break;
+                    case ChatEvent.CHAT_REQUEST:
+                        if (!isLoading) {
+                            appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "user", message("llm.user"), eventObj.toString()));
+                            startLoading();
+                        }
+                        break;
+                    case ChatEvent.CHAT_RESPONSE:
+                        appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "assistant", message("llm.assistant"), eventObj.toString()));
+                        break;
+                    case ChatEvent.COPY_CHAT_RESPONSE:
+                        copyToClipboard(eventObj);
+                        break;
+                    case ChatEvent.CONFIG_CHANGE_COPY_AS_MARKDOWN:
+                        copyAsMarkdown = (boolean) eventObj;
+                        break;
+                    case ChatEvent.DRY_RUN_PROMPT:
+                        String dryRunPrompt = (String) eventObj;
+                        if (dryRunPrompt.isEmpty()){
+                            JOptionPane.showMessageDialog(LLMResponsePanel.this, message("llm.dry.run.prompt.empty"), message("llm.dry.run.prompt"), JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "system", message("llm.system"), message("llm.dry.run.prompt") + "\n" + eventObj.toString()));
+                        }
+                        break;
+                    case ChatEvent.ERROR:
+                        JOptionPane.showMessageDialog(LLMResponsePanel.this, message("llm.error") + ": " + eventObj.toString(), message("llm.error"), JOptionPane.ERROR_MESSAGE);
+                        break;
+                }
+            }
+        };
+
+        // Register with event bus
+        EventBusService.getInstance().register(eventObserver);
 
         // Setup improved JEditorPane for HTML rendering
         outputArea = new JEditorPane();
@@ -167,10 +193,6 @@ public class LLMResponsePanel extends JPanel implements BasicEventObserver {
         add(centerPanel, BorderLayout.CENTER);
         add(inputPanel, BorderLayout.SOUTH);
 
-        // add the chatPanel to the responsePanel, and notify update on the responsePanel with user message
-        this.chatPanel.addListener(message -> {
-            onEventHappen("CHAT_REQUEST", message);
-        });
         
         // Initialize with empty chat container
         updateOutputArea();
@@ -323,54 +345,5 @@ public class LLMResponsePanel extends JPanel implements BasicEventObserver {
         }
         StringSelection selection = new StringSelection(currentContentToCopy);
         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
-    }
-
-    @Override
-    public void onEventHappen(String eventName, Object eventObj) {
-        switch (eventName) {
-            case "START_LOADING":
-                startLoading();
-                break;
-            case "STOP_LOADING":
-                stopLoading();
-                break;
-            case "COPY_CHAT_RESPONSE":
-                copyToClipboard(eventObj);
-                break;
-            case "CONFIG_CHANGE:copyAsMarkdown":
-                copyAsMarkdown = (boolean) eventObj;
-                break;
-            case "CHAT_REQUEST":
-                if (!isLoading) {
-                    appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "user", message("llm.user"), eventObj.toString()));
-                    startLoading();
-                }
-                break;
-            case "DRY_RUN_PROMPT":
-                String dryRunPrompt = (String) eventObj;
-                if (dryRunPrompt.isEmpty()){
-                    JOptionPane.showMessageDialog(this, message("llm.dry.run.prompt.empty"), message("llm.dry.run.prompt"), JOptionPane.INFORMATION_MESSAGE);
-                } else {
-                    appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "system", message("llm.system"), message("llm.dry.run.prompt") + "\n" + eventObj.toString()));
-                }
-                break;
-            default:
-                String[] responseType = eventName.split(":");
-                if (responseType.length > 1 && responseType[0].equals("CHAT_RESPONSE")) {
-                    switch (responseType[1]) {
-                        case "CHAT_MESSAGE":
-                            appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "assistant", message("llm.assistant"), eventObj.toString()));
-                            break;
-                        case "ERROR":
-                            JOptionPane.showMessageDialog(this, message("llm.error") + ": " + eventObj.toString(), message("llm.error"), JOptionPane.ERROR_MESSAGE);
-                            break;
-                        case "UNIT_TEST_REQUEST":
-                            clearOutput();
-                            appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "system", message("llm.system"), message("llm.new.unit.test.suggestion") + "\n" + eventObj.toString()));
-                            break;
-                    }
-                }
-                break;
-        }
     }
 }

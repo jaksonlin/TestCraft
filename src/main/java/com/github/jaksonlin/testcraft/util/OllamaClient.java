@@ -2,13 +2,17 @@ package com.github.jaksonlin.testcraft.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intellij.openapi.diagnostic.Logger;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,12 +21,11 @@ public class OllamaClient {
     private static final Logger LOG = Logger.getInstance(OllamaClient.class);
     private final String baseUrl;
     private final ObjectMapper objectMapper;
-    private final HttpClient httpClient;
+    private final CloseableHttpClient httpClient;
     private final int timeoutSeconds;
     private final String model;
     private final int maxTokens;
     private final float temperature;
-
 
     public OllamaClient(String host, String model, int maxTokens, float temperature, int port, int timeoutSeconds) {
         this.baseUrl = String.format("http://%s:%d", host, port);
@@ -31,28 +34,31 @@ public class OllamaClient {
         this.model = model;
         this.maxTokens = maxTokens;
         this.temperature = temperature;
-        this.httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(timeoutSeconds))
+        
+        RequestConfig config = RequestConfig.custom()
+                .setConnectTimeout(timeoutSeconds * 1000)
+                .setConnectionRequestTimeout(timeoutSeconds * 1000)
+                .setSocketTimeout(timeoutSeconds * 1000)
+                .build();
+        
+        this.httpClient = HttpClients.custom()
+                .setDefaultRequestConfig(config)
                 .build();
     }
 
     public boolean testConnection() {
         try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(baseUrl))
-                    .timeout(Duration.ofSeconds(timeoutSeconds))
-                    .GET()
-                    .build();
-
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            return response.statusCode() == 200;
+            HttpGet request = new HttpGet(baseUrl);
+            try (CloseableHttpResponse response = httpClient.execute(request)) {
+                return response.getStatusLine().getStatusCode() == 200;
+            }
         } catch (Exception e) {
             LOG.warn("Failed to test connection to Ollama server", e);
             return false;
         }
     }
 
-    public String chatCompletion(List<Message> messages) throws IOException, InterruptedException {
+    public String chatCompletion(List<Message> messages) throws IOException {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", model);
         requestBody.put("messages", messages);
@@ -60,22 +66,21 @@ public class OllamaClient {
         requestBody.put("temperature", temperature);
         requestBody.put("num_predict", maxTokens);
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl + "/api/chat"))
-                .header("Content-Type", "application/json")
-                .timeout(Duration.ofSeconds(timeoutSeconds))
-                .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(requestBody)))
-                .build();
+        HttpPost request = new HttpPost(baseUrl + "/api/chat");
+        request.setHeader("Content-Type", "application/json");
+        request.setEntity(new StringEntity(objectMapper.writeValueAsString(requestBody), "UTF-8"));
 
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        try (CloseableHttpResponse response = httpClient.execute(request)) {
+            if (response.getStatusLine().getStatusCode() != 200) {
+                String errorBody = EntityUtils.toString(response.getEntity());
+                LOG.error("Error from Ollama API: " + errorBody);
+                throw new IOException("Failed to get response from Ollama API: " + response.getStatusLine().getStatusCode());
+            }
 
-        if (response.statusCode() != 200) {
-            LOG.error("Error from Ollama API: " + response.body());
-            throw new IOException("Failed to get response from Ollama API: " + response.statusCode());
+            String responseBody = EntityUtils.toString(response.getEntity());
+            Map<String, Object> responseMap = objectMapper.readValue(responseBody, Map.class);
+            return ((Map<String, String>) responseMap.get("message")).get("content");
         }
-
-        Map<String, Object> responseMap = objectMapper.readValue(response.body(), Map.class);
-        return ((Map<String, String>) responseMap.get("message")).get("content");
     }
 
     public static class Message {

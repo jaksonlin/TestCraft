@@ -1,9 +1,9 @@
 package com.github.jaksonlin.testcraft.presentation.viewmodels;
 
-import com.github.jaksonlin.testcraft.core.context.PitestContext;
-import com.github.jaksonlin.testcraft.messaging.mediators.IMutationMediator;
-import com.github.jaksonlin.testcraft.messaging.mediators.IMutationReportUI;
-import com.github.jaksonlin.testcraft.core.services.RunHistoryManagerService;
+import com.github.jaksonlin.testcraft.domain.context.PitestContext;
+import com.github.jaksonlin.testcraft.infrastructure.messaging.mediators.IMutationMediator;
+import com.github.jaksonlin.testcraft.infrastructure.messaging.mediators.IMutationReportUI;
+import com.github.jaksonlin.testcraft.infrastructure.services.business.RunHistoryManagerService;
 import com.github.jaksonlin.testcraft.util.Mutation;
 import com.github.jaksonlin.testcraft.util.Pair;
 import com.intellij.icons.AllIcons;

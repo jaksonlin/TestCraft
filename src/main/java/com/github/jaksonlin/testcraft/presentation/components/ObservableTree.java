@@ -1,7 +1,9 @@
 package com.github.jaksonlin.testcraft.presentation.components;
 
+import com.github.jaksonlin.testcraft.infrastructure.messaging.events.BasicEventObserver;
+import com.github.jaksonlin.testcraft.infrastructure.messaging.events.RunHistoryEvent;
+import com.github.jaksonlin.testcraft.infrastructure.services.system.EventBusService;
 import com.github.jaksonlin.testcraft.util.MyBundle;
-import com.github.jaksonlin.testcraft.messaging.observers.BasicEventObserver;
 import com.github.jaksonlin.testcraft.util.Pair;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,30 +15,37 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-public class ObservableTree extends JTree implements BasicEventObserver {
+public class ObservableTree extends JTree  {
 
-    @Override
-    public void onEventHappen(String eventName,Object eventObj) {
-        if (!eventName.equals("RUN_HISTORY")) {
-            return;
-        }
-        if (eventObj == null) {
-            initializeMutationTree(Collections.emptyList());
-        } else if (eventObj instanceof Pair) {
-            Pair<?, ?> pair = (Pair<?, ?>) eventObj;
-            if (pair.getFirst() instanceof String && pair.getSecond() instanceof String) {
-                updateMutationTree(new Pair<>((String) pair.getFirst(), (String) pair.getSecond()));
+    private final BasicEventObserver eventObserver = new BasicEventObserver() {
+        @Override
+        public void onEventHappen(String eventName, Object eventObj) {
+            if (!eventName.equals(RunHistoryEvent.RUN_HISTORY)) {
+                return;
             }
-        } else if (eventObj instanceof List) {
-            List<?> list = (List<?>) eventObj;
-            if (list.isEmpty()) {
+            if (eventObj == null) {
                 initializeMutationTree(Collections.emptyList());
-            } else if (list.get(0) instanceof Pair) {
-                List<Pair<String, String>> nodeList = (List<Pair<String, String>>) list;
-                initializeMutationTree(nodeList);
+            } else if (eventObj instanceof Pair) {
+                Pair<?, ?> pair = (Pair<?, ?>) eventObj;
+                if (pair.getFirst() instanceof String && pair.getSecond() instanceof String) {
+                    updateMutationTree(new Pair<>((String) pair.getFirst(), (String) pair.getSecond()));
+                }
+            } else if (eventObj instanceof List) {
+                List<?> list = (List<?>) eventObj;
+                if (list.isEmpty()) {
+                    initializeMutationTree(Collections.emptyList());
+                } else if (list.get(0) instanceof Pair) {
+                    List<Pair<String, String>> nodeList = (List<Pair<String, String>>) list;
+                    initializeMutationTree(nodeList);
+                }
             }
         }
+    };
+
+    public ObservableTree() {
+        EventBusService.getInstance().register(eventObserver);
     }
+      
 
     private void initializeMutationTree(@NotNull List<Pair<String, String>> nodeNameList) {
         DefaultTreeModel treeModel = buildTreeModel(nodeNameList);

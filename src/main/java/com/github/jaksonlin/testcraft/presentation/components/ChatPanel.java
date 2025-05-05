@@ -1,5 +1,7 @@
 package com.github.jaksonlin.testcraft.presentation.components;
 
+import com.github.jaksonlin.testcraft.infrastructure.messaging.events.ChatEvent;
+import com.github.jaksonlin.testcraft.infrastructure.services.system.EventBusService;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
 
@@ -7,18 +9,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyAdapter;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ChatPanel extends JPanel {
     private final JTextArea inputArea;
     private final JButton sendButton;
-    private final List<ChatMessageListener> listeners = new ArrayList<>();
     private final JPanel inputPanel;
-
-    public interface ChatMessageListener {
-        void onNewMessage(String message);
-    }
 
     public ChatPanel() {
         setLayout(new BorderLayout());
@@ -51,9 +46,7 @@ public class ChatPanel extends JPanel {
         });
     }
 
-    public void addListener(ChatMessageListener listener) {
-        listeners.add(listener);
-    }
+
 
     public JPanel getInputPanel() {
         return inputPanel;
@@ -62,7 +55,7 @@ public class ChatPanel extends JPanel {
     private void sendMessage() {
         String message = inputArea.getText().trim();
         if (!message.isEmpty()) {
-            listeners.forEach(listener -> listener.onNewMessage(message));
+            EventBusService.getInstance().post(new ChatEvent(ChatEvent.CHAT_REQUEST, message));
             inputArea.setText("");
             inputArea.requestFocus();
         }
