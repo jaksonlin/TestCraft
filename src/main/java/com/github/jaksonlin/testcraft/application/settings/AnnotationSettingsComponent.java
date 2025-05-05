@@ -1,5 +1,6 @@
 package com.github.jaksonlin.testcraft.application.settings;
 
+import com.github.jaksonlin.testcraft.infrastructure.services.system.I18nService;
 import com.intellij.json.JsonFileType;
 import com.intellij.openapi.editor.EditorSettings;
 import com.intellij.openapi.editor.ScrollType;
@@ -8,7 +9,6 @@ import com.intellij.ui.EditorTextField;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextField;
 import org.jetbrains.annotations.NotNull;
-import com.github.jaksonlin.testcraft.util.MyBundle;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,7 +20,7 @@ public class AnnotationSettingsComponent {
     private final JCheckBox autoImportCheckBox;
     private final JCheckBox enableValidationCheckBox;
     private static final int EDITOR_HEIGHT = 300;
-    
+
     private static final String EXAMPLE_JSON = "{\n" +
             "    \"fields\": [\n" +
             "        {\n" +
@@ -96,29 +96,29 @@ public class AnnotationSettingsComponent {
         c.gridx = 0;
         c.gridy = 0;
         c.weighty = 0.0;
-        JLabel importSettingsLabel = new JBLabel("<html><body><b>" + MyBundle.message("settings.annotation.import.title") + "</b></body></html>");
+        JLabel importSettingsLabel = new JBLabel("<html><body><b>" + I18nService.getInstance().message("settings.annotation.import.title") + "</b></body></html>");
         contentPanel.add(importSettingsLabel, c);
 
         // Package input
-        addLabelAndField(contentPanel, MyBundle.message("settings.annotation.package.label"), packageTextField, 1,
-                MyBundle.message("settings.annotation.package.tooltip"));
+        addLabelAndField(contentPanel, I18nService.getInstance().message("settings.annotation.package.label"), packageTextField, 1,
+                I18nService.getInstance().message("settings.annotation.package.tooltip"));
 
         // Checkboxes
         c.gridy = 2;
         c.gridwidth = 2;
-        autoImportCheckBox = new JCheckBox(MyBundle.message("settings.annotation.autoImport"));
-        autoImportCheckBox.setToolTipText(MyBundle.message("settings.annotation.autoImport.tooltip"));
+        autoImportCheckBox = new JCheckBox(I18nService.getInstance().message("settings.annotation.autoImport"));
+        autoImportCheckBox.setToolTipText(I18nService.getInstance().message("settings.annotation.autoImport.tooltip"));
         contentPanel.add(autoImportCheckBox, c);
 
         c.gridy = 3;
-        enableValidationCheckBox = new JCheckBox(MyBundle.message("settings.annotation.enableValidation"));
-        enableValidationCheckBox.setToolTipText(MyBundle.message("settings.annotation.enableValidation.tooltip"));
+        enableValidationCheckBox = new JCheckBox(I18nService.getInstance().message("settings.annotation.enableValidation"));
+        enableValidationCheckBox.setToolTipText(I18nService.getInstance().message("settings.annotation.enableValidation.tooltip"));
         contentPanel.add(enableValidationCheckBox, c);
 
         // Schema Configuration section
         c.gridy = 4;
         c.insets = new Insets(15, 5, 5, 5);
-        JLabel schemaLabel = new JBLabel("<html><body><b>" + MyBundle.message("settings.annotation.schema.title") + "</b></body></html>");
+        JLabel schemaLabel = new JBLabel("<html><body><b>" + I18nService.getInstance().message("settings.annotation.schema.title") + "</b></body></html>");
         contentPanel.add(schemaLabel, c);
 
         // Schema editor
@@ -129,7 +129,7 @@ public class AnnotationSettingsComponent {
         
         // Wrap editor in a panel to ensure it expands properly
         JPanel editorPanel = new JPanel(new BorderLayout());
-        editorPanel.add(new JBLabel(MyBundle.message("settings.annotation.schema.label")), BorderLayout.NORTH);
+        editorPanel.add(new JBLabel(I18nService.getInstance().message("settings.annotation.schema.label")), BorderLayout.NORTH);
         editorPanel.add(schemaEditor, BorderLayout.CENTER);
         contentPanel.add(editorPanel, c);
 
@@ -143,44 +143,44 @@ public class AnnotationSettingsComponent {
         helpPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         
         JLabel helpText = new JBLabel("<html><body style='width: 600px'>" +
-                "<h3>" + MyBundle.message("settings.annotation.schema.help.title") + "</h3>" +
-                "<p>" + MyBundle.message("settings.annotation.schema.help.intro") + "</p>" +
+                "<h3>" + I18nService.getInstance().message("settings.annotation.schema.help.title") + "</h3>" +
+                "<p>" + I18nService.getInstance().message("settings.annotation.schema.help.intro") + "</p>" +
                 
-                "<h4>" + MyBundle.message("settings.annotation.schema.help.structure.title") + "</h4>" +
+                "<h4>" + I18nService.getInstance().message("settings.annotation.schema.help.structure.title") + "</h4>" +
                 "<ul>" +
-                "<li>" + MyBundle.message("settings.annotation.schema.help.structure.1") + "</li>" +
-                "<li>" + MyBundle.message("settings.annotation.schema.help.structure.2") + "</li>" +
-                "<li>" + MyBundle.message("settings.annotation.schema.help.structure.3") + "</li>" +
+                "<li>" + I18nService.getInstance().message("settings.annotation.schema.help.structure.1") + "</li>" +
+                "<li>" + I18nService.getInstance().message("settings.annotation.schema.help.structure.2") + "</li>" +
+                "<li>" + I18nService.getInstance().message("settings.annotation.schema.help.structure.3") + "</li>" +
                 "</ul>" +
                 
-                "<h4>" + MyBundle.message("settings.annotation.schema.help.validation.title") + "</h4>" +
+                "<h4>" + I18nService.getInstance().message("settings.annotation.schema.help.validation.title") + "</h4>" +
                 "<ul>" +
-                "<li>" + MyBundle.message("settings.annotation.schema.help.validation.1") + "</li>" +
-                "<li>" + MyBundle.message("settings.annotation.schema.help.validation.2") + "</li>" +
-                "<li>" + MyBundle.message("settings.annotation.schema.help.validation.3") + "</li>" +
-                "<li>" + MyBundle.message("settings.annotation.schema.help.validation.4") + "</li>" +
-                "<li>" + MyBundle.message("settings.annotation.schema.help.validation.5") + "</li>" +
+                "<li>" + I18nService.getInstance().message("settings.annotation.schema.help.validation.1") + "</li>" +
+                "<li>" + I18nService.getInstance().message("settings.annotation.schema.help.validation.2") + "</li>" +
+                "<li>" + I18nService.getInstance().message("settings.annotation.schema.help.validation.3") + "</li>" +
+                "<li>" + I18nService.getInstance().message("settings.annotation.schema.help.validation.4") + "</li>" +
+                "<li>" + I18nService.getInstance().message("settings.annotation.schema.help.validation.5") + "</li>" +
                 "</ul>" +
                 
-                "<h4>" + MyBundle.message("settings.annotation.schema.help.valueProvider.title") + "</h4>" +
+                "<h4>" + I18nService.getInstance().message("settings.annotation.schema.help.valueProvider.title") + "</h4>" +
                 "<ul>" +
-                "<li>" + MyBundle.message("settings.annotation.schema.help.valueProvider.1") + "</li>" +
-                "<li>" + MyBundle.message("settings.annotation.schema.help.valueProvider.2") + "</li>" +
-                "<li>" + MyBundle.message("settings.annotation.schema.help.valueProvider.3") + "</li>" +
+                "<li>" + I18nService.getInstance().message("settings.annotation.schema.help.valueProvider.1") + "</li>" +
+                "<li>" + I18nService.getInstance().message("settings.annotation.schema.help.valueProvider.2") + "</li>" +
+                "<li>" + I18nService.getInstance().message("settings.annotation.schema.help.valueProvider.3") + "</li>" +
                 "</ul>" +
                 
-                "<h4>" + MyBundle.message("settings.annotation.schema.help.example.title") + "</h4>" +
+                "<h4>" + I18nService.getInstance().message("settings.annotation.schema.help.example.title") + "</h4>" +
                 "<div style='background-color:rgb(46, 46, 46); padding: 10px; border-radius: 5px; font-family: monospace; white-space: pre; color: #e8e8e8; font-size: 10px;'>" +
                 EXAMPLE_JSON.replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br>").replace(" ", "&nbsp;") +
                 "</div>" +
                 
-                "<h4>" + MyBundle.message("settings.annotation.schema.help.notes.title") + "</h4>" +
+                "<h4>" + I18nService.getInstance().message("settings.annotation.schema.help.notes.title") + "</h4>" +
                 "<ul>" +
-                "<li>" + MyBundle.message("settings.annotation.schema.help.notes.1") + "</li>" +
-                "<li>" + MyBundle.message("settings.annotation.schema.help.notes.2") + "</li>" +
-                "<li>" + MyBundle.message("settings.annotation.schema.help.notes.3") + "</li>" +
-                "<li>" + MyBundle.message("settings.annotation.schema.help.notes.4") + "</li>" +
-                "<li>" + MyBundle.message("settings.annotation.schema.help.notes.5") + "</li>" +
+                "<li>" + I18nService.getInstance().message("settings.annotation.schema.help.notes.1") + "</li>" +
+                "<li>" + I18nService.getInstance().message("settings.annotation.schema.help.notes.2") + "</li>" +
+                "<li>" + I18nService.getInstance().message("settings.annotation.schema.help.notes.3") + "</li>" +
+                "<li>" + I18nService.getInstance().message("settings.annotation.schema.help.notes.4") + "</li>" +
+                "<li>" + I18nService.getInstance().message("settings.annotation.schema.help.notes.5") + "</li>" +
                 "</ul>" +
                 "</body></html>");
         

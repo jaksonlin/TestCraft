@@ -4,7 +4,7 @@ import com.github.jaksonlin.testcraft.domain.context.PitestContext;
 import com.github.jaksonlin.testcraft.infrastructure.commands.CommandCancellationException;
 import com.github.jaksonlin.testcraft.infrastructure.commands.pitest.*;
 import com.github.jaksonlin.testcraft.infrastructure.services.business.PitestService;
-import com.github.jaksonlin.testcraft.util.MyBundle;
+import com.github.jaksonlin.testcraft.infrastructure.services.system.I18nService;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
@@ -65,7 +65,7 @@ public class RunPitestAction extends AnAction {
                     for (PitestCommand command : commands) {
                         if (indicator.isCanceled()) {
                             ApplicationManager.getApplication().invokeLater(() ->
-                                    Messages.showInfoMessage(MyBundle.message("pitest.run.canceled"), MyBundle.message("pitest.run.canceled.title"))
+                                    Messages.showInfoMessage(I18nService.getInstance().message("pitest.run.canceled"), I18nService.getInstance().message("pitest.run.canceled.title"))
                             );
                             break;
                         }
@@ -74,7 +74,7 @@ public class RunPitestAction extends AnAction {
                 } catch (Exception e) {
                     if (e.getCause() instanceof CommandCancellationException) {
                         ApplicationManager.getApplication().invokeLater(() ->
-                                Messages.showInfoMessage(MyBundle.message("pitest.run.canceled"), MyBundle.message("pitest.run.canceled.title"))
+                                Messages.showInfoMessage(I18nService.getInstance().message("pitest.run.canceled"), I18nService.getInstance().message("pitest.run.canceled.title"))
                         );
                     } else {
                         showErrorDialog(e, context);
@@ -89,7 +89,7 @@ public class RunPitestAction extends AnAction {
         e.printStackTrace(new PrintWriter(sw));
         String stackTrace = sw.toString();
         String contextInformation = PitestContext.dumpPitestContext(context);
-        String errorMessage = MyBundle.message("error.pitest.general.title") + ": " + e.getMessage() + "; " + contextInformation + "\n" + stackTrace;
+        String errorMessage = I18nService.getInstance().message("error.pitest.general.title") + ": " + e.getMessage() + "; " + contextInformation + "\n" + stackTrace;
 
         JTextArea textArea = new JTextArea(errorMessage);
         textArea.setEditable(false);

@@ -124,7 +124,7 @@ public final class LLMConfigService
         // Handle events from LLMChatMediator if needed
         switch (eventName) {
             case ChatEvent.CHAT_REQUEST:
-                this.llmChatMediator.handleChatMessage(eventObj.toString());
+                handleChatMessage(eventObj.toString());
                 break;
             case ChatEvent.CLEAR_CHAT:
                 this.llmChatMediator.clearChat();

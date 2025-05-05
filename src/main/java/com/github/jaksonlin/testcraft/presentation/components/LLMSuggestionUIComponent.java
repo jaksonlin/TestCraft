@@ -38,6 +38,8 @@ public class LLMSuggestionUIComponent  {
                     dryRunButton.setEnabled(false);
                     break;
                 case ChatEvent.STOP_LOADING:
+                case ChatEvent.CHAT_RESPONSE:
+                case ChatEvent.ERROR:
                     generateButton.setEnabled(true);
                     dryRunButton.setEnabled(true);
                     break;

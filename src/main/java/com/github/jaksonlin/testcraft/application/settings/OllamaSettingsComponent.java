@@ -6,9 +6,13 @@ import com.intellij.util.ui.JBUI;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.jaksonlin.testcraft.util.OllamaClient;
-import com.github.jaksonlin.testcraft.util.MyBundle;
+
 import javax.swing.*;
 import java.awt.*;
+
+import com.github.jaksonlin.testcraft.infrastructure.services.system.I18nService;
+
+import com.github.jaksonlin.testcraft.infrastructure.services.system.I18nService;
 
 public class OllamaSettingsComponent {
     private final JPanel mainPanel;
@@ -30,49 +34,49 @@ public class OllamaSettingsComponent {
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
 
         // Connection Settings Section
-        JPanel connectionPanel = createSectionPanel(MyBundle.message("llm.settings.connection.title"));
+        JPanel connectionPanel = createSectionPanel(I18nService.getInstance().message("llm.settings.connection.title"));
         GridBagConstraints c = new GridBagConstraints();
         c.insets = JBUI.insets(5);
         c.fill = GridBagConstraints.HORIZONTAL;
         c.anchor = GridBagConstraints.LINE_START;
 
         // Host field
-        addLabelAndField(connectionPanel, MyBundle.message("llm.settings.host.label"), hostField,
-                MyBundle.message("llm.settings.host.tooltip"));
+        addLabelAndField(connectionPanel, I18nService.getInstance().message("llm.settings.host.label"), hostField,
+                I18nService.getInstance().message("llm.settings.host.tooltip"));
 
         // Port field
-        addLabelAndField(connectionPanel, MyBundle.message("llm.settings.port.label"), portField,
-                MyBundle.message("llm.settings.port.tooltip"));
+        addLabelAndField(connectionPanel, I18nService.getInstance().message("llm.settings.port.label"), portField,
+                I18nService.getInstance().message("llm.settings.port.tooltip"));
 
         contentPanel.add(connectionPanel);
         contentPanel.add(Box.createVerticalStrut(10));
 
         // Model Settings Section
-        JPanel modelPanel = createSectionPanel(MyBundle.message("llm.settings.model.title"));
+        JPanel modelPanel = createSectionPanel(I18nService.getInstance().message("llm.settings.model.title"));
 
         // Model field
-        addLabelAndField(modelPanel, MyBundle.message("llm.settings.model.label"), modelField,
-                MyBundle.message("llm.settings.model.tooltip"));
+        addLabelAndField(modelPanel, I18nService.getInstance().message("llm.settings.model.label"), modelField,
+                I18nService.getInstance().message("llm.settings.model.tooltip"));
 
         // Max Tokens field
-        addLabelAndField(modelPanel, MyBundle.message("llm.settings.maxTokens.label"), maxTokensField,
-                MyBundle.message("llm.settings.maxTokens.tooltip"));
+        addLabelAndField(modelPanel, I18nService.getInstance().message("llm.settings.maxTokens.label"), maxTokensField,
+                I18nService.getInstance().message("llm.settings.maxTokens.tooltip"));
 
         // Temperature field
-        addLabelAndField(modelPanel, MyBundle.message("llm.settings.temperature.label"), temperatureField,
-                MyBundle.message("llm.settings.temperature.tooltip"));
+        addLabelAndField(modelPanel, I18nService.getInstance().message("llm.settings.temperature.label"), temperatureField,
+                I18nService.getInstance().message("llm.settings.temperature.tooltip"));
 
         // Timeout field
-        addLabelAndField(modelPanel, MyBundle.message("llm.settings.timeout.label"), timeoutField,
-                MyBundle.message("llm.settings.timeout.tooltip"));
+        addLabelAndField(modelPanel, I18nService.getInstance().message("llm.settings.timeout.label"), timeoutField,
+                I18nService.getInstance().message("llm.settings.timeout.tooltip"));
 
         contentPanel.add(modelPanel);
         contentPanel.add(Box.createVerticalStrut(10));
 
         // Output Settings Section
-        JPanel outputPanel = createSectionPanel(MyBundle.message("llm.settings.output.title"));
-        copyAsMarkdownCheckbox = new JCheckBox(MyBundle.message("llm.settings.copyMarkdown.label"));
-        copyAsMarkdownCheckbox.setToolTipText(MyBundle.message("llm.settings.copyMarkdown.tooltip"));
+        JPanel outputPanel = createSectionPanel(I18nService.getInstance().message("llm.settings.output.title"));
+        copyAsMarkdownCheckbox = new JCheckBox(I18nService.getInstance().message("llm.settings.copyMarkdown.label"));
+        copyAsMarkdownCheckbox.setToolTipText(I18nService.getInstance().message("llm.settings.copyMarkdown.tooltip"));
         copyAsMarkdownCheckbox.setAlignmentX(Component.LEFT_ALIGNMENT);
         outputPanel.add(copyAsMarkdownCheckbox);
 
@@ -80,18 +84,18 @@ public class OllamaSettingsComponent {
         contentPanel.add(Box.createVerticalStrut(10));
 
         // Test Connection Section
-        JPanel testPanel = createSectionPanel(MyBundle.message("llm.settings.test.title"));
-        JButton testConnectionButton = new JButton(MyBundle.message("llm.settings.test.button"));
+        JPanel testPanel = createSectionPanel(I18nService.getInstance().message("llm.settings.test.title"));
+        JButton testConnectionButton = new JButton(I18nService.getInstance().message("llm.settings.test.button"));
         testConnectionButton.setAlignmentX(Component.LEFT_ALIGNMENT);
         testPanel.add(testConnectionButton);
 
         // Add help text
         JLabel helpText = new JBLabel("<html><body style='width: 300px'>" +
-                "<p><b>" + MyBundle.message("llm.settings.help.title") + "</b></p>" +
+                "<p><b>" + I18nService.getInstance().message("llm.settings.help.title") + "</b></p>" +
                 "<ul>" +
-                "<li>" + MyBundle.message("llm.settings.help.running") + "</li>" +
-                "<li>" + MyBundle.message("llm.settings.help.host") + "</li>" +
-                "<li>" + MyBundle.message("llm.settings.help.port") + "</li>" +
+                "<li>" + I18nService.getInstance().message("llm.settings.help.running") + "</li>" +
+                "<li>" + I18nService.getInstance().message("llm.settings.help.host") + "</li>" +
+                "<li>" + I18nService.getInstance().message("llm.settings.help.port") + "</li>" +
                 "</ul>" +
                 "</body></html>");
         helpText.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -152,18 +156,18 @@ public class OllamaSettingsComponent {
             if (success) {
                 JOptionPane.showMessageDialog(mainPanel,
                     "Successfully connected to Ollama server!",
-                    MyBundle.message("llm.settings.test.title"),
+                    I18nService.getInstance().message("llm.settings.test.title"),
                     JOptionPane.INFORMATION_MESSAGE);
             } else {
                 JOptionPane.showMessageDialog(mainPanel,
-                    MyBundle.message("llm.error.connection"),
-                    MyBundle.message("llm.settings.test.title"),
+                    I18nService.getInstance().message("llm.error.connection"),
+                    I18nService.getInstance().message("llm.settings.test.title"),
                     JOptionPane.ERROR_MESSAGE);
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(mainPanel,
-                MyBundle.message("llm.error.connection") + ": " + e.getMessage(),
-                MyBundle.message("llm.settings.test.title"),
+                I18nService.getInstance().message("llm.error.connection") + ": " + e.getMessage(),
+                I18nService.getInstance().message("llm.settings.test.title"),
                 JOptionPane.ERROR_MESSAGE);
         }
     }

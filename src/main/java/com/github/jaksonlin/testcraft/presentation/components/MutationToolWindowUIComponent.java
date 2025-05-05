@@ -1,6 +1,6 @@
 package com.github.jaksonlin.testcraft.presentation.components;
 
-import com.github.jaksonlin.testcraft.util.MyBundle;
+
 import com.github.jaksonlin.testcraft.presentation.viewmodels.MutationToolWindowViewModel;
 import com.intellij.openapi.project.Project;
 
@@ -13,8 +13,10 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import com.github.jaksonlin.testcraft.infrastructure.services.system.I18nService;
+
 public class MutationToolWindowUIComponent {
-    private final JButton clearButton = new JButton(MyBundle.message("clear.button"));
+    private final JButton clearButton = new JButton(I18nService.getInstance().message("clear.button"));
     private final JTextField searchInput = new JTextField(20);
     protected final ObservableTree resultTree = new ObservableTree();
     private final MutationToolWindowViewModel vm;
@@ -24,7 +26,7 @@ public class MutationToolWindowUIComponent {
         this.vm = new MutationToolWindowViewModel(project, resultTree);
         this.toolWindowPanel = createToolWindowPanel();
         registerListeners();
-        searchInput.setToolTipText(MyBundle.message("search.placeholder"));
+        searchInput.setToolTipText(I18nService.getInstance().message("search.placeholder"));
     }
 
     private void registerListeners() {

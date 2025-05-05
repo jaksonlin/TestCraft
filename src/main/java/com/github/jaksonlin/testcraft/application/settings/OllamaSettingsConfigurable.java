@@ -1,13 +1,15 @@
 package com.github.jaksonlin.testcraft.application.settings;
 
 import com.github.jaksonlin.testcraft.infrastructure.services.config.LLMConfigService;
-import com.github.jaksonlin.testcraft.util.MyBundle;
+
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.options.Configurable;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+
+import com.github.jaksonlin.testcraft.infrastructure.services.system.I18nService;
 
 public class OllamaSettingsConfigurable implements Configurable {
     private OllamaSettingsComponent settingsComponent = new OllamaSettingsComponent();
@@ -16,7 +18,7 @@ public class OllamaSettingsConfigurable implements Configurable {
     @Nls(capitalization = Nls.Capitalization.Title)
     @Override
     public String getDisplayName() {
-        return MyBundle.message("settings.testcraft.llm");
+        return I18nService.getInstance().message("settings.testcraft.llm");
     }
 
     @Override

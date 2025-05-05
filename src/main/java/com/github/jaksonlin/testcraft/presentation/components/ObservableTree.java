@@ -3,7 +3,7 @@ package com.github.jaksonlin.testcraft.presentation.components;
 import com.github.jaksonlin.testcraft.infrastructure.messaging.events.RunHistoryEvent;
 import com.github.jaksonlin.testcraft.infrastructure.messaging.events.TypedEventObserver;
 import com.github.jaksonlin.testcraft.infrastructure.services.system.EventBusService;
-import com.github.jaksonlin.testcraft.util.MyBundle;
+import com.github.jaksonlin.testcraft.infrastructure.services.system.I18nService;
 import com.github.jaksonlin.testcraft.util.Pair;
 import org.jetbrains.annotations.NotNull;
 
@@ -50,7 +50,7 @@ public class ObservableTree extends JTree  {
     }
 
     private DefaultTreeModel buildTreeModel(@NotNull List<Pair<String, String>> nodeNameList) {
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode(MyBundle.message("mutation.tree.root"));
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode(I18nService.getInstance().message("mutation.tree.root"));
 
         for (Pair<String, String> pair : nodeNameList) {
             String packageName = pair.getFirst();

@@ -16,7 +16,24 @@ import java.awt.event.KeyAdapter;
 
 public class ChatPanelComponent {
 
-    private final TypedEventObserver<ChatEvent> chatObserver;
+    private final TypedEventObserver<ChatEvent> chatObserver = new TypedEventObserver<ChatEvent>(ChatEvent.class) {
+        @Override
+        protected void onTypedEvent(ChatEvent event) {
+            // Handle the chat event
+            switch (event.getEventType()) {
+                case ChatEvent.START_LOADING:
+                    // disable input area and send button
+                    setInputEnabled(false);
+                    break;
+                case ChatEvent.STOP_LOADING:
+                case ChatEvent.CHAT_RESPONSE:
+                case ChatEvent.ERROR:
+                    // enable input area and send button
+                    setInputEnabled(true);
+                    break;
+            }
+        }
+    };
     private final JTextArea inputArea;
     private final JButton sendButton;
     private final JPanel masterPanel;
@@ -50,22 +67,7 @@ public class ChatPanelComponent {
             }
         });
 
-        chatObserver = new TypedEventObserver<ChatEvent>(ChatEvent.class) {
-            @Override
-            protected void onTypedEvent(ChatEvent event) {
-                // Handle the chat event
-                switch (event.getEventType()) {
-                    case ChatEvent.START_LOADING:
-                        // disable input area and send button
-                        setInputEnabled(false);
-                        break;
-                    case ChatEvent.STOP_LOADING:
-                        // enable input area and send button
-                        setInputEnabled(true);
-                        break;
-                }
-            }
-        };
+
     }
 
 

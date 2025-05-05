@@ -13,13 +13,15 @@ import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.github.jaksonlin.testcraft.util.MyBundle;
+
 
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.github.jaksonlin.testcraft.infrastructure.services.system.I18nService;
 
 public class PrepareEnvironmentCommand extends PitestCommand {
     private final JavaFileProcessor javaFileProcessor = new JavaFileProcessor();
@@ -144,7 +146,7 @@ public class PrepareEnvironmentCommand extends PitestCommand {
     }
 
     private void collectTargetClassThatWeTest(List<String> sourceRoots) {
-        String targetClass = showInputDialog(MyBundle.message("dialog.target.class.message"), MyBundle.message("dialog.target.class.title"));
+        String targetClass = showInputDialog(I18nService.getInstance().message("dialog.target.class.message"), I18nService.getInstance().message("dialog.target.class.title"));
         if (targetClass == null || targetClass.isEmpty()) {
             try {
                 throw new CommandCancellationException("User cancelled the operation");
@@ -234,7 +236,7 @@ public class PrepareEnvironmentCommand extends PitestCommand {
         }
         dependencies.addAll(resourceDirectories);
         if (dependencies.isEmpty()) {
-            Messages.showErrorDialog(MyBundle.message("error.pitest.dependencies"), MyBundle.message("error.pitest.title"));
+            Messages.showErrorDialog(I18nService.getInstance().message("error.pitest.dependencies"), I18nService.getInstance().message("error.pitest.title"));
             throw new IllegalStateException("Cannot find pitest dependencies");
         }
         getContext().setPitestDependencies(String.join(File.pathSeparator, dependencies));

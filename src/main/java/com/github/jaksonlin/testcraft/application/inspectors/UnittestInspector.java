@@ -1,8 +1,8 @@
 package com.github.jaksonlin.testcraft.application.inspectors;
 
-import com.github.jaksonlin.testcraft.util.MyBundle;
 import com.github.jaksonlin.testcraft.infrastructure.commands.testscan.UnittestFileInspectorCommand;
 import com.github.jaksonlin.testcraft.domain.context.CaseCheckContext;
+import com.github.jaksonlin.testcraft.infrastructure.services.system.I18nService;
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.openapi.project.Project;
@@ -18,12 +18,12 @@ public class UnittestInspector extends AbstractBaseJavaLocalInspectionTool {
 
     @Override
     public @NotNull String getGroupDisplayName() {
-        return MyBundle.message("inspection.group.name");
+        return I18nService.getInstance().message("inspection.group.name");
     }
 
     @Override
     public @NotNull String getDisplayName() {
-        return MyBundle.message("inspection.display.name");
+        return I18nService.getInstance().message("inspection.display.name");
     }
 
     @Override

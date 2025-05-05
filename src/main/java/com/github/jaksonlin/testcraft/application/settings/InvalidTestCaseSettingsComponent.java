@@ -1,12 +1,13 @@
 package com.github.jaksonlin.testcraft.application.settings;
 
+import com.github.jaksonlin.testcraft.infrastructure.services.system.I18nService;
 import com.intellij.openapi.editor.EditorSettings;
 import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.ui.EditorTextField;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
 import org.jetbrains.annotations.NotNull;
-import com.github.jaksonlin.testcraft.util.MyBundle;
+
 
 import javax.swing.*;
 import java.awt.*;
@@ -36,30 +37,30 @@ public class InvalidTestCaseSettingsComponent {
         c.gridx = 0;
         c.gridy = 0;
         c.weighty = 0.0;
-        JLabel validationLabel = new JBLabel("<html><body><b>" + MyBundle.message("settings.invalidTestCase.title") + "</b></body></html>");
+        JLabel validationLabel = new JBLabel("<html><body><b>" + I18nService.getInstance().message("settings.invalidTestCase.title") + "</b></body></html>");
         contentPanel.add(validationLabel, c);
 
         // Checkboxes
         c.gridy = 1;
-        enableCheckbox = new JBCheckBox(MyBundle.message("settings.invalidTestCase.enableCheck"));
-        enableCheckbox.setToolTipText(MyBundle.message("settings.invalidTestCase.enableCheck.tooltip"));
+        enableCheckbox = new JBCheckBox(I18nService.getInstance().message("settings.invalidTestCase.enableCheck"));
+        enableCheckbox.setToolTipText(I18nService.getInstance().message("settings.invalidTestCase.enableCheck.tooltip"));
         contentPanel.add(enableCheckbox, c);
 
         c.gridy = 2;
-        enableCommentCheckbox = new JBCheckBox(MyBundle.message("settings.invalidTestCase.enableCommentCheck"));
-        enableCommentCheckbox.setToolTipText(MyBundle.message("settings.invalidTestCase.enableCommentCheck.tooltip"));
+        enableCommentCheckbox = new JBCheckBox(I18nService.getInstance().message("settings.invalidTestCase.enableCommentCheck"));
+        enableCommentCheckbox.setToolTipText(I18nService.getInstance().message("settings.invalidTestCase.enableCommentCheck.tooltip"));
         contentPanel.add(enableCommentCheckbox, c);
 
         // Invalid Assertions section
         c.gridy = 3;
         c.insets = new Insets(15, 5, 5, 5);
-        JLabel assertionsLabel = new JBLabel("<html><body><b>" + MyBundle.message("settings.invalidTestCase.assertions.title") + "</b></body></html>");
+        JLabel assertionsLabel = new JBLabel("<html><body><b>" + I18nService.getInstance().message("settings.invalidTestCase.assertions.title") + "</b></body></html>");
         contentPanel.add(assertionsLabel, c);
 
         // Editor description
         c.gridy = 4;
         c.insets = new Insets(5, 5, 5, 5);
-        JLabel editorDesc = new JBLabel(MyBundle.message("settings.invalidTestCase.assertions.description"));
+        JLabel editorDesc = new JBLabel(I18nService.getInstance().message("settings.invalidTestCase.assertions.description"));
         contentPanel.add(editorDesc, c);
 
         // Assertion editor
@@ -73,11 +74,11 @@ public class InvalidTestCaseSettingsComponent {
         c.weighty = 0.0; // Reset vertical weight
         c.insets = new Insets(10, 5, 5, 5);
         JLabel helpText = new JBLabel("<html><body style='width: 300px'>" +
-                "<b>" + MyBundle.message("settings.invalidTestCase.assertions.examples.title") + "</b><br>" +
-                MyBundle.message("settings.invalidTestCase.assertions.examples.1") + "<br>" +
-                MyBundle.message("settings.invalidTestCase.assertions.examples.2") + "<br>" +
-                MyBundle.message("settings.invalidTestCase.assertions.examples.3") + "<br>" +
-                MyBundle.message("settings.invalidTestCase.assertions.examples.4") +
+                "<b>" + I18nService.getInstance().message("settings.invalidTestCase.assertions.examples.title") + "</b><br>" +
+                I18nService.getInstance().message("settings.invalidTestCase.assertions.examples.1") + "<br>" +
+                I18nService.getInstance().message("settings.invalidTestCase.assertions.examples.2") + "<br>" +
+                I18nService.getInstance().message("settings.invalidTestCase.assertions.examples.3") + "<br>" +
+                I18nService.getInstance().message("settings.invalidTestCase.assertions.examples.4") +
                 "</body></html>");
         contentPanel.add(helpText, c);
 

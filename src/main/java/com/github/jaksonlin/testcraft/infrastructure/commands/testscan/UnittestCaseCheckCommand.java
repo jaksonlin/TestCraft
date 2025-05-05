@@ -1,6 +1,6 @@
 package com.github.jaksonlin.testcraft.infrastructure.commands.testscan;
 
-import com.github.jaksonlin.testcraft.util.MyBundle;
+
 import com.github.jaksonlin.testcraft.domain.annotations.AnnotationSchema;
 import com.github.jaksonlin.testcraft.domain.context.CaseCheckContext;
 import com.github.jaksonlin.testcraft.domain.context.UnittestCase;
@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.github.jaksonlin.testcraft.infrastructure.services.system.I18nService;
 
 public abstract class UnittestCaseCheckCommand {
     private final Project project;
@@ -37,7 +39,7 @@ public abstract class UnittestCaseCheckCommand {
         Messages.showMessageDialog(
                 project,
                 message,
-                MyBundle.message("test.annotation.details.title"),
+                I18nService.getInstance().message("test.annotation.details.title"),
                 Messages.getInformationIcon()
         );
     }
@@ -46,7 +48,7 @@ public abstract class UnittestCaseCheckCommand {
         Messages.showMessageDialog(
                 project,
                 "Error parsing annotation: " + message,
-                MyBundle.message("test.file.action.title"),
+                I18nService.getInstance().message("test.file.action.title"),
                 Messages.getErrorIcon()
         );
     }
@@ -55,7 +57,7 @@ public abstract class UnittestCaseCheckCommand {
         Messages.showMessageDialog(
                 project,
                 "No " + annotationName + " annotation found on this method",
-                MyBundle.message("test.file.action.title"),
+                I18nService.getInstance().message("test.file.action.title"),
                 Messages.getWarningIcon()
         );
     }
@@ -64,7 +66,7 @@ public abstract class UnittestCaseCheckCommand {
         Messages.showMessageDialog(
                 project,
                 "This method is not a JUnit test method",
-                MyBundle.message("test.annotation.generation.title"),
+                I18nService.getInstance().message("test.annotation.generation.title"),
                 Messages.getWarningIcon()
         );
     }
@@ -73,7 +75,7 @@ public abstract class UnittestCaseCheckCommand {
         Messages.showMessageDialog(
                 project,
                 "No methods found in this class",
-                MyBundle.message("test.methods.not.found.title"),
+                I18nService.getInstance().message("test.methods.not.found.title"),
                 Messages.getWarningIcon()
         );
     }
@@ -82,7 +84,7 @@ public abstract class UnittestCaseCheckCommand {
         Messages.showMessageDialog(
                 project,
                 "No test methods found in the class that can add annotation.",
-                MyBundle.message("test.methods.no.annotation.title"),
+                I18nService.getInstance().message("test.methods.no.annotation.title"),
                 Messages.getInformationIcon()
         );
     }
@@ -91,7 +93,7 @@ public abstract class UnittestCaseCheckCommand {
         Messages.showMessageDialog(
                 project,
                 annotationName + " already exist on this method",
-                MyBundle.message("test.annotation.exists.title"),
+                I18nService.getInstance().message("test.annotation.exists.title"),
                 Messages.getWarningIcon()
         );
     }

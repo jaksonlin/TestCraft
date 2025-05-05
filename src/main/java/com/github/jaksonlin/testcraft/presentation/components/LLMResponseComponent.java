@@ -40,9 +40,7 @@ public class LLMResponseComponent  {
                     }
                     break;
                 case ChatEvent.CHAT_RESPONSE:
-                    if (isLoading) {
-                        stopLoading();
-                    }
+                    stopLoading();
                     appendMarkdownToOutput(String.format(MESSAGE_TEMPLATE, "assistant", I18nService.getInstance().message("llm.assistant"), event.getPayload().toString()));
                     break;
                 case ChatEvent.COPY_CHAT_RESPONSE:

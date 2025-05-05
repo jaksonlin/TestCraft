@@ -1,6 +1,6 @@
 package com.github.jaksonlin.testcraft.infrastructure.messaging.mediators;
 
-import com.github.jaksonlin.testcraft.util.MyBundle;
+import com.github.jaksonlin.testcraft.infrastructure.services.system.I18nService;
 import com.github.jaksonlin.testcraft.infrastructure.messaging.events.ChatEvent;
 import com.github.jaksonlin.testcraft.infrastructure.services.system.EventBusService;
 import com.github.jaksonlin.testcraft.util.Mutation;
@@ -49,14 +49,14 @@ public class LLMChatMediatorImpl implements ILLMChatMediator {
                 // Test connection before attempting to send message
                 if (!ollamaClient.testConnection()) {
                     eventBusService.post(new ChatEvent(ChatEvent.CHAT_RESPONSE, 
-                        MyBundle.message("llm.error.connection")));
+                        I18nService.getInstance().message("llm.error.connection")));
                     return;
                 }
                 
                 List<OllamaClient.Message> messages = createPromptOnly(testCodeFile, sourceCodeFile, mutations);
                 if (messages.isEmpty()) {
                     eventBusService.post(new ChatEvent(ChatEvent.CHAT_RESPONSE, 
-                        MyBundle.message("llm.error.no.mutations")));
+                        I18nService.getInstance().message("llm.error.no.mutations")));
                     return;
                 }
                 messageHistory.addAll(messages);
@@ -80,7 +80,7 @@ public class LLMChatMediatorImpl implements ILLMChatMediator {
                 // Test connection before attempting to send message
                 if (!ollamaClient.testConnection()) {
                     eventBusService.post(new ChatEvent(ChatEvent.CHAT_RESPONSE, 
-                        MyBundle.message("llm.error.connection")));
+                        I18nService.getInstance().message("llm.error.connection")));
                     return;
                 }
                 messageHistory.add(new OllamaClient.Message("user", message));
@@ -189,14 +189,14 @@ public class LLMChatMediatorImpl implements ILLMChatMediator {
                 .count();
 
         // System message to set context
-        promptOnlyMessages.add(new OllamaClient.Message("system", MyBundle.message("llm.prompt.system")));
+        promptOnlyMessages.add(new OllamaClient.Message("system", I18nService.getInstance().message("llm.prompt.system")));
 
         // Read source files if needed
         String sourceCode = readFileContent(sourceCodeFile);
         String testCode = readFileContent(testCodeFile);
 
         // User message with the structured data
-        String prompt = String.format(MyBundle.message("llm.prompt.user"),
+        String prompt = String.format(I18nService.getInstance().message("llm.prompt.user"),
                     sourceCode,
                     testCode,
                     totalMutations,
@@ -227,10 +227,10 @@ public class LLMChatMediatorImpl implements ILLMChatMediator {
                 .count();
 
         // System message to set context
-        promptOnlyMessages.add(new OllamaClient.Message("system", MyBundle.message("llm.prompt.system")));
+        promptOnlyMessages.add(new OllamaClient.Message("system", I18nService.getInstance().message("llm.prompt.system")));
 
         // User message with the structured data
-        String prompt = String.format(MyBundle.message("llm.prompt.user.compact"),
+            String prompt = String.format(I18nService.getInstance().message("llm.prompt.user.compact"),
                 testClassName,
                 sourceClassName,
                 totalMutations,
