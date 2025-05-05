@@ -1,8 +1,8 @@
 package com.github.jaksonlin.testcraft.presentation.viewmodels;
 
-import com.github.jaksonlin.testcraft.messaging.mediators.IMutationMediator;
-import com.github.jaksonlin.testcraft.messaging.mediators.MutationMediatorImpl;
-import com.github.jaksonlin.testcraft.core.services.RunHistoryManagerService;
+import com.github.jaksonlin.testcraft.infrastructure.messaging.mediators.IMutationMediator;
+import com.github.jaksonlin.testcraft.infrastructure.messaging.mediators.MutationMediatorImpl;
+import com.github.jaksonlin.testcraft.infrastructure.services.business.RunHistoryManagerService;
 import com.github.jaksonlin.testcraft.presentation.components.ObservableTree;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.Nullable;
@@ -12,12 +12,11 @@ import javax.swing.tree.TreePath;
 import java.util.Enumeration;
 
 public class MutationToolWindowViewModel {
-    private final RunHistoryManagerService runHistoryManager;
+    private final RunHistoryManagerService runHistoryManager = RunHistoryManagerService.getInstance();
     private final IMutationMediator mutationReportMediator = new MutationMediatorImpl();
     private final MutationTreeMediatorViewModel mutationTreeMediatorVM;
 
     public MutationToolWindowViewModel(Project project, ObservableTree mutationTree) {
-        this.runHistoryManager = project.getService(RunHistoryManagerService.class);
         this.mutationTreeMediatorVM = new MutationTreeMediatorViewModel(project, mutationReportMediator);
         runHistoryManager.addObserver(mutationTree);
     }

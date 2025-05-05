@@ -104,36 +104,36 @@
         <!-- Settings Group -->
         <applicationConfigurable
                 parentId="root"
-                id="com.github.jaksonlin.testcraft.infrastructure.settings"
+                id="com.github.jaksonlin.testcraft.application.settings"
                 displayName="TestCraft"
-                instance="com.github.jaksonlin.testcraft.infrastructure.settings.TestCraftSettingsConfigurable"/>
+                instance="com.github.jaksonlin.testcraft.application.settings.TestCraftSettingsConfigurable"/>
                 
         <applicationConfigurable
-                parentId="com.github.jaksonlin.testcraft.infrastructure.settings"
-                instance="com.github.jaksonlin.testcraft.infrastructure.settings.AnnotationSettingsConfigurable"
-                id="com.github.jaksonlin.testcraft.infrastructure.settings.annotations"
+                parentId="com.github.jaksonlin.testcraft.application.settings"
+                instance="com.github.jaksonlin.testcraft.application.settings.AnnotationSettingsConfigurable"
+                id="com.github.jaksonlin.testcraft.application.settings.annotations"
                 displayName="Test Annotations"/>
                 
         <applicationConfigurable
-                parentId="com.github.jaksonlin.testcraft.infrastructure.settings"
-                instance="com.github.jaksonlin.testcraft.infrastructure.settings.InvalidTestCaseSettingsConfigurable"
-                id="com.github.jaksonlin.testcraft.infrastructure.settings.asserts"
+                parentId="com.github.jaksonlin.testcraft.application.settings"
+                instance="com.github.jaksonlin.testcraft.application.settings.InvalidTestCaseSettingsConfigurable"
+                id="com.github.jaksonlin.testcraft.application.settings.asserts"
                 displayName="Test Case Validation"/>
                 
         <applicationConfigurable
-                parentId="com.github.jaksonlin.testcraft.infrastructure.settings"
-                instance="com.github.jaksonlin.testcraft.infrastructure.settings.OllamaSettingsConfigurable"
-                id="com.github.jaksonlin.testcraft.infrastructure.settings.ollama"
+                parentId="com.github.jaksonlin.testcraft.application.settings"
+                instance="com.github.jaksonlin.testcraft.application.settings.OllamaSettingsConfigurable"
+                id="com.github.jaksonlin.testcraft.application.settings.ollama"
                 displayName="LLM Settings"/>
                 
         <!-- Services -->
-        <applicationService serviceImplementation="com.github.jaksonlin.testcraft.core.services.AnnotationConfigService"/>
-        <applicationService serviceImplementation="com.github.jaksonlin.testcraft.core.services.InvalidTestCaseConfigService"/>
-        <applicationService serviceImplementation="com.github.jaksonlin.testcraft.core.services.LLMService"/>
+        <applicationService serviceImplementation="com.github.jaksonlin.testcraft.infrastructure.services.config.AnnotationConfigService"/>
+        <applicationService serviceImplementation="com.github.jaksonlin.testcraft.infrastructure.services.config.InvalidTestCaseConfigService"/>
+        <applicationService serviceImplementation="com.github.jaksonlin.testcraft.infrastructure.services.LLMService"/>
         <localInspection
             shortName="UnittestCaseAnnotationInspection"
             language="JAVA"
-            implementationClass="com.github.jaksonlin.testcraft.presentation.inspectors.UnittestInspector"
+            implementationClass="com.github.jaksonlin.testcraft.application.inspectors.UnittestInspector"
             displayName="Unit test case comment and assert check"
             enabledByDefault="true"
             groupName="Java"
@@ -142,14 +142,14 @@
         
         <completion.contributor
                 language="JAVA"
-                implementationClass="com.github.jaksonlin.testcraft.presentation.completions.AnnotationCompletionContributor"/>
+                implementationClass="com.github.jaksonlin.testcraft.application.completions.AnnotationCompletionContributor"/>
                 
         
 
     </extensions>
 
     <applicationListeners>
-        <listener class="com.github.jaksonlin.testcraft.messaging.listeners.MyApplicationActivationListener" topic="com.intellij.openapi.application.ApplicationActivationListener"/>
+        <listener class="com.github.jaksonlin.testcraft.infrastructure.messaging.listeners.MyApplicationActivationListener" topic="com.intellij.openapi.application.ApplicationActivationListener"/>
     </applicationListeners>
 
     <!-- Add right-click entry to run Pitest on a JUnit test file -->
@@ -164,22 +164,22 @@
             <add-to-group group-id="UnittestHelperToolMenu" anchor="last"/>
             <!-- Action inside the submenu -->
             <action
-                    class="com.github.jaksonlin.testcraft.presentation.actions.RunPitestAction"
+                    class="com.github.jaksonlin.testcraft.application.actions.RunPitestAction"
                     id="RunPitestAction"
                     text="$action.RunPitestAction.text">
             </action>
-            <action class="com.github.jaksonlin.testcraft.presentation.actions.RunCaseAnnoationCheckAction"
+            <action class="com.github.jaksonlin.testcraft.application.actions.RunCaseAnnoationCheckAction"
                     id="RunCaseAnnoationCheckAction"
                     text="$action.RunCaseAnnoationCheckAction.text">
             </action>
-            <action class="com.github.jaksonlin.testcraft.presentation.actions.GenerateAnnotationCommandAction"
+            <action class="com.github.jaksonlin.testcraft.application.actions.GenerateAnnotationCommandAction"
                     id="GenerateAnnotationCommandAction"
                     text="$action.GenerateAnnotationCommandAction.text">
             </action>
         </group>
 
         <!-- Project View Actions -->
-        <action class="com.github.jaksonlin.testcraft.presentation.actions.CheckInvalidTestCasesAction"
+        <action class="com.github.jaksonlin.testcraft.application.actions.CheckInvalidTestCasesAction"
                 id="CheckInvalidTestCasesAction"
                 text="$action.CheckInvalidTestCasesAction.text">
             <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>

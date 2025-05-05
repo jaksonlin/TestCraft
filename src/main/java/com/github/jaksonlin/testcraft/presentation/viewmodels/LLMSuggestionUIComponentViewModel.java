@@ -1,68 +1,52 @@
 package com.github.jaksonlin.testcraft.presentation.viewmodels;
 
-import com.github.jaksonlin.testcraft.core.context.PitestContext;
-import com.github.jaksonlin.testcraft.messaging.observers.BasicEventObserver;
-import com.github.jaksonlin.testcraft.messaging.observers.ObserverBase;
-import com.github.jaksonlin.testcraft.core.services.LLMService;
+import com.github.jaksonlin.testcraft.domain.context.PitestContext;
+import com.github.jaksonlin.testcraft.infrastructure.messaging.events.ChatEvent;
+import com.github.jaksonlin.testcraft.infrastructure.messaging.events.TypedEventObserver;
+import com.github.jaksonlin.testcraft.infrastructure.services.config.LLMConfigService;
+import com.github.jaksonlin.testcraft.infrastructure.services.system.EventBusService;
 
-public class LLMSuggestionUIComponentViewModel extends ObserverBase implements BasicEventObserver {
 
-    private final LLMService llmService;
-    
+public class LLMSuggestionUIComponentViewModel  {
+    private final LLMConfigService llmConfigService = LLMConfigService.getInstance();
+    private final EventBusService eventBusService = EventBusService.getInstance();
 
-    public LLMSuggestionUIComponentViewModel(LLMService llmService) {
-        this.llmService = llmService;
-        llmService.addObserver(this); // as hub to forward events
-        this.addObserver(llmService);
-    }
+    private final TypedEventObserver<ChatEvent> chatObserver = new TypedEventObserver<ChatEvent>(ChatEvent.class) {
+        @Override
+        public void onTypedEvent(ChatEvent event) {
+            switch (event.getEventType()) {
+                case ChatEvent.REQUEST_COPY_CHAT_RESPONSE:
+                    String chatHistory = llmConfigService.getChatHistory();
+                    // when chatHistory is empty, use the lastDryRunPrompt
+                    if (chatHistory.isEmpty()) {
+                        chatHistory = lastDryRunPrompt;
+                    }
+                    eventBusService.post(new ChatEvent(ChatEvent.COPY_CHAT_RESPONSE, chatHistory));
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
 
     public void propagateConfigChange() {
-        llmService.propagateConfigChange();
-    }
-
-    public void clearChat() {
-        notifyObservers("CLEAR_CHAT", null);
-    }
-
-    public void copyChat() {
-        String chatHistory = llmService.getChatHistory();
-        // when chatHistory is empty, use the lastDryRunPrompt
-        if (chatHistory.isEmpty()) {
-            chatHistory = lastDryRunPrompt;
-        }
-        notifyObservers("COPY_CHAT_RESPONSE", chatHistory);
-    }
-
-
-
-    @Override
-    public void onEventHappen(String eventName, Object eventObj) {
-        // Handle events from LLMService/UIComponent if needed
-        switch (eventName) {
-            default:
-                // if have chat response, stop loading
-                if (eventName.contains("CHAT_RESPONSE:")) {
-                    notifyObservers("STOP_LOADING", null);
-                }
-                notifyObservers(eventName, eventObj);
-                break;
-        }
+        llmConfigService.propagateConfigChange();
     }
 
 
     public void generateSuggestions(PitestContext context) {
-        notifyObservers("START_LOADING", null);
-        llmService.generateUnittestRequest(context.getTestFilePath(), context.getTargetClassFilePath(), context.getMutationResults());
+        eventBusService.post(new ChatEvent(ChatEvent.START_LOADING, null));
+        llmConfigService.generateUnittestRequest(context.getTestFilePath(), context.getTargetClassFilePath(), context.getMutationResults());
     }
 
     private String lastDryRunPrompt = "";
 
     public void dryRunGetPrompt(PitestContext context) {
-        lastDryRunPrompt = llmService.dryRunGetPrompt(context.getFullyQualifiedTargetTestClassName(), context.getTargetClassFullyQualifiedName(), context.getMutationResults());
-        notifyObservers("DRY_RUN_PROMPT", lastDryRunPrompt);
+        lastDryRunPrompt = llmConfigService.dryRunGetPrompt(context.getFullyQualifiedTargetTestClassName(), context.getTargetClassFullyQualifiedName(), context.getMutationResults());
+        eventBusService.post(new ChatEvent(ChatEvent.DRY_RUN_PROMPT, lastDryRunPrompt));
     }
 
     public void handleChatMessage(String message) {
-        llmService.handleChatMessage(message);
+        llmConfigService.handleChatMessage(message);
     }
 }

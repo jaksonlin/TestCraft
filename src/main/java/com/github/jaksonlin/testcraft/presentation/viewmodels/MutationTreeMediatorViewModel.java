@@ -1,9 +1,9 @@
 package com.github.jaksonlin.testcraft.presentation.viewmodels;
 
-import com.github.jaksonlin.testcraft.core.context.PitestContext;
-import com.github.jaksonlin.testcraft.messaging.mediators.IMutationMediator;
-import com.github.jaksonlin.testcraft.messaging.mediators.IMutationReportUI;
-import com.github.jaksonlin.testcraft.core.services.RunHistoryManagerService;
+import com.github.jaksonlin.testcraft.domain.context.PitestContext;
+import com.github.jaksonlin.testcraft.infrastructure.messaging.mediators.IMutationMediator;
+import com.github.jaksonlin.testcraft.infrastructure.messaging.mediators.IMutationReportUI;
+import com.github.jaksonlin.testcraft.infrastructure.services.business.RunHistoryManagerService;
 import com.github.jaksonlin.testcraft.util.Mutation;
 import com.github.jaksonlin.testcraft.util.Pair;
 import com.intellij.icons.AllIcons;
@@ -33,18 +33,28 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import com.github.jaksonlin.testcraft.infrastructure.messaging.events.MutationEvent;
+import com.github.jaksonlin.testcraft.infrastructure.messaging.events.TypedEventObserver;
 
 public class MutationTreeMediatorViewModel implements IMutationReportUI {
     private static final Logger log = LoggerFactory.getLogger(MutationTreeMediatorViewModel.class);
     private final Project project;
     private final IMutationMediator mediator;
-    private final RunHistoryManagerService runHistoryManager;
+    private final RunHistoryManagerService runHistoryManager = RunHistoryManagerService.getInstance();
     protected final HashMap<String, Integer> annotatedNodes = new HashMap<>();
+    private final TypedEventObserver<MutationEvent> mutationObserver = new TypedEventObserver<MutationEvent>(MutationEvent.class) {
+        @Override
+        public void onTypedEvent(MutationEvent event) {
+            if (event.getEventType().equals(MutationEvent.MUTATION_RESULT)) {
+                Pair<String, Map<Integer, Pair<String, Boolean>>> payload = (Pair<String, Map<Integer, Pair<String, Boolean>>>) event.getPayload();
+                SwingUtilities.invokeLater(() -> updateMutationResult(payload.getFirst(), payload.getSecond()));
+            }
+        }
+    };
 
     public MutationTreeMediatorViewModel(@NotNull Project project, @NotNull IMutationMediator mediator) {
         this.project = project;
         this.mediator = mediator;
-        this.runHistoryManager = project.getService(RunHistoryManagerService.class);
         mediator.register(this);
         registerEditorListener(project);
     }
@@ -62,7 +72,6 @@ public class MutationTreeMediatorViewModel implements IMutationReportUI {
         });
     }
 
-    @Override
     public void updateMutationResult(String mutationClassFilePath, Map<Integer, Pair<String, Boolean>> mutationTestResult) {
         VirtualFile virtualFile = LocalFileSystem.getInstance().findFileByPath(mutationClassFilePath);
         if (virtualFile != null) {
