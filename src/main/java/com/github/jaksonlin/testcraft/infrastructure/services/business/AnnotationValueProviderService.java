@@ -4,8 +4,10 @@ import com.github.jaksonlin.testcraft.domain.annotations.ValueProvider;
 import com.github.jaksonlin.testcraft.domain.annotations.ValueProviderType;
 import com.github.jaksonlin.testcraft.domain.context.CaseCheckContext;
 import com.github.jaksonlin.testcraft.util.GitUtil;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Computable;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import org.jetbrains.annotations.NotNull;
@@ -29,37 +31,39 @@ public final class AnnotationValueProviderService {
 
     @Nullable
     public Object provideValue(@NotNull ValueProvider provider, @NotNull CaseCheckContext context) {
-        ValueProviderType type = provider.getType();
-        if (type != null) {
-            switch (type) {
-                case GIT_AUTHOR:
-                    return getGitAuthor();
-                case LAST_MODIFIER_AUTHOR:
-                    return getLastModifierAuthor(context.getPsiMethod());
-                case LAST_MODIFIER_TIME:
-                    return getLastModifierTime(context.getPsiMethod());
-                case CURRENT_DATE:
-                    return getCurrentDate(provider.getFormat());
-                case METHOD_NAME_BASED:
-                    return generateDescription(context.getPsiMethod());
-                case FIXED_VALUE:
-                    return provider.getValue();
-                case CLASS_NAME:
-                    return guessClassUnderTestClassName(context.getPsiClass());
-                case METHOD_NAME:
-                    return guessMethodUnderTestMethodName(context.getPsiMethod());
-                case METHOD_SIGNATURE:
-                    String signature = tryGetMethodUnderTestSignature(context.getPsiClass(), context.getPsiMethod());
-                    return signature != null ? signature : "";
-                case FIRST_CREATOR_AUTHOR:
-                    return getFirstCreatorAuthor(context.getPsiMethod());
-                case FIRST_CREATOR_TIME:
-                    return getFirstCreatorTime(context.getPsiMethod());
-                default:
-                    return null;
+        return ApplicationManager.getApplication().runReadAction((Computable<Object>)() -> {
+            ValueProviderType type = provider.getType();
+            if (type != null) {
+                switch (type) {
+                    case GIT_AUTHOR:
+                        return getGitAuthor();
+                    case LAST_MODIFIER_AUTHOR:
+                        return getLastModifierAuthor(context.getPsiMethod());
+                    case LAST_MODIFIER_TIME:
+                        return getLastModifierTime(context.getPsiMethod());
+                    case CURRENT_DATE:
+                        return getCurrentDate(provider.getFormat());
+                    case METHOD_NAME_BASED:
+                        return generateDescription(context.getPsiMethod());
+                    case FIXED_VALUE:
+                        return provider.getValue();
+                    case CLASS_NAME:
+                        return guessClassUnderTestClassName(context.getPsiClass());
+                    case METHOD_NAME:
+                        return guessMethodUnderTestMethodName(context.getPsiMethod());
+                    case METHOD_SIGNATURE:
+                        String signature = tryGetMethodUnderTestSignature(context.getPsiClass(), context.getPsiMethod());
+                        return signature != null ? signature : "";
+                    case FIRST_CREATOR_AUTHOR:
+                        return getFirstCreatorAuthor(context.getPsiMethod());
+                    case FIRST_CREATOR_TIME:
+                        return getFirstCreatorTime(context.getPsiMethod());
+                    default:
+                        return null;
+                }
             }
-        }
-        return null;
+            return null;
+        });
     }
 
     private String getGitAuthor() {

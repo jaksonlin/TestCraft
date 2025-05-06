@@ -1,6 +1,7 @@
 package com.github.jaksonlin.testcraft.util;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
@@ -15,11 +16,44 @@ import git4idea.config.GitConfigUtil;
 import git4idea.repo.GitRepository;
 import git4idea.repo.GitRepositoryManager;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Executors;
 
 public class GitUtil {
+    private static final Logger logger = Logger.getInstance(GitUtil.class);
+    private static final ThreadPoolExecutor gitThreadPool = new ThreadPoolExecutor(
+        4, // core pool size
+        8, // max pool size
+        10L, // reduced keep alive time to release threads faster
+        TimeUnit.SECONDS,
+        new LinkedBlockingQueue<>(50),
+        new ThreadFactory() {
+            private final AtomicInteger counter = new AtomicInteger(1);
+            @Override
+            public Thread newThread(Runnable r) {
+                Thread thread = new Thread(r, "GitCommandThread-" + counter.getAndIncrement());
+                thread.setDaemon(true);
+                return thread;
+            }
+        },
+        new ThreadPoolExecutor.AbortPolicy()
+    ) {
+        @Override
+        protected void afterExecute(Runnable r, Throwable t) {
+            super.afterExecute(r, t);
+            purge();
+            allowCoreThreadTimeOut(true);
+        }
+    };
+    private static final long GIT_COMMAND_TIMEOUT = 30; // seconds
 
     public static GitRepositoryManager getRepositoryManager(Project project) {
         return GitRepositoryManager.getInstance(project);
@@ -35,30 +69,63 @@ public class GitUtil {
         return GitRepositoryManager.getInstance(project).getRepositoryForFile(file);
     }
 
-    public static GitUserInfo getGitUserInfo(Project project) {
-        GitRepositoryManager repositoryManager = getRepositoryManager(project);
-        List<GitRepository> repositories = repositoryManager.getRepositories();
-        GitRepository repository = repositories.isEmpty() ? null : repositories.get(0);
-
-        if (repository != null) {
+    private static CompletableFuture<List<String>> runGitCommandAsync(GitLineHandler handler) {
+        Git git = Git.getInstance();
+        boolean inDispatchThread = ApplicationManager.getApplication().isDispatchThread();
+        
+        Callable<List<String>> runCommandCallable = () -> {
             try {
-                Callable<String> getNameCallable = () -> GitConfigUtil.getValue(project, repository.getRoot(), GitConfigUtil.USER_NAME);
-                String name = ApplicationManager.getApplication().executeOnPooledThread(getNameCallable).get();
-
-                Callable<String> getEmailCallable = () -> GitConfigUtil.getValue(project, repository.getRoot(), GitConfigUtil.USER_EMAIL);
-                String email = ApplicationManager.getApplication().executeOnPooledThread(getEmailCallable).get();
-
-                return new GitUserInfo(
-                        name != null ? name : "Unknown",
-                        email != null ? email : "unknown@email.com"
-                );
-            } catch (InterruptedException | ExecutionException e) {
-                // Handle exception appropriately, maybe log it
-                e.printStackTrace();
-                return new GitUserInfo("Unknown", "unknown@email.com");
+                logger.info("Starting git command execution in thread: " + Thread.currentThread().getName());
+                List<String> result = git.runCommand(handler).getOutput();
+                logger.info("Completed git command execution in thread: " + Thread.currentThread().getName());
+                return result;
+            } catch (Exception e) {
+                logger.error("Error executing git command in thread " + Thread.currentThread().getName(), e);
+                throw e;
+            } finally {
+                gitThreadPool.purge();
             }
+        };
+
+        CompletableFuture<List<String>> future = new CompletableFuture<>();
+        
+        try {
+            logger.info("Submitting git command to thread pool. Current active threads: " +
+                gitThreadPool.getActiveCount() + ", Queue size: " + gitThreadPool.getQueue().size());
+            
+            gitThreadPool.submit(() -> {
+                try {
+                    List<String> result = runCommandCallable.call();
+                    future.complete(result);
+                } catch (Exception e) {
+                    future.completeExceptionally(e);
+                }
+            });
+            
+            // Set a timeout
+            long timeout = inDispatchThread ? 5 : GIT_COMMAND_TIMEOUT;
+            ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+            scheduler.schedule(() -> {
+                if (!future.isDone()) {
+                    future.completeExceptionally(new TimeoutException("Git command timed out after " + timeout + " seconds"));
+                }
+                scheduler.shutdown();
+            }, timeout, TimeUnit.SECONDS);
+            
+        } catch (Exception e) {
+            future.completeExceptionally(e);
         }
-        return new GitUserInfo("Unknown", "unknown@email.com");
+        
+        return future;
+    }
+
+    private static List<String> runGitCommand(GitLineHandler handler) {
+        try {
+            return runGitCommandAsync(handler).get();
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("Failed to execute git command", e);
+            throw new RuntimeException("Git command execution failed: " + e.getMessage(), e);
+        }
     }
 
     public static GitCommitInfo getLastCommitInfo(Project project, PsiFile file) {
@@ -67,20 +134,24 @@ public class GitUtil {
         if (repository == null) {
             return null;
         }
-        Git git = Git.getInstance();
 
         GitLineHandler handler = new GitLineHandler(project, repository.getRoot(), GitCommand.LOG);
-        handler.addParameters(
-                "--max-count=1",
-                "--pretty=format:%an|%ae|%ad|%s",
-                "--date=format:%Y-%m-%d %H:%M:%S",
-                "--",
-                virtualFile.getPath()
-        );
+       
+        List<String> gitCommandArgs = new ArrayList<>();
+        gitCommandArgs.add("--max-count=1");
+        gitCommandArgs.add("--pretty=format:%an|%ae|%ad|%s");
+        gitCommandArgs.add("--date=format:%Y-%m-%d %H:%M:%S");
+        gitCommandArgs.add("--");
+        gitCommandArgs.add(virtualFile.getPath());
+        handler.addParameters(gitCommandArgs);
+        StringBuilder command = new StringBuilder();
 
-        try {
-            Callable<List<String>> runCommandCallable = () -> git.runCommand(handler).getOutput();
-            List<String> output = ApplicationManager.getApplication().executeOnPooledThread(runCommandCallable).get();
+        for (String arg : gitCommandArgs) { 
+            command.append(arg).append(" ");
+        }
+        logger.info("Running git command: " + command.toString());
+
+            List<String> output = runGitCommand(handler);
             String firstLine = output.isEmpty() ? null : output.get(0);
             if (firstLine != null) {
                 String[] parts = firstLine.split("\\|");
@@ -93,10 +164,7 @@ public class GitUtil {
                     );
                 }
             }
-        } catch (InterruptedException | ExecutionException e) {
-            // Handle exception appropriately, maybe log it
-            e.printStackTrace();
-        }
+
         return null;
     }
 
@@ -110,7 +178,6 @@ public class GitUtil {
         if (repository == null) {
             return null;
         }
-        Git git = Git.getInstance();
 
         Document document = FileDocumentManager.getInstance().getDocument(file);
         if (document == null) {
@@ -122,15 +189,21 @@ public class GitUtil {
         int endLine = document.getLineNumber(endOffset) + 1;
 
         GitLineHandler handler = new GitLineHandler(project, repository.getRoot(), GitCommand.BLAME);
-        handler.addParameters(
-                "-L", startLine + "," + endLine,
-                "--porcelain",
-                file.getPath()
-        );
+        
+        List<String> gitCommandArgs = new ArrayList<>();
+        gitCommandArgs.add("-L");
+        gitCommandArgs.add(startLine + "," + endLine);
+        gitCommandArgs.add("--porcelain");
+        gitCommandArgs.add(file.getPath());
+        handler.addParameters(gitCommandArgs);
+        StringBuilder command = new StringBuilder();
+        for (String arg : gitCommandArgs) {
+            command.append(arg).append(" ");
+        }
+        logger.info("Running git command: " + command.toString());
 
-        try {
-            Callable<List<String>> runCommandCallable = () -> git.runCommand(handler).getOutput();
-            List<String> output = ApplicationManager.getApplication().executeOnPooledThread(runCommandCallable).get();
+
+            List<String> output = runGitCommand(handler);
 
             String authorName = null;
             String email = null;
@@ -169,43 +242,55 @@ public class GitUtil {
                         timestamp != null ? timestamp : System.currentTimeMillis()
                 );
             }
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
+
         return null;
     }
 
     public static GitUserInfo getLastModifyInfo(Project project, PsiMethod psiMethod) {
-        PsiFile containingFile = psiMethod.getContainingFile();
-        VirtualFile file = containingFile != null ? containingFile.getVirtualFile() : null;
-        if (file == null) {
-            return null;
-        }
-        GitRepository repository = getRepositoryForFile(project, file);
-        if (repository == null) {
-            return null;
-        }
-        Git git = Git.getInstance();
-
-        Document document = FileDocumentManager.getInstance().getDocument(file);
-        if (document == null) {
-            return null;
-        }
-        int startOffset = psiMethod.getTextRange().getStartOffset();
-        int endOffset = psiMethod.getTextRange().getEndOffset();
-        int startLine = document.getLineNumber(startOffset) + 1;
-        int endLine = document.getLineNumber(endOffset) + 1;
-
-        GitLineHandler handler = new GitLineHandler(project, repository.getRoot(), GitCommand.BLAME);
-        handler.addParameters(
-                "-L", startLine + "," + endLine,
-                "--porcelain",
-                file.getPath()
-        );
-
         try {
-            Callable<List<String>> runCommandCallable = () -> git.runCommand(handler).getOutput();
-            List<String> output = ApplicationManager.getApplication().executeOnPooledThread(runCommandCallable).get();
+            PsiFile containingFile = psiMethod.getContainingFile();
+            VirtualFile file = containingFile != null ? containingFile.getVirtualFile() : null;
+            if (file == null) {
+                logger.error("Cannot get virtual file for method: " + psiMethod.getName());
+                return getGitUserInfo(project);
+            }
+            
+            GitRepository repository = getRepositoryForFile(project, file);
+            if (repository == null) {
+                logger.error("Cannot find git repository for file: " + file.getPath());
+                return getGitUserInfo(project);
+            }
+
+            Document document = FileDocumentManager.getInstance().getDocument(file);
+            if (document == null) {
+                logger.error("Cannot get document for file: " + file.getPath());
+                return getGitUserInfo(project);
+            }
+            
+            int startOffset = psiMethod.getTextRange().getStartOffset();
+            int endOffset = psiMethod.getTextRange().getEndOffset();
+            int startLine = document.getLineNumber(startOffset) + 1;
+            int endLine = document.getLineNumber(endOffset) + 1;
+
+            GitLineHandler handler = new GitLineHandler(project, repository.getRoot(), GitCommand.BLAME);
+
+            List<String> gitCommandArgs = new ArrayList<>();
+            gitCommandArgs.add("-L");
+            gitCommandArgs.add(startLine + "," + endLine);
+            gitCommandArgs.add("--porcelain");
+            gitCommandArgs.add(file.getPath());
+            handler.addParameters(gitCommandArgs);
+            StringBuilder command = new StringBuilder();
+            for (String arg : gitCommandArgs) {
+                command.append(arg).append(" ");
+            }
+            logger.info("Running git command: " + command.toString());
+
+            List<String> output = runGitCommand(handler);
+            if (output == null || output.isEmpty()) {
+                logger.info("No output from git blame command");
+                return getGitUserInfo(project);
+            }
 
             BlameInfo latestCommit = null;
             BlameInfo currentCommit = null;
@@ -247,7 +332,7 @@ public class GitUtil {
                             latestCommit = currentCommit;
                         }
                     } catch (NumberFormatException e) {
-                        e.printStackTrace();
+                        logger.error("Error parsing timestamp from git blame output", e);
                     }
                     currentCommit = null;
                 }
@@ -260,10 +345,57 @@ public class GitUtil {
                         latestCommit.getTimestamp() != null ? latestCommit.getTimestamp() : System.currentTimeMillis()
                 );
             }
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+
+            // If we couldn't get the last modify info, return current user info
+            logger.info("Could not determine last modifier, using current user info");
+            return getGitUserInfo(project);
+            
+        } catch (Exception e) {
+            logger.error("Error getting last modify info", e);
+            return getGitUserInfo(project);
         }
-        return null;
+    }
+
+    public static CompletableFuture<GitUserInfo> getGitUserInfoAsync(Project project) {
+        GitRepositoryManager repositoryManager = getRepositoryManager(project);
+        List<GitRepository> repositories = repositoryManager.getRepositories();
+        GitRepository repository = repositories.isEmpty() ? null : repositories.get(0);
+
+        if (repository != null) {
+            CompletableFuture<String> nameFuture = CompletableFuture.supplyAsync(() -> {
+                try {
+                    return GitConfigUtil.getValue(project, repository.getRoot(), GitConfigUtil.USER_NAME);
+                } catch (Exception e) {
+                    logger.error("Error getting git user name", e);
+                    return "Unknown";
+                }
+            }, gitThreadPool);
+
+            CompletableFuture<String> emailFuture = CompletableFuture.supplyAsync(() -> {
+                try {
+                    return GitConfigUtil.getValue(project, repository.getRoot(), GitConfigUtil.USER_EMAIL);
+                } catch (Exception e) {
+                    logger.error("Error getting git user email", e);
+                    return "unknown@email.com";
+                }
+            }, gitThreadPool);
+
+            return CompletableFuture.allOf(nameFuture, emailFuture)
+                .thenApply(v -> new GitUserInfo(
+                    nameFuture.join() != null ? nameFuture.join() : "Unknown",
+                    emailFuture.join() != null ? emailFuture.join() : "unknown@email.com"
+                ));
+        }
+        return CompletableFuture.completedFuture(new GitUserInfo("Unknown", "unknown@email.com"));
+    }
+
+    public static GitUserInfo getGitUserInfo(Project project) {
+        try {
+            return getGitUserInfoAsync(project).get(5, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            logger.error("Failed to get git user info", e);
+            return new GitUserInfo("Unknown", "unknown@email.com");
+        }
     }
 
     private static class BlameInfo {

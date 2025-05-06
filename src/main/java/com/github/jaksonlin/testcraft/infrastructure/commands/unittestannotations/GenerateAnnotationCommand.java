@@ -152,7 +152,6 @@ public class GenerateAnnotationCommand extends UnittestCaseCheckCommand {
                     }
                 }
                 if (selectedMethodCount > 0) {
-                    CountDownLatch latch = new CountDownLatch(selectedMethodCount);
                     ProgressManager.getInstance().run(new Task.Backgroundable(getProject(), "Applying annotations") {
                         @Override
                         public void run(@NotNull ProgressIndicator indicator) {
@@ -160,22 +159,16 @@ public class GenerateAnnotationCommand extends UnittestCaseCheckCommand {
                             for (int i = 0; i < testMethods.size(); i++) {
                                 if (selected[i]) {
                                     int finalI = i;
-                                    ApplicationManager.getApplication().executeOnPooledThread(() -> {
+
                                         try {
                                             generateAnnotation(testMethods.get(finalI), getContext().getSchema());
                                         } catch (Exception e) {
                                             LOG.error("Failed to generate annotation", e);
-                                        } finally {
-                                            latch.countDown();
                                         }
-                                    });
+
                                 }
                             }
-                            try {
-                                latch.await();
-                            } catch (InterruptedException e) {
-                                LOG.error("Interrupted while waiting for latch", e);
-                            }
+
                         }
                     });
                 }
