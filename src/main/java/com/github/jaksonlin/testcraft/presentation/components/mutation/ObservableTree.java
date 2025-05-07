@@ -1,8 +1,7 @@
-package com.github.jaksonlin.testcraft.presentation.components;
+package com.github.jaksonlin.testcraft.presentation.components.mutation;
 
 import com.github.jaksonlin.testcraft.infrastructure.messaging.events.RunHistoryEvent;
 import com.github.jaksonlin.testcraft.infrastructure.messaging.events.TypedEventObserver;
-import com.github.jaksonlin.testcraft.infrastructure.services.system.EventBusService;
 import com.github.jaksonlin.testcraft.infrastructure.services.system.I18nService;
 import com.github.jaksonlin.testcraft.util.Pair;
 import org.jetbrains.annotations.NotNull;

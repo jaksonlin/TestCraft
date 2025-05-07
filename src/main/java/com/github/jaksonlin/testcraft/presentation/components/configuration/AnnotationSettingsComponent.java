@@ -1,4 +1,4 @@
-package com.github.jaksonlin.testcraft.application.settings;
+package com.github.jaksonlin.testcraft.presentation.components.configuration;
 
 import com.github.jaksonlin.testcraft.infrastructure.services.system.I18nService;
 import com.intellij.json.JsonFileType;
@@ -96,7 +96,7 @@ public class AnnotationSettingsComponent {
         c.gridx = 0;
         c.gridy = 0;
         c.weighty = 0.0;
-        JLabel importSettingsLabel = new JBLabel("<html><body><b>" + I18nService.getInstance().message("settings.annotation.import.title") + "</b></body></html>");
+        JLabel importSettingsLabel = new JBLabel("<html><b>" + I18nService.getInstance().message("settings.annotation.import.title") + "</b></html>");
         contentPanel.add(importSettingsLabel, c);
 
         // Package input
@@ -118,7 +118,7 @@ public class AnnotationSettingsComponent {
         // Schema Configuration section
         c.gridy = 4;
         c.insets = new Insets(15, 5, 5, 5);
-        JLabel schemaLabel = new JBLabel("<html><body><b>" + I18nService.getInstance().message("settings.annotation.schema.title") + "</b></body></html>");
+        JLabel schemaLabel = new JBLabel("<html><b>" + I18nService.getInstance().message("settings.annotation.schema.title") + "</b></html>");
         contentPanel.add(schemaLabel, c);
 
         // Schema editor
@@ -142,7 +142,7 @@ public class AnnotationSettingsComponent {
         JPanel helpPanel = new JPanel(new BorderLayout());
         helpPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         
-        JLabel helpText = new JBLabel("<html><body style='width: 600px'>" +
+        JLabel helpText = new JBLabel("<html>" +
                 "<h3>" + I18nService.getInstance().message("settings.annotation.schema.help.title") + "</h3>" +
                 "<p>" + I18nService.getInstance().message("settings.annotation.schema.help.intro") + "</p>" +
                 
@@ -165,32 +165,10 @@ public class AnnotationSettingsComponent {
                 "<h4>" + I18nService.getInstance().message("settings.annotation.schema.help.valueProvider.title") + "</h4>" +
                 "<ul>" +
                 "<li>" + I18nService.getInstance().message("settings.annotation.schema.help.valueProvider.1") + "</li>" +
-                "<li>" + I18nService.getInstance().message("settings.annotation.schema.help.valueProvider.2") + "</li>" +
-                "<li>" + I18nService.getInstance().message("settings.annotation.schema.help.valueProvider.3") + "</li>" +
                 "</ul>" +
-                
-                "<h4>" + I18nService.getInstance().message("settings.annotation.schema.help.example.title") + "</h4>" +
-                "<div style='background-color:rgb(46, 46, 46); padding: 10px; border-radius: 5px; font-family: monospace; white-space: pre; color: #e8e8e8; font-size: 10px;'>" +
-                EXAMPLE_JSON.replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br>").replace(" ", "&nbsp;") +
-                "</div>" +
-                
-                "<h4>" + I18nService.getInstance().message("settings.annotation.schema.help.notes.title") + "</h4>" +
-                "<ul>" +
-                "<li>" + I18nService.getInstance().message("settings.annotation.schema.help.notes.1") + "</li>" +
-                "<li>" + I18nService.getInstance().message("settings.annotation.schema.help.notes.2") + "</li>" +
-                "<li>" + I18nService.getInstance().message("settings.annotation.schema.help.notes.3") + "</li>" +
-                "<li>" + I18nService.getInstance().message("settings.annotation.schema.help.notes.4") + "</li>" +
-                "<li>" + I18nService.getInstance().message("settings.annotation.schema.help.notes.5") + "</li>" +
-                "</ul>" +
-                "</body></html>");
+                "</html>");
         
-        // Create a scroll pane for the help text
-        JScrollPane scrollPane = new JScrollPane(helpText);
-        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        
-        helpPanel.add(scrollPane, BorderLayout.CENTER);
+        helpPanel.add(helpText, BorderLayout.CENTER);
         contentPanel.add(helpPanel, c);
 
         // Add content panel to main panel

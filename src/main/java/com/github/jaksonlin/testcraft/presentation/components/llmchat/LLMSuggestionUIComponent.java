@@ -1,4 +1,4 @@
-package com.github.jaksonlin.testcraft.presentation.components;
+package com.github.jaksonlin.testcraft.presentation.components.llmchat;
 
 import com.github.jaksonlin.testcraft.domain.context.PitestContext;
 import com.github.jaksonlin.testcraft.infrastructure.messaging.events.RunHistoryEvent;

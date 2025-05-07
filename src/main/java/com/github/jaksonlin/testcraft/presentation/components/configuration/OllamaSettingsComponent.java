@@ -1,4 +1,4 @@
-package com.github.jaksonlin.testcraft.application.settings;
+package com.github.jaksonlin.testcraft.presentation.components.configuration;
 
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextField;
@@ -9,8 +9,6 @@ import com.github.jaksonlin.testcraft.util.OllamaClient;
 
 import javax.swing.*;
 import java.awt.*;
-
-import com.github.jaksonlin.testcraft.infrastructure.services.system.I18nService;
 
 import com.github.jaksonlin.testcraft.infrastructure.services.system.I18nService;
 

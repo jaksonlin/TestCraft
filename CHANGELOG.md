@@ -71,3 +71,6 @@
 ## 1.0.9 - 2025-04-30
 - bugfix, backward compatibility to JDK1.8 support to run in older IntelliJ IDEA version
 - upload to pitest-gradle also, for pitest-gradle user, please uninstall pitest-gradle plugin and reinstall the new one manged in [testcraft](https://plugins.jetbrains.com/plugin/27221-testcraft-pro).
+
+## 1.0.10 - 2025-05-06
+- bugfix, git command execution in a separate thread to avoid UI blocking

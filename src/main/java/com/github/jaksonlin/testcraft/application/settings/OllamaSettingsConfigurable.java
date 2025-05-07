@@ -2,6 +2,7 @@ package com.github.jaksonlin.testcraft.application.settings;
 
 import com.github.jaksonlin.testcraft.infrastructure.services.config.LLMConfigService;
 
+import com.github.jaksonlin.testcraft.presentation.components.configuration.OllamaSettingsComponent;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.options.Configurable;
 import org.jetbrains.annotations.Nls;

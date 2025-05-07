@@ -1,7 +1,7 @@
 package com.github.jaksonlin.testcraft.infrastructure.commands.pitest;
 
 import com.github.jaksonlin.testcraft.domain.context.PitestContext;
-import com.github.jaksonlin.testcraft.presentation.components.PitestOutputDialog;
+import com.github.jaksonlin.testcraft.presentation.components.mutation.PitestOutputDialog;
 import com.github.jaksonlin.testcraft.util.ProcessResult;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;

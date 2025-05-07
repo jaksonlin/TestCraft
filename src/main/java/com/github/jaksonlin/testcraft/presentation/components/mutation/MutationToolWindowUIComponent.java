@@ -1,4 +1,4 @@
-package com.github.jaksonlin.testcraft.presentation.components;
+package com.github.jaksonlin.testcraft.presentation.components.mutation;
 
 
 import com.github.jaksonlin.testcraft.presentation.viewmodels.MutationToolWindowViewModel;
