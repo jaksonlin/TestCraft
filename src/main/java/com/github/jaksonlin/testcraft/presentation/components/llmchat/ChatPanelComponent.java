@@ -1,4 +1,4 @@
-package com.github.jaksonlin.testcraft.presentation.components;
+package com.github.jaksonlin.testcraft.presentation.components.llmchat;
 
 import com.github.jaksonlin.testcraft.infrastructure.messaging.events.ChatEvent;
 import com.github.jaksonlin.testcraft.infrastructure.messaging.events.TypedEventObserver;

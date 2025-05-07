@@ -3,7 +3,7 @@ package com.github.jaksonlin.testcraft.presentation.viewmodels;
 import com.github.jaksonlin.testcraft.infrastructure.messaging.mediators.IMutationMediator;
 import com.github.jaksonlin.testcraft.infrastructure.messaging.mediators.MutationMediatorImpl;
 import com.github.jaksonlin.testcraft.infrastructure.services.business.RunHistoryManagerService;
-import com.github.jaksonlin.testcraft.presentation.components.ObservableTree;
+import com.github.jaksonlin.testcraft.presentation.components.mutation.ObservableTree;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.Nullable;
 

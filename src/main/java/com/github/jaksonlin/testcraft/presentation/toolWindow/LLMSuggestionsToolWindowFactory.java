@@ -1,9 +1,7 @@
 package com.github.jaksonlin.testcraft.presentation.toolWindow;
 
-import com.github.jaksonlin.testcraft.presentation.components.LLMSuggestionUIComponent;
-import com.github.jaksonlin.testcraft.infrastructure.services.config.LLMConfigService;
+import com.github.jaksonlin.testcraft.presentation.components.llmchat.LLMSuggestionUIComponent;
 import com.github.jaksonlin.testcraft.infrastructure.services.business.RunHistoryManagerService;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;

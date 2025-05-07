@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.github.jaksonlin.testcraft.domain.annotations.AnnotationSchema;
 import com.github.jaksonlin.testcraft.infrastructure.services.config.AnnotationConfigService;
+import com.github.jaksonlin.testcraft.presentation.components.configuration.AnnotationSettingsComponent;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;

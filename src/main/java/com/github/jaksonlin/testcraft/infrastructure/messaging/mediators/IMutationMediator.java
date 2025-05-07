@@ -6,5 +6,4 @@ import java.util.List;
 
 public interface IMutationMediator {
     void processMutationResult(String mutationTargetClassFilePath, List<Mutation> mutationList);
-    void register(IMutationReportUI clientUI);
 }

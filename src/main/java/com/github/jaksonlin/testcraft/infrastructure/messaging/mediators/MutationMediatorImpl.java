@@ -14,7 +14,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class MutationMediatorImpl implements IMutationMediator {
-    protected IMutationReportUI clientUI;
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private final EventBusService eventBusService = EventBusService.getInstance();
 
@@ -22,9 +21,7 @@ public class MutationMediatorImpl implements IMutationMediator {
     public void processMutationResult(String mutationTargetClassFilePath, List<Mutation> mutations) {
         executorService.submit(() -> {
             Map<Integer, Pair<String, Boolean>> renderedFormat = convertResultToUIRenderFormat(mutations);
-            if (clientUI != null) {
-                eventBusService.post(new MutationEvent(MutationEvent.MUTATION_RESULT, new Pair<String, Map<Integer, Pair<String, Boolean>>>(mutationTargetClassFilePath, renderedFormat)));
-            }
+            eventBusService.post(new MutationEvent(MutationEvent.MUTATION_RESULT, new Pair<String, Map<Integer, Pair<String, Boolean>>>(mutationTargetClassFilePath, renderedFormat)));
         });
     }
 
@@ -65,8 +62,5 @@ public class MutationMediatorImpl implements IMutationMediator {
         return groupNumber + " " + mutation.getDescription() + " -> " + mutation.getStatus();
     }
 
-    @Override
-    public void register(IMutationReportUI clientUI) {
-        this.clientUI = clientUI;
-    }
+
 }

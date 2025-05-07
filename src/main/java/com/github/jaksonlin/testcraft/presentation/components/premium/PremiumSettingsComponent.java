@@ -1,4 +1,4 @@
-package com.github.jaksonlin.testcraft.presentation.components;
+package com.github.jaksonlin.testcraft.presentation.components.premium;
 
 import com.github.jaksonlin.testcraft.infrastructure.license.PremiumManager;
 

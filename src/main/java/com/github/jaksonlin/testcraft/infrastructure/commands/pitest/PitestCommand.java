@@ -3,7 +3,7 @@ package com.github.jaksonlin.testcraft.infrastructure.commands.pitest;
 import com.github.jaksonlin.testcraft.infrastructure.commands.CommandCancellationException;
 import com.github.jaksonlin.testcraft.domain.context.PitestContext;
 import com.github.jaksonlin.testcraft.infrastructure.services.business.RunHistoryManagerService;
-import com.github.jaksonlin.testcraft.presentation.components.PitestOutputDialog;
+import com.github.jaksonlin.testcraft.presentation.components.mutation.PitestOutputDialog;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.project.Project;

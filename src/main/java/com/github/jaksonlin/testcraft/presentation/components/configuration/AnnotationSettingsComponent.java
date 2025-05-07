@@ -1,4 +1,4 @@
-package com.github.jaksonlin.testcraft.application.settings;
+package com.github.jaksonlin.testcraft.presentation.components.configuration;
 
 import com.github.jaksonlin.testcraft.infrastructure.services.system.I18nService;
 import com.intellij.json.JsonFileType;
