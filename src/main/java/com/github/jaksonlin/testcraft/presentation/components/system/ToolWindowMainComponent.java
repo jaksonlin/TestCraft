@@ -3,6 +3,7 @@ package com.github.jaksonlin.testcraft.presentation.components.system;
 import com.github.jaksonlin.testcraft.infrastructure.services.business.RunHistoryManagerService;
 import com.github.jaksonlin.testcraft.presentation.components.llmchat.LLMSuggestionUIComponent;
 import com.github.jaksonlin.testcraft.presentation.components.mutation.MutationToolWindowUIComponent;
+import com.github.jaksonlin.testcraft.presentation.components.testcase.InvalidTestCasesResultComponent;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.ui.components.JBTabbedPane;
@@ -30,9 +31,15 @@ public class ToolWindowMainComponent {
         tabbedPane.addTab("LLM Suggestions", llmSuggestionToolWindowPanel);
         RunHistoryManagerService.getInstance().addObserver(uiComponent);
 
+        // create a new MutationToolWindowUIComponent
         MutationToolWindowUIComponent mutationToolWindowUI = new MutationToolWindowUIComponent(project);
         JPanel mutationToolWindowPanel = mutationToolWindowUI.getPanel();
         tabbedPane.addTab("Mutation", mutationToolWindowPanel);
+
+        // create a new InvalidTestCasesResultComponent
+        InvalidTestCasesResultComponent invalidTestCasesResultComponent = new InvalidTestCasesResultComponent();
+        JPanel invalidTestCasesResultPanel = invalidTestCasesResultComponent.getPanel();
+        tabbedPane.addTab("Invalid Test Cases", invalidTestCasesResultPanel);
     }
 
     

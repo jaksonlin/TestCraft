@@ -78,3 +78,4 @@
 ## 1.0.11 - 2025-05-13
 - lib dependency upgrade, use fastjson to parse the annotation schema
 - put all toolwindow into one multi-tab toolwindow
+- invalid test case scan on directory

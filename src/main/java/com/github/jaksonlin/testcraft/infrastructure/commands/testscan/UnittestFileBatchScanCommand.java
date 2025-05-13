@@ -1,6 +1,7 @@
 package com.github.jaksonlin.testcraft.infrastructure.commands.testscan;
 
 import com.github.jaksonlin.testcraft.domain.context.CaseCheckContext;
+import com.github.jaksonlin.testcraft.domain.model.InvalidTestCase;
 import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -17,6 +18,9 @@ import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+
+import com.github.jaksonlin.testcraft.infrastructure.messaging.events.InvalidTestScanEvent;
+import com.github.jaksonlin.testcraft.infrastructure.services.system.EventBusService;
 
 public class UnittestFileBatchScanCommand {
     private final Set<String> testAnnotations = new HashSet<>(Arrays.asList(
@@ -35,10 +39,11 @@ public class UnittestFileBatchScanCommand {
 
     public void execute() {
         new Task.Backgroundable(project, "Scanning Test Cases", false) {
-            private List<String> invalidTests = new ArrayList<>();
+            private List<InvalidTestCase> invalidTestCases = new ArrayList<>();
 
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
+                EventBusService.getInstance().post(new InvalidTestScanEvent(InvalidTestScanEvent.INVALID_TEST_SCAN_START_EVENT, null));
                 indicator.setIndeterminate(false);
                 indicator.setText("Finding test classes...");
                 
@@ -71,8 +76,8 @@ public class UnittestFileBatchScanCommand {
                                 command.execute();
 
                                 if (holder.hasResults()) {
-                                    String methodName = method.getName();
-                                    invalidTests.add(String.format("%s.%s", qualifiedName, methodName));
+                                    InvalidTestCase invalidTestCase = new InvalidTestCase(project, testClass, method);
+                                    invalidTestCases.add(invalidTestCase);
                                 }
                             }
                         }
@@ -84,14 +89,15 @@ public class UnittestFileBatchScanCommand {
 
             @Override
             public void onSuccess() {
-                if (invalidTests.isEmpty()) {
+                if (invalidTestCases.isEmpty()) {
                     Messages.showInfoMessage(project, "No invalid test cases found.", "Test Case Validation Results");
                 } else {
                     StringBuilder message = new StringBuilder();
-                    message.append(String.format("Found %d invalid test cases:\n\n", invalidTests.size()));
-                    for (String test : invalidTests) {
-                        message.append(String.format("- %s\n", test));
+                    message.append(String.format("Found %d invalid test cases:\n\n", invalidTestCases.size()));
+                    for (InvalidTestCase testCase : invalidTestCases) {
+                        message.append(String.format("- %s\n", testCase.getQualifiedName()));
                     }
+                    EventBusService.getInstance().post(new InvalidTestScanEvent(InvalidTestScanEvent.INVALID_TEST_SCAN_END_EVENT, invalidTestCases));
                     Messages.showWarningDialog(project, message.toString(), "Test Case Validation Results");
                 }
             }
