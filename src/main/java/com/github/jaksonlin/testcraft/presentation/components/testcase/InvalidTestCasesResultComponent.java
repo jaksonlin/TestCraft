@@ -9,6 +9,7 @@ import java.util.List;
 import com.github.jaksonlin.testcraft.domain.model.InvalidTestCase;
 import com.github.jaksonlin.testcraft.infrastructure.messaging.events.InvalidTestScanEvent;
 import com.github.jaksonlin.testcraft.infrastructure.messaging.events.TypedEventObserver;
+import com.github.jaksonlin.testcraft.infrastructure.services.system.I18nService;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -47,7 +48,7 @@ public class InvalidTestCasesResultComponent {
 
     private void initializePanel() {
         mainPanel.setLayout(new BorderLayout(10, 10));
-        summaryLabel.setText("No invalid test cases found.");
+        summaryLabel.setText(I18nService.getInstance().message("invalid.test.cases.result.initial.message"));
         resultList.setListData(new String[0]);
         mainPanel.add(summaryLabel, BorderLayout.NORTH);
         mainPanel.add(new JScrollPane(resultList), BorderLayout.CENTER);
@@ -59,10 +60,10 @@ public class InvalidTestCasesResultComponent {
     public void setInvalidTestCases(List<InvalidTestCase> invalidTestCases) {
         this.currentInvalidTestCases = invalidTestCases;
         if (invalidTestCases == null || invalidTestCases.isEmpty()) {
-            summaryLabel.setText("No invalid test cases found.");
+            summaryLabel.setText(I18nService.getInstance().message("invalid.test.cases.result.no.invalid.test.cases.found"));
             resultList.setListData(new String[0]);
         } else {
-            summaryLabel.setText("Found " + invalidTestCases.size() + " invalid test cases:");
+            summaryLabel.setText(I18nService.getInstance().message("invalid.test.cases.result.found.invalid.test.cases", invalidTestCases.size()));
             String[] displayData = invalidTestCases.stream()
                 .map(this::formatInvalidTestCase)
                 .toArray(String[]::new);

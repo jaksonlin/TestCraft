@@ -7,6 +7,7 @@ import com.github.jaksonlin.testcraft.presentation.components.testcase.InvalidTe
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.ui.components.JBTabbedPane;
+import com.github.jaksonlin.testcraft.infrastructure.services.system.I18nService;
 
 import javax.swing.*;
 
@@ -28,18 +29,18 @@ public class ToolWindowMainComponent {
         LLMSuggestionUIComponent uiComponent = new LLMSuggestionUIComponent();
         // add the uiComponent to the toolWindow through the content manager
         JPanel llmSuggestionToolWindowPanel = uiComponent.getPanel();
-        tabbedPane.addTab("LLM Suggestions", llmSuggestionToolWindowPanel);
+        tabbedPane.addTab(I18nService.getInstance().message("toolwindow.llm.suggestion.tab.name"), llmSuggestionToolWindowPanel);
         RunHistoryManagerService.getInstance().addObserver(uiComponent);
 
         // create a new MutationToolWindowUIComponent
         MutationToolWindowUIComponent mutationToolWindowUI = new MutationToolWindowUIComponent(project);
         JPanel mutationToolWindowPanel = mutationToolWindowUI.getPanel();
-        tabbedPane.addTab("Mutation", mutationToolWindowPanel);
+        tabbedPane.addTab(I18nService.getInstance().message("toolwindow.mutation.tab.name"), mutationToolWindowPanel);
 
         // create a new InvalidTestCasesResultComponent
         InvalidTestCasesResultComponent invalidTestCasesResultComponent = new InvalidTestCasesResultComponent();
         JPanel invalidTestCasesResultPanel = invalidTestCasesResultComponent.getPanel();
-        tabbedPane.addTab("Invalid Test Cases", invalidTestCasesResultPanel);
+        tabbedPane.addTab(I18nService.getInstance().message("toolwindow.invalid.testcases.tab.name"), invalidTestCasesResultPanel);
     }
 
     
