@@ -95,7 +95,7 @@ public final class AnnotationConfigService implements PersistentStateComponent<A
     public void setSchemaJson(String schemaJson) {
         try {
             AnnotationSchema schema = JSON.parseObject(schemaJson, AnnotationSchema.class);
-            myState.schemaJson = JSON.toJSONString(schema);
+            myState.schemaJson = schemaJson;
             myState.currentSchema = schema;
             LOG.info("Updated annotation config: " + myState.schemaJson);
         } catch (Exception e) {
