@@ -1,7 +1,6 @@
 package com.github.jaksonlin.testcraft.application.settings;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.alibaba.fastjson.JSON;
 import com.github.jaksonlin.testcraft.domain.annotations.AnnotationSchema;
 import com.github.jaksonlin.testcraft.infrastructure.services.config.AnnotationConfigService;
 import com.github.jaksonlin.testcraft.presentation.components.configuration.AnnotationSettingsComponent;
@@ -12,13 +11,11 @@ import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import java.io.IOException;
 import java.util.Objects;
 
 public class AnnotationSettingsConfigurable implements Configurable {
     private AnnotationSettingsComponent settingsComponent;
     private final AnnotationConfigService configService = ApplicationManager.getApplication().getService(AnnotationConfigService.class);
-    private final ObjectMapper jsonMapper = JsonMapper.builder().build();
 
     @Nls(capitalization = Nls.Capitalization.Title)
     @Override
@@ -51,32 +48,32 @@ public class AnnotationSettingsConfigurable implements Configurable {
 
     @Override
     public void apply() throws ConfigurationException {
-        String jsonText = settingsComponent.getSchemaText();
         try {
-            // Validate JSON format and schema
-            jsonMapper.readValue(jsonText, AnnotationSchema.class);
+            String jsonText = settingsComponent.getSchemaText();
+            // Validate JSON format
+            JSON.parseObject(jsonText, AnnotationSchema.class);
             
             AnnotationConfigService.State state = configService.getState();
-            if (state == null) return;
-
-            state.schemaJson = jsonText;
-            state.annotationPackage = settingsComponent.getPackageText();
-            state.autoImport = settingsComponent.isAutoImport();
-            state.shouldCheckAnnotation = settingsComponent.isEnableValidation();
-        } catch (IOException e) {
-            throw new ConfigurationException("Invalid JSON schema: " + e.getMessage());
+            if (state != null) {
+                configService.setShouldCheckAnnotation(settingsComponent.isEnableValidation());
+                configService.setAutoImport(settingsComponent.isAutoImport());
+                configService.setAnnotationPackage(settingsComponent.getPackageText());
+                configService.setSchemaJson(jsonText);
+            }
+        } catch (Exception e) {
+            throw new ConfigurationException("Invalid JSON format: " + e.getMessage());
         }
     }
 
     @Override
     public void reset() {
         AnnotationConfigService.State state = configService.getState();
-        if (state == null) return;
-
-        settingsComponent.setSchemaText(state.schemaJson);
-        settingsComponent.setPackageText(state.annotationPackage);
-        settingsComponent.setAutoImport(state.autoImport);
-        settingsComponent.setEnableValidation(state.shouldCheckAnnotation);
+        if (state != null) {
+            settingsComponent.setSchemaText(state.schemaJson);
+            settingsComponent.setPackageText(state.annotationPackage);
+            settingsComponent.setAutoImport(state.autoImport);
+            settingsComponent.setEnableValidation(state.shouldCheckAnnotation);
+        }
     }
 
     @Override

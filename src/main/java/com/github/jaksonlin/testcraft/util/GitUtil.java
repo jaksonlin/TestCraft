@@ -398,6 +398,40 @@ public class GitUtil {
         }
     }
 
+    /**
+     * Gets the remote URL of the git repository for the given project.
+     * @param project The project to get the git URL for
+     * @return The git repository URL, or null if not found
+     */
+    public static String getGitUrl(Project project) {
+        try {
+            GitRepositoryManager repositoryManager = getRepositoryManager(project);
+            List<GitRepository> repositories = repositoryManager.getRepositories();
+            
+            if (repositories.isEmpty()) {
+                logger.info("No git repositories found for project");
+                return null;
+            }
+
+            GitRepository repository = repositories.get(0);
+            String url = repository.getRemotes().stream()
+                    .filter(remote -> "origin".equals(remote.getName()))
+                    .findFirst()
+                    .map(remote -> remote.getFirstUrl())
+                    .orElse(null);
+
+            if (url == null) {
+                logger.info("No origin remote found for repository");
+                return null;
+            }
+
+            return url;
+        } catch (Exception e) {
+            logger.error("Error getting git URL", e);
+            return null;
+        }
+    }
+
     private static class BlameInfo {
         private String author;
         private String email;

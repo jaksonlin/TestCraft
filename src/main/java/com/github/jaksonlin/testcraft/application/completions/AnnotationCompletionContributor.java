@@ -1,8 +1,6 @@
 package com.github.jaksonlin.testcraft.application.completions;
 
-import com.github.jaksonlin.testcraft.domain.annotations.AnnotationFieldConfig;
-import com.github.jaksonlin.testcraft.domain.annotations.AnnotationSchema;
-import com.github.jaksonlin.testcraft.domain.annotations.DefaultValue;
+import com.github.jaksonlin.testcraft.domain.annotations.*;
 import com.github.jaksonlin.testcraft.infrastructure.services.config.AnnotationConfigService;
 import com.intellij.codeInsight.completion.*;
 import com.intellij.codeInsight.lookup.LookupElement;
@@ -74,10 +72,10 @@ public class AnnotationCompletionContributor extends CompletionContributor {
                         AnnotationFieldConfig finalField = field;
                         field.getValidation().getValidValues().forEach(value -> {
                             boolean isDefault = false;
-                            if (finalField.getDefaultValue() instanceof DefaultValue.StringValue) {
-                                isDefault = ((DefaultValue.StringValue) finalField.getDefaultValue()).getValue().equals(value);
-                            } else if (finalField.getDefaultValue() instanceof DefaultValue.StringListValue) {
-                                isDefault = ((DefaultValue.StringListValue) finalField.getDefaultValue()).getValue().contains(value);
+                            if (finalField.getDefaultValue() instanceof StringValue) {
+                                isDefault = ((StringValue) finalField.getDefaultValue()).getValue().equals(value);
+                            } else if (finalField.getDefaultValue() instanceof StringListValue) {
+                                isDefault = ((StringListValue) finalField.getDefaultValue()).getValue().contains(value);
                             }
 
                             CustomAnnotationCompletionLookupElement element = new CustomAnnotationCompletionLookupElement(

@@ -1,10 +1,10 @@
 package com.github.jaksonlin.testcraft.presentation.components.configuration;
 
 import com.github.jaksonlin.testcraft.infrastructure.services.system.I18nService;
-import com.intellij.json.JsonFileType;
 import com.intellij.openapi.editor.EditorSettings;
 import com.intellij.openapi.editor.ScrollType;
 import com.intellij.openapi.editor.ex.EditorEx;
+import com.intellij.openapi.fileTypes.PlainTextFileType;
 import com.intellij.ui.EditorTextField;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextField;
@@ -176,7 +176,7 @@ public class AnnotationSettingsComponent {
     }
 
     private EditorTextField createSchemaEditor() {
-        EditorTextField editor = new EditorTextField("", null, JsonFileType.INSTANCE) {
+        EditorTextField editor = new EditorTextField("", null, PlainTextFileType.INSTANCE) {
             @Override
             protected @NotNull EditorEx createEditor() {
                 EditorEx editor = super.createEditor();

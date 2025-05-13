@@ -45,7 +45,9 @@ public final class AnnotationValueProviderService {
                         return getCurrentDate(provider.getFormat());
                     case METHOD_NAME_BASED:
                         return generateDescription(context.getPsiMethod());
-                    case FIXED_VALUE:
+                    case FIXED_STRING_LIST:
+                        return Arrays.asList(provider.getValue().split(","));
+                    case FIXED_STRING_VALUE:
                         return provider.getValue();
                     case CLASS_NAME:
                         return guessClassUnderTestClassName(context.getPsiClass());

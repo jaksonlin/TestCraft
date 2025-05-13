@@ -31,6 +31,13 @@
 
     <change-notes><![CDATA[
         <h2>Change Notes</h2>
+        <h3>1.0.11 - 2025-05-13</h3>
+        <ul>
+            <li>lib dependency upgrade, use fastjson to parse the annotation schema</li>
+            <li>put all toolwindow into one multi-tab toolwindow</li>
+            <li>invalid test case scan on directory</li>
+        </ul>
+
         <h3>1.0.10 - 2025-05-06</h3>
         <ul>
             <li>bugfix, git command execution in a separate thread to avoid UI blocking</li>
@@ -82,7 +89,7 @@
         </ul>
     ]]></change-notes>
 
-    <version>1.0.10</version>
+    <version>1.0.11</version>
 
     <vendor email="jaksonlin [at] gmail.com">Jason Lam</vendor>
     <id>com.github.jaksonlin.testcraftpro</id>
@@ -92,18 +99,23 @@
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
     <depends>com.intellij.modules.lang</depends>
-    <depends>com.intellij.modules.json</depends>
     <depends>Git4Idea</depends>
 
     <resource-bundle>messages.MyBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="com.github.jaksonlin.testcraft.presentation.toolWindow.MutationToolWindowFactory" id="MutationTestHistory" icon="/pitestHistoryWindowIcon.svg"/>
+        <toolWindow factoryClass="com.github.jaksonlin.testcraft.presentation.toolWindow.MultiTabToolWindowFactory" 
+                   id="TestCraft" 
+                   icon="/llm-suggestions.svg"
+                   anchor="right"/>
+        <!-- <toolWindow factoryClass="com.github.jaksonlin.testcraft.presentation.toolWindow.MutationToolWindowFactory" 
+                   id="MutationTestHistory" 
+                   icon="/pitestHistoryWindowIcon.svg"/>
         <toolWindow id="LLM Suggestions" 
                     secondary="true"
                     icon="/llm-suggestions.svg"
                     anchor="right"
-                    factoryClass="com.github.jaksonlin.testcraft.presentation.toolWindow.LLMSuggestionsToolWindowFactory"/>
+                    factoryClass="com.github.jaksonlin.testcraft.presentation.toolWindow.LLMSuggestionsToolWindowFactory"/> -->
 
         <!-- Settings Group -->
         <applicationConfigurable

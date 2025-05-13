@@ -1,14 +1,26 @@
 package com.github.jaksonlin.testcraft.domain.annotations;
+import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson.annotation.JSONType;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import org.jetbrains.annotations.Nullable;
+import java.util.List;
 
 public class ValueProvider {
+    @JSONField(name = "type")
     private ValueProviderType type;
-    @Nullable
+
+    @JSONField(name = "format", defaultValue = "")
     private String format;
-    @Nullable
-    private JsonNode value;
+
+    @JSONField(name = "value", defaultValue = "")
+    private String value;
+
+    public String getFormat() {
+        return format;
+    }
+
+    public void setFormat(String format) {
+        this.format = format;
+    }
 
     public ValueProvider() {
     }
@@ -25,22 +37,15 @@ public class ValueProvider {
         this.type = type;
     }
 
-    @Nullable
-    public String getFormat() {
-        return format;
-    }
-
-    public void setFormat(@Nullable String format) {
-        this.format = format;
-    }
-
-    @Nullable
-    public JsonNode getValue() {
+    public String getValue(){
         return value;
     }
 
-    public void setValue(@Nullable JsonNode value) {
-        this.value = value;
+    public void setValue(String value){
+        this.value = value; 
     }
+    
+
+   
 }
 

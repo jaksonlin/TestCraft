@@ -7,7 +7,7 @@ TestCraft is the evolution of the [pitest-gradle](https://plugins.jetbrains.com/
 - Advanced test case management features
 - AI-powered test analysis capabilities
 
-The plugin has been renamed to TestCraft to better represent its expanded functionality and modern testing features. Current version: 1.0.8 (continuing from the last pitest-gradle version).
+The plugin has been renamed to TestCraft to better represent its expanded functionality and modern testing features. The release version will continuing from the last pitest-gradle version.
 
 <!-- Plugin description end -->
 
