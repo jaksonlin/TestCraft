@@ -6,248 +6,23 @@ import com.alibaba.fastjson.annotation.JSONType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @JSONType(typeName = "AnnotationSchema")
 public class AnnotationSchema {
     @JSONField(name = "annotationClassName")
     private String annotationClassName;
     private List<AnnotationFieldConfig> fields;
-    public static final String DEFAULT_SCHEMA = "{\n" +
-            "  \"annotationClassName\": \"UnittestCaseInfo\",\n" +
-            "  \"fields\": [\n" +
-            "    {\n" +
-            "      \"name\": \"author\",\n" +
-            "      \"type\": \"STRING\",\n" +
-            "      \"required\": true,\n" +
-            "      \"valueProvider\": {\n" +
-            "        \"type\": \"FIRST_CREATOR_AUTHOR\"\n" +
-            "      },\n" +
-            "      \"validation\": {\n" +
-            "        \"allowEmpty\": false\n" +
-            "      },\n" +
-            "      \"defaultValue\": {\n" +
-            "        \"type\": \"StringValue\",\n" +
-            "        \"value\": \"\"\n" +
-            "      }\n" +
-            "    },\n" +
-            "    {\n" +
-            "      \"name\": \"title\",\n" +
-            "      \"type\": \"STRING\",\n" +
-            "      \"required\": true,\n" +
-            "      \"valueProvider\": {\n" +
-            "        \"type\": \"METHOD_NAME_BASED\"\n" +
-            "      },\n" +
-            "      \"validation\": {\n" +
-            "        \"allowEmpty\": false\n" +
-            "      },\n" +
-            "      \"defaultValue\": {\n" +
-            "        \"type\": \"StringValue\",\n" +
-            "        \"value\": \"\"\n" +
-            "      }\n" +
-            "    },\n" +
-            "    {\n" +
-            "      \"name\": \"targetClass\",\n" +
-            "      \"type\": \"STRING\",\n" +
-            "      \"required\": true,\n" +
-            "      \"valueProvider\": {\n" +
-            "        \"type\": \"CLASS_NAME\"\n" +
-            "      },\n" +
-            "      \"validation\": {\n" +
-            "        \"allowEmpty\": false\n" +
-            "      },\n" +
-            "      \"defaultValue\": {\n" +
-            "        \"type\": \"StringValue\",\n" +
-            "        \"value\": \"\"\n" +
-            "      }\n" +
-            "    },\n" +
-            "    {\n" +
-            "      \"name\": \"targetMethod\",\n" +
-            "      \"type\": \"STRING\",\n" +
-            "      \"required\": true,\n" +
-            "      \"valueProvider\": {\n" +
-            "        \"type\": \"METHOD_NAME\"\n" +
-            "      },\n" +
-            "      \"validation\": {\n" +
-            "        \"allowEmpty\": false\n" +
-            "      },\n" +
-            "      \"defaultValue\": {\n" +
-            "        \"type\": \"StringValue\",\n" +
-            "        \"value\": \"\"\n" +
-            "      }\n" +
-            "    },\n" +
-            "    {\n" +
-            "      \"name\": \"lastUpdateTime\",\n" +
-            "      \"type\": \"STRING\",\n" +
-            "      \"required\": true,\n" +
-            "      \"valueProvider\": {\n" +
-            "        \"type\": \"LAST_MODIFIER_TIME\",\n" +
-            "        \"format\": \"yyyy-MM-dd HH:mm:ss\"\n" +
-            "      },\n" +
-            "      \"validation\": {\n" +
-            "        \"allowEmpty\": false\n" +
-            "      },\n" +
-            "      \"defaultValue\": {\n" +
-            "        \"type\": \"StringValue\",\n" +
-            "        \"value\": \"\"\n" +
-            "      }\n" +
-            "    },\n" +
-            "    {\n" +
-            "      \"name\": \"lastUpdateAuthor\",\n" +
-            "      \"type\": \"STRING\",\n" +
-            "      \"required\": true,\n" +
-            "      \"valueProvider\": {\n" +
-            "        \"type\": \"LAST_MODIFIER_AUTHOR\"\n" +
-            "      },\n" +
-            "      \"validation\": {\n" +
-            "        \"allowEmpty\": false\n" +
-            "      },\n" +
-            "      \"defaultValue\": {\n" +
-            "        \"type\": \"StringValue\",\n" +
-            "        \"value\": \"\"\n" +
-            "      }\n" +
-            "    },\n" +
-            "    {\n" +
-            "      \"name\": \"methodSignature\",\n" +
-            "      \"type\": \"STRING\",\n" +
-            "      \"required\": true,\n" +
-            "      \"valueProvider\": {\n" +
-            "        \"type\": \"METHOD_SIGNATURE\"\n" +
-            "      },\n" +
-            "      \"validation\": {\n" +
-            "        \"allowEmpty\": false\n" +
-            "      },\n" +
-            "      \"defaultValue\": {\n" +
-            "        \"type\": \"StringValue\",\n" +
-            "        \"value\": \"\"\n" +
-            "      }\n" +
-            "    },\n" +
-            "    {\n" +
-            "      \"name\": \"testPoints\",\n" +
-            "      \"type\": \"STRING_LIST\",\n" +
-            "      \"required\": false,\n" +
-            "      \"valueProvider\": {\n" +
-            "        \"type\": \"FIXED_VALUE\",\n" +
-            "        \"value\": [\"Functionality\"]\n" +
-            "      },\n" +
-            "      \"defaultValue\": {\n" +
-            "        \"type\": \"StringListValue\",\n" +
-            "        \"value\": []\n" +
-            "      },\n" +
-            "      \"validation\": {\n" +
-            "        \"validValues\": [\n" +
-            "          \"BoundaryValue\",\n" +
-            "          \"NonEmpty\",\n" +
-            "          \"ErrorHandling\",\n" +
-            "          \"InputValidation\",\n" +
-            "          \"PositiveScenario\",\n" +
-            "          \"NegativeScenario\",\n" +
-            "          \"EdgeCase\",\n" +
-            "          \"Functionality\",\n" +
-            "          \"BusinessLogicValidation\",\n" +
-            "          \"BusinessInputOutput\",\n" +
-            "          \"SideEffects\",\n" +
-            "          \"StateTransition\",\n" +
-            "          \"BusinessCalculation\",\n" +
-            "          \"Security\",\n" +
-            "          \"Performance\"\n" +
-            "        ],\n" +
-            "        \"allowCustomValues\": true,\n" +
-            "        \"mode\": \"CONTAINS\",\n" +
-            "        \"allowEmpty\": true\n" +
-            "      }\n" +
-            "    },\n" +
-            "    {\n" +
-            "      \"name\": \"status\",\n" +
-            "      \"type\": \"STRING\",\n" +
-            "      \"required\": false,\n" +
-            "      \"valueProvider\": {\n" +
-            "        \"type\": \"FIXED_VALUE\",\n" +
-            "        \"value\": \"TODO\"\n" +
-            "      },\n" +
-            "      \"defaultValue\": {\n" +
-            "        \"type\": \"StringValue\",\n" +
-            "        \"value\": \"TODO\"\n" +
-            "      },\n" +
-            "      \"validation\": {\n" +
-            "        \"validValues\": [\n" +
-            "          \"TODO\",\n" +
-            "          \"IN_PROGRESS\",\n" +
-            "          \"DONE\",\n" +
-            "          \"BLOCKED\"\n" +
-            "        ],\n" +
-            "        \"allowCustomValues\": false,\n" +
-            "        \"mode\": \"EXACT\",\n" +
-            "        \"allowEmpty\": false\n" +
-            "      }\n" +
-            "    },\n" +
-            "    {\n" +
-            "      \"name\": \"description\",\n" +
-            "      \"type\": \"STRING\",\n" +
-            "      \"required\": false,\n" +
-            "      \"valueProvider\": {\n" +
-            "        \"type\": \"METHOD_NAME_BASED\"\n" +
-            "      },\n" +
-            "      \"validation\": {\n" +
-            "        \"allowEmpty\": true\n" +
-            "      },\n" +
-            "      \"defaultValue\": {\n" +
-            "        \"type\": \"StringValue\",\n" +
-            "        \"value\": \"\"\n" +
-            "      }\n" +
-            "    },\n" +
-            "    {\n" +
-            "      \"name\": \"tags\",\n" +
-            "      \"type\": \"STRING_LIST\",\n" +
-            "      \"required\": false,\n" +
-            "      \"defaultValue\": {\n" +
-            "        \"type\": \"StringListValue\",\n" +
-            "        \"value\": []\n" +
-            "      },\n" +
-            "      \"validation\": {\n" +
-            "        \"allowEmpty\": true\n" +
-            "      }\n" +
-            "    },\n" +
-            "    {\n" +
-            "      \"name\": \"relatedRequirements\",\n" +
-            "      \"type\": \"STRING_LIST\",\n" +
-            "      \"required\": false,\n" +
-            "      \"defaultValue\": {\n" +
-            "        \"type\": \"StringListValue\",\n" +
-            "        \"value\": []\n" +
-            "      },\n" +
-            "      \"validation\": {\n" +
-            "        \"allowEmpty\": true\n" +
-            "      }\n" +
-            "    },\n" +
-            "    {\n" +
-            "      \"name\": \"relatedTestcases\",\n" +
-            "      \"type\": \"STRING_LIST\",\n" +
-            "      \"required\": false,\n" +
-            "      \"defaultValue\": {\n" +
-            "        \"type\": \"StringListValue\",\n" +
-            "        \"value\": []\n" +
-            "      },\n" +
-            "      \"validation\": {\n" +
-            "        \"allowEmpty\": true\n" +
-            "      }\n" +
-            "    },\n" +
-            "    {\n" +
-            "      \"name\": \"relatedDefects\",\n" +
-            "      \"type\": \"STRING_LIST\",\n" +
-            "      \"required\": false,\n" +
-            "      \"defaultValue\": {\n" +
-            "        \"type\": \"StringListValue\",\n" +
-            "        \"value\": []\n" +
-            "      },\n" +
-            "      \"validation\": {\n" +
-            "        \"allowEmpty\": true\n" +
-            "      }\n" +
-            "    }\n" +
-            "  ]\n" +
-            "}";
+    private static final String DEFAULT_SCHEMA_PATH = "/schemas/default_annotation_schema.json";
 
+ 
     public AnnotationSchema() {
     }
 
@@ -272,11 +47,26 @@ public class AnnotationSchema {
         this.fields = fields;
     }
 
+    public static String getDefaultSchema(){
+        try (InputStream is = AnnotationSchema.class.getResourceAsStream(DEFAULT_SCHEMA_PATH)) {
+            if (is == null) {
+                throw new RuntimeException("Could not find default schema file: " + DEFAULT_SCHEMA_PATH);
+            }
+           return new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))
+                    .lines()
+                    .collect(Collectors.joining("\n"));
+            
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load default schema", e);
+        }
+    }
+
     public static class Companion {
         private static final JSON json;
 
         static {
-            json = JSON.parseObject(DEFAULT_SCHEMA);
+            String schemaContent = getDefaultSchema();
+            json = JSON.parseObject(schemaContent);
         }
 
         @Nullable
@@ -289,5 +79,4 @@ public class AnnotationSchema {
             }
         }
     }
-
 }

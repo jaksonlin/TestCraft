@@ -54,11 +54,11 @@ public class AnnotationParser {
     private Object convertValue(@Nullable Object value, AnnotationFieldConfig field) {
         if (value == null) {
             DefaultValue defaultValue = field.getDefaultValue();
-            if (defaultValue instanceof DefaultValue.StringValue) {
-                return ((DefaultValue.StringValue) defaultValue).getValue();
-            } else if (defaultValue instanceof DefaultValue.StringListValue) {
-                return ((DefaultValue.StringListValue) defaultValue).getValue();
-            } else if (defaultValue instanceof DefaultValue.NullValue) {
+            if (defaultValue instanceof StringValue) {
+                return ((StringValue) defaultValue).getValue();
+            } else if (defaultValue instanceof StringListValue) {
+                return ((StringListValue) defaultValue).getValue();
+            } else if (defaultValue instanceof NullValue) {
                 return null;
             }
             return null; // Should ideally not reach here if DefaultValue is exhaustive
@@ -66,7 +66,7 @@ public class AnnotationParser {
 
         switch (field.getType()) {
             case STRING:
-                return value instanceof String ? value : (field.getDefaultValue() instanceof DefaultValue.StringValue ? ((DefaultValue.StringValue) field.getDefaultValue()).getValue() : null);
+                return value instanceof String ? value : (field.getDefaultValue() instanceof StringValue ? ((StringValue) field.getDefaultValue()).getValue() : null);
             case STRING_LIST:
                 if (value instanceof List<?>) {
                     return ((List<?>) value).stream()

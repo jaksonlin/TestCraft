@@ -14,21 +14,21 @@ public class AnnotationFieldConfig {
 
     public AnnotationFieldConfig() {
         this.required = false;
-        this.defaultValue = new DefaultValue.NullValue();
+        this.defaultValue = new NullValue();
     }
 
     public AnnotationFieldConfig(String name, AnnotationFieldType type) {
         this.name = name;
         this.type = type;
         this.required = false;
-        this.defaultValue = new DefaultValue.NullValue();
+        this.defaultValue = new NullValue();
     }
 
     public AnnotationFieldConfig(String name, AnnotationFieldType type, FieldValidation validation) {
         this.name = name;
         this.type = type;
         this.required = false;
-        this.defaultValue = new DefaultValue.NullValue();
+        this.defaultValue = new NullValue();
         this.validation = validation;
     }
 

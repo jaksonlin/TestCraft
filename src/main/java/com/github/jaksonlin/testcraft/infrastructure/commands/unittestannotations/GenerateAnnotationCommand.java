@@ -1,10 +1,7 @@
 package com.github.jaksonlin.testcraft.infrastructure.commands.unittestannotations;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.github.jaksonlin.testcraft.domain.annotations.AnnotationFieldConfig;
-import com.github.jaksonlin.testcraft.domain.annotations.AnnotationFieldType;
-import com.github.jaksonlin.testcraft.domain.annotations.AnnotationSchema;
-import com.github.jaksonlin.testcraft.domain.annotations.DefaultValue;
+import com.github.jaksonlin.testcraft.domain.annotations.*;
 import com.github.jaksonlin.testcraft.infrastructure.commands.testscan.UnittestCaseCheckCommand;
 import com.github.jaksonlin.testcraft.domain.context.CaseCheckContext;
 import com.github.jaksonlin.testcraft.infrastructure.services.config.AnnotationConfigService;
@@ -316,8 +313,8 @@ public class GenerateAnnotationCommand extends UnittestCaseCheckCommand {
                     }
                 } else {
                     // comes from DefaultValue, not value provider
-                    if (value instanceof DefaultValue.StringListValue){
-                        List<String> list = ((DefaultValue.StringListValue) value).getValue();
+                    if (value instanceof StringListValue){
+                        List<String> list = ((StringListValue) value).getValue();
                         for (int j = 0; j < list.size(); j++) {
                             if (j > 0) annotationText.append(", ");
                             annotationText.append("\"").append(list.get(j)).append("\"");

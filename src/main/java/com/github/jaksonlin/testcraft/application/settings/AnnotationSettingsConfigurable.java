@@ -55,10 +55,10 @@ public class AnnotationSettingsConfigurable implements Configurable {
             
             AnnotationConfigService.State state = configService.getState();
             if (state != null) {
-                state.schemaJson = jsonText;
-                state.annotationPackage = settingsComponent.getPackageText();
-                state.autoImport = settingsComponent.isAutoImport();
-                state.shouldCheckAnnotation = settingsComponent.isEnableValidation();
+                configService.setShouldCheckAnnotation(settingsComponent.isEnableValidation());
+                configService.setAutoImport(settingsComponent.isAutoImport());
+                configService.setAnnotationPackage(settingsComponent.getPackageText());
+                configService.setSchemaJson(jsonText);
             }
         } catch (Exception e) {
             throw new ConfigurationException("Invalid JSON format: " + e.getMessage());

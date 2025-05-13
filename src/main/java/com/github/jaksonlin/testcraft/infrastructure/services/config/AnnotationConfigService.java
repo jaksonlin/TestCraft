@@ -22,7 +22,8 @@ import java.util.Objects;
 public final class AnnotationConfigService implements PersistentStateComponent<AnnotationConfigService.State> {
     private static final Logger LOG = Logger.getInstance(AnnotationConfigService.class);
     public static class State {
-        public String schemaJson = AnnotationSchema.DEFAULT_SCHEMA;
+        public String schemaJson = AnnotationSchema.getDefaultSchema();
+        private AnnotationSchema currentSchema = null;
         public String annotationPackage = "com.example.unittest.annotations";
         public boolean shouldCheckAnnotation = false;
         public boolean autoImport = true;
@@ -60,17 +61,29 @@ public final class AnnotationConfigService implements PersistentStateComponent<A
     @Override
     public void loadState(@NotNull State state) {
         myState = state;
+        try {
+            if (state.schemaJson != null && !state.schemaJson.isEmpty()) {
+                myState.currentSchema = JSON.parseObject(state.schemaJson, AnnotationSchema.class);
+            }
+        } catch (Exception e) {
+            LOG.error("Error decoding schema", e);
+        }
     }
 
     public @Nullable AnnotationSchema getSchema() {
+        if (myState.currentSchema != null) {
+            return getState().currentSchema;
+        }
         try {
             if (myState.schemaJson != null && !myState.schemaJson.isEmpty()) {
-                return JSON.parseObject(myState.schemaJson, AnnotationSchema.class);
+                myState.currentSchema = JSON.parseObject(myState.schemaJson, AnnotationSchema.class);
             }
-            return JSON.parseObject(AnnotationSchema.DEFAULT_SCHEMA, AnnotationSchema.class);
+            myState.currentSchema = JSON.parseObject(AnnotationSchema.getDefaultSchema(), AnnotationSchema.class);
+            return myState.currentSchema;
         } catch (Exception e) {
             try {
-                return JSON.parseObject(AnnotationSchema.DEFAULT_SCHEMA, AnnotationSchema.class);
+                myState.currentSchema = JSON.parseObject(AnnotationSchema.getDefaultSchema(), AnnotationSchema.class);
+                return myState.currentSchema;
             } catch (Exception ex) {
                 // ignore
                 LOG.error("Error decoding default schema", ex);
@@ -79,9 +92,11 @@ public final class AnnotationConfigService implements PersistentStateComponent<A
         }
     }
 
-    public void updateSchema(@NotNull AnnotationSchema schema) {
+    public void setSchemaJson(String schemaJson) {
         try {
+            AnnotationSchema schema = JSON.parseObject(schemaJson, AnnotationSchema.class);
             myState.schemaJson = JSON.toJSONString(schema);
+            myState.currentSchema = schema;
             LOG.info("Updated annotation config: " + myState.schemaJson);
         } catch (Exception e) {
             LOG.error("Error encoding schema", e);
@@ -90,7 +105,7 @@ public final class AnnotationConfigService implements PersistentStateComponent<A
 
     public @NotNull AnnotationSchema getDefaultSchema() {
         try {
-            return JSON.parseObject(AnnotationSchema.DEFAULT_SCHEMA, AnnotationSchema.class);
+            return JSON.parseObject(AnnotationSchema.getDefaultSchema(), AnnotationSchema.class);
         } catch (Exception e) {
             LOG.error("Error decoding default schema", e);
             return new AnnotationSchema();
