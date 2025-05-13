@@ -1,13 +1,17 @@
 package com.github.jaksonlin.testcraft.domain.annotations;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson.annotation.JSONType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
+@JSONType(typeName = "AnnotationSchema")
 public class AnnotationSchema {
+    @JSONField(name = "annotationClassName")
     private String annotationClassName;
     private List<AnnotationFieldConfig> fields;
     public static final String DEFAULT_SCHEMA = "{\n" +
@@ -269,20 +273,21 @@ public class AnnotationSchema {
     }
 
     public static class Companion {
-        private static final ObjectMapper json;
+        private static final JSON json;
 
         static {
-            json = new ObjectMapper();
+            json = JSON.parseObject(DEFAULT_SCHEMA);
         }
 
         @Nullable
         public static AnnotationSchema fromJson(@NotNull String jsonString) {
             try {
-                return json.readValue(jsonString, AnnotationSchema.class);
-            } catch (IOException e) {
+                return JSON.parseObject(jsonString, AnnotationSchema.class);
+            } catch (Exception e) {
                 e.printStackTrace();
                 return null;
             }
         }
     }
+
 }

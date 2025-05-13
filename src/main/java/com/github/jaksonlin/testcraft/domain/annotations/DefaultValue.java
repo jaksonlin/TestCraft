@@ -1,28 +1,45 @@
 package com.github.jaksonlin.testcraft.domain.annotations;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson.annotation.JSONType;
 
 import java.util.List;
 
-@JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.PROPERTY,
-        property = "type")
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = DefaultValue.StringValue.class, name = "StringValue"),
-        @JsonSubTypes.Type(value = DefaultValue.StringListValue.class, name = "StringListValue"),
-        @JsonSubTypes.Type(value = DefaultValue.NullValue.class, name = "NullValue")
+@JSONType(typeName = "DefaultValue", seeAlso = {
+    StringValue.class,
+    StringListValue.class,
+    NullValue.class
 })
 public abstract class DefaultValue {
+    @JSONField(name = "type")
+    private String type;
 
+    public DefaultValue() {
+    }
+
+    public DefaultValue(String type) {
+        this.type = type;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    @JSONType(typeName = "StringValue")
     public static class StringValue extends DefaultValue {
+        @JSONField(name = "value")
         private String value;
 
         public StringValue() {
+            super("StringValue");
         }
 
         public StringValue(String value) {
+            super("StringValue");
             this.value = value;
         }
 
@@ -35,13 +52,17 @@ public abstract class DefaultValue {
         }
     }
 
+    @JSONType(typeName = "StringListValue")
     public static class StringListValue extends DefaultValue {
+        @JSONField(name = "value")
         private List<String> value;
 
         public StringListValue() {
+            super("StringListValue");
         }
 
         public StringListValue(List<String> value) {
+            super("StringListValue");
             this.value = value;
         }
 
@@ -54,7 +75,10 @@ public abstract class DefaultValue {
         }
     }
 
+    @JSONType(typeName = "NullValue")
     public static class NullValue extends DefaultValue {
-        // No fields needed for NullValue
+        public NullValue() {
+            super("NullValue");
+        }
     }
 }

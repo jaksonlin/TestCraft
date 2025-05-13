@@ -53,9 +53,13 @@ dependencies {
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.18.0")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.18.0")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.18.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2") // Use latest version
     implementation("org.commonmark:commonmark:0.21.0")
     implementation("org.apache.httpcomponents:httpclient:4.5.13")
+    
+    // FastJSON dependencies
+    implementation("com.alibaba:fastjson:2.0.45")
+    implementation("com.alibaba:fastjson:2.0.45:sources")
+    implementation("com.alibaba:fastjson:2.0.45:javadoc")
 
     // IntelliJ Platform Gradle Plugin Dependencies Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
     intellijPlatform {
@@ -68,8 +72,6 @@ dependencies {
         plugins(providers.gradleProperty("platformPlugins").map { it.split(',') })
 
         testFramework(TestFrameworkType.Platform)
-
-        bundledPlugin("com.intellij.modules.json")
 
     }
 }

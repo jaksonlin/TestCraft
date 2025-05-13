@@ -1,8 +1,8 @@
 package com.github.jaksonlin.testcraft.infrastructure.services.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.alibaba.fastjson.JSON;
 import com.github.jaksonlin.testcraft.domain.annotations.AnnotationSchema;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.components.State;
@@ -21,8 +21,6 @@ import java.util.Objects;
 )
 public final class AnnotationConfigService implements PersistentStateComponent<AnnotationConfigService.State> {
     private static final Logger LOG = Logger.getInstance(AnnotationConfigService.class);
-    private static final ObjectMapper jsonMapper = JsonMapper.builder().build();
-
     public static class State {
         public String schemaJson = AnnotationSchema.DEFAULT_SCHEMA;
         public String annotationPackage = "com.example.unittest.annotations";
@@ -50,47 +48,52 @@ public final class AnnotationConfigService implements PersistentStateComponent<A
 
     private State myState = new State();
 
-    @Nullable
+    public static AnnotationConfigService getInstance() {
+        return ApplicationManager.getApplication().getService(AnnotationConfigService.class);
+    }
+
     @Override
-    public State getState() {
+    public @Nullable State getState() {
         return myState;
     }
 
     @Override
     public void loadState(@NotNull State state) {
-        LOG.info("Loading annotation config: " + state.schemaJson);
         myState = state;
     }
 
-    public AnnotationSchema getSchema() {
+    public @Nullable AnnotationSchema getSchema() {
         try {
-            return jsonMapper.readValue(myState.schemaJson, AnnotationSchema.class);
-        } catch (IOException e) {
+            if (myState.schemaJson != null && !myState.schemaJson.isEmpty()) {
+                return JSON.parseObject(myState.schemaJson, AnnotationSchema.class);
+            }
+            return JSON.parseObject(AnnotationSchema.DEFAULT_SCHEMA, AnnotationSchema.class);
+        } catch (Exception e) {
             try {
-                return jsonMapper.readValue(AnnotationSchema.DEFAULT_SCHEMA, AnnotationSchema.class);
-            } catch (IOException ex) {
-                // Should not happen, but handle for robustness
+                return JSON.parseObject(AnnotationSchema.DEFAULT_SCHEMA, AnnotationSchema.class);
+            } catch (Exception ex) {
+                // ignore
                 LOG.error("Error decoding default schema", ex);
-                return null; // Or throw an exception depending on your error handling strategy
+                return null;
             }
         }
     }
 
-    public void updateSchema(AnnotationSchema schema) {
+    public void updateSchema(@NotNull AnnotationSchema schema) {
         try {
-            myState.schemaJson = jsonMapper.writeValueAsString(schema);
+            myState.schemaJson = JSON.toJSONString(schema);
             LOG.info("Updated annotation config: " + myState.schemaJson);
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOG.error("Error encoding schema", e);
         }
     }
 
-    public AnnotationSchema getBuildInSchema() {
+    public @NotNull AnnotationSchema getDefaultSchema() {
         try {
-            return jsonMapper.readValue(AnnotationSchema.DEFAULT_SCHEMA, AnnotationSchema.class);
-        } catch (IOException e) {
+            return JSON.parseObject(AnnotationSchema.DEFAULT_SCHEMA, AnnotationSchema.class);
+        } catch (Exception e) {
             LOG.error("Error decoding default schema", e);
-            return null; // Or throw an exception
+            return new AnnotationSchema();
         }
     }
 

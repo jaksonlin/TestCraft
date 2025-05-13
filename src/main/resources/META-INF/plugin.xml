@@ -92,7 +92,6 @@
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
     <depends>com.intellij.modules.lang</depends>
-    <depends>com.intellij.modules.json</depends>
     <depends>Git4Idea</depends>
 
     <resource-bundle>messages.MyBundle</resource-bundle>
