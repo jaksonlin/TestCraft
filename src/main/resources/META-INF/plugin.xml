@@ -97,12 +97,18 @@
     <resource-bundle>messages.MyBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="com.github.jaksonlin.testcraft.presentation.toolWindow.MutationToolWindowFactory" id="MutationTestHistory" icon="/pitestHistoryWindowIcon.svg"/>
+        <toolWindow factoryClass="com.github.jaksonlin.testcraft.presentation.toolWindow.MultiTabToolWindowFactory" 
+                   id="TestCraft" 
+                   icon="/llm-suggestions.svg"
+                   anchor="right"/>
+        <!-- <toolWindow factoryClass="com.github.jaksonlin.testcraft.presentation.toolWindow.MutationToolWindowFactory" 
+                   id="MutationTestHistory" 
+                   icon="/pitestHistoryWindowIcon.svg"/>
         <toolWindow id="LLM Suggestions" 
                     secondary="true"
                     icon="/llm-suggestions.svg"
                     anchor="right"
-                    factoryClass="com.github.jaksonlin.testcraft.presentation.toolWindow.LLMSuggestionsToolWindowFactory"/>
+                    factoryClass="com.github.jaksonlin.testcraft.presentation.toolWindow.LLMSuggestionsToolWindowFactory"/> -->
 
         <!-- Settings Group -->
         <applicationConfigurable
