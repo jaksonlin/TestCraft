@@ -21,6 +21,7 @@ import java.util.*;
 
 import com.github.jaksonlin.testcraft.infrastructure.messaging.events.InvalidTestScanEvent;
 import com.github.jaksonlin.testcraft.infrastructure.services.system.EventBusService;
+import com.github.jaksonlin.testcraft.infrastructure.services.system.I18nService;
 
 public class UnittestFileBatchScanCommand {
     private final Set<String> testAnnotations = new HashSet<>(Arrays.asList(
@@ -45,7 +46,7 @@ public class UnittestFileBatchScanCommand {
             public void run(@NotNull ProgressIndicator indicator) {
                 EventBusService.getInstance().post(new InvalidTestScanEvent(InvalidTestScanEvent.INVALID_TEST_SCAN_START_EVENT, null));
                 indicator.setIndeterminate(false);
-                indicator.setText("Finding test classes...");
+                indicator.setText(I18nService.getInstance().message("testscan.scanning_test_classes"));
                 
                 List<PsiClass> testClasses = ReadAction.compute(() -> findTestClasses());
                 if (testClasses.isEmpty()) {
@@ -91,6 +92,7 @@ public class UnittestFileBatchScanCommand {
             public void onSuccess() {
                 if (invalidTestCases.isEmpty()) {
                     Messages.showInfoMessage(project, "No invalid test cases found.", "Test Case Validation Results");
+                    EventBusService.getInstance().post(new InvalidTestScanEvent(InvalidTestScanEvent.INVALID_TEST_SCAN_END_EVENT, null));
                 } else {
                     StringBuilder message = new StringBuilder();
                     message.append(String.format("Found %d invalid test cases:\n\n", invalidTestCases.size()));
