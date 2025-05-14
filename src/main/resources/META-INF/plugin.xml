@@ -106,7 +106,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow factoryClass="com.github.jaksonlin.testcraft.presentation.toolWindow.MultiTabToolWindowFactory" 
                    id="TestCraft" 
-                   icon="/llm-suggestions.svg"
+                   icon="/icons/testcraft.svg"
                    anchor="right"/>
         <!-- <toolWindow factoryClass="com.github.jaksonlin.testcraft.presentation.toolWindow.MutationToolWindowFactory" 
                    id="MutationTestHistory" 
@@ -171,7 +171,7 @@
     <!-- Add right-click entry to run Pitest on a JUnit test file -->
     <actions>
         <!-- First Level Menu -->
-        <group id="UnittestHelperToolMenu" text="Unittest Helpers" popup="true" description="Java unittest helper tool" icon="/utMenu.svg">
+        <group id="UnittestHelperToolMenu" text="Unittest Helpers" popup="true" description="Java unittest helper tool" icon="/icons/testcraft.svg">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
         </group>
 
@@ -197,6 +197,7 @@
         <!-- Project View Actions -->
         <action class="com.github.jaksonlin.testcraft.application.actions.CheckInvalidTestCasesAction"
                 id="CheckInvalidTestCasesAction"
+                icon="/icons/testcraft.svg"
                 text="$action.CheckInvalidTestCasesAction.text">
             <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
         </action>
