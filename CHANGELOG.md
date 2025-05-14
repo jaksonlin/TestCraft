@@ -79,3 +79,8 @@
 - lib dependency upgrade, use fastjson to parse the annotation schema
 - put all toolwindow into one multi-tab toolwindow
 - invalid test case scan on directory
+
+## 1.0.12 - 2025-05-14
+- add plugin icon
+- add i18n for testcase scan result
+- fix a bug that the testcase scan result is not shown in the toolwindow

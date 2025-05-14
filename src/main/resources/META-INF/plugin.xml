@@ -31,6 +31,12 @@
 
     <change-notes><![CDATA[
         <h2>Change Notes</h2>
+        <h3>1.0.12 - 2025-05-14</h3>
+        <ul>
+            <li>add plugin icon</li>
+            <li>add i18n for testcase scan result</li>
+            <li>fix a bug that the testcase scan result is not shown in the toolwindow</li>
+        </ul>
         <h3>1.0.11 - 2025-05-13</h3>
         <ul>
             <li>lib dependency upgrade, use fastjson to parse the annotation schema</li>
