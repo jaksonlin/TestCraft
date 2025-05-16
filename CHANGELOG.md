@@ -84,3 +84,7 @@
 - add plugin icon
 - add i18n for testcase scan result
 - fix a bug that the testcase scan result is not shown in the toolwindow
+
+## 1.0.13 - 2025-05-16
+- update pitest to allow mutation on specific method on a class
+- update tool window to show test case scan result on completion

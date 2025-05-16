@@ -5,12 +5,15 @@ import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 public class JavaFileProcessor {
     // Read the Java File and get the main class's fully qualified name
     public ClassFileInfo getFullyQualifiedName(String file) {
@@ -31,7 +34,10 @@ public class JavaFileProcessor {
                                 .orElse("");
                         String className = classDeclaration.getNameAsString();
                         String fullyQualifiedName = packageName.isEmpty() ? className : packageName + "." + className;
-                        return new ClassFileInfo(fullyQualifiedName, className, packageName);
+                        List<String> methods = classDeclaration.getMethods().stream()
+                            .map(MethodDeclaration::getNameAsString)
+                            .collect(Collectors.toList());
+                        return new ClassFileInfo(fullyQualifiedName, className, packageName, methods);
                     }
                 }
             } else {

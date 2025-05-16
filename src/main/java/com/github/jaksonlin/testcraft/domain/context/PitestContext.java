@@ -28,6 +28,7 @@ public class PitestContext {
     private final long timestamp;
     private List<Mutation> mutationResults;
     private String workingDirectory;
+    private String methodsToMutate;
 
     public String getWorkingDirectory() {
         return workingDirectory;
@@ -196,6 +197,14 @@ public class PitestContext {
 
     public long getTimestamp() {
         return timestamp;
+    }
+
+    public String getMethodsToMutate() {
+        return methodsToMutate;
+    }
+
+    public void setMethodsToMutate(String methodsToMutate) {
+        this.methodsToMutate = methodsToMutate;
     }
 
     public static String dumpPitestContext(PitestContext context) {

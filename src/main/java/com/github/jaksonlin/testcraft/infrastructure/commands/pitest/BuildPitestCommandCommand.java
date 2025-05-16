@@ -80,6 +80,11 @@ public class BuildPitestCommandCommand extends PitestCommand {
         command.add("STRONGER");
         command.add("--skipFailingTests");
 
+        if (getContext().getMethodsToMutate() != null) {
+            command.add("--targetMethods");
+            command.add(getContext().getMethodsToMutate());
+        }
+
         getContext().setCommand(command);
     }
 }
