@@ -6,6 +6,7 @@ import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
@@ -103,13 +104,16 @@ public class UnittestFileBatchScanCommand {
                     }
                     if (invalidTestCases.size() > 0) {
                         // Show the tool window and select the invalid test cases tab
-                        ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow("TestCraft");
-                        if (toolWindow != null) {
-                            toolWindow.show();
-                            toolWindow.getContentManager().setSelectedContent(
-                                toolWindow.getContentManager().findContent(I18nService.getInstance().message("toolwindow.invalid.testcases.tab.name"))
-                            );
-                        }
+                        ApplicationManager.getApplication().invokeLater(() -> {
+                                ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow("TestCraft");
+                                if (toolWindow != null) {
+                                    toolWindow.show();
+                                    toolWindow.getContentManager().setSelectedContent(
+                                        toolWindow.getContentManager().findContent(I18nService.getInstance().message("toolwindow.invalid.testcases.tab.name"))
+                                    );
+                                }
+                            }   
+                        );
                     }
                     EventBusService.getInstance().post(new InvalidTestScanEvent(InvalidTestScanEvent.INVALID_TEST_SCAN_END_EVENT, invalidTestCases));
                     Messages.showWarningDialog(project, message.toString(), I18nService.getInstance().message("testscan.test_case_validation_results"));

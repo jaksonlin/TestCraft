@@ -7,6 +7,7 @@ This product includes software developed by:
 - JavaParser (https://javaparser.org)
 - FasterXML, LLC (Jackson Project)
 - JUnit Team (JUnit Library)
+- PITest (http://pitest.org/) - Modified version included in lib/pitest-*.jar
 
 This product is a derivative work that evolved from pitest-gradle.
 The original pitest-gradle was licensed under MIT and has been rewritten
