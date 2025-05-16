@@ -13,6 +13,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
@@ -99,8 +101,19 @@ public class UnittestFileBatchScanCommand {
                     for (InvalidTestCase testCase : invalidTestCases) {
                         message.append(String.format("- %s\n", testCase.getQualifiedName()));
                     }
+                    if (invalidTestCases.size() > 0) {
+                        // Show the tool window and select the invalid test cases tab
+                        ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow("TestCraft");
+                        if (toolWindow != null) {
+                            toolWindow.show();
+                            toolWindow.getContentManager().setSelectedContent(
+                                toolWindow.getContentManager().findContent(I18nService.getInstance().message("toolwindow.invalid.testcases.tab.name"))
+                            );
+                        }
+                    }
                     EventBusService.getInstance().post(new InvalidTestScanEvent(InvalidTestScanEvent.INVALID_TEST_SCAN_END_EVENT, invalidTestCases));
                     Messages.showWarningDialog(project, message.toString(), I18nService.getInstance().message("testscan.test_case_validation_results"));
+                    
                 }
             }
 
