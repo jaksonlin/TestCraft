@@ -31,6 +31,53 @@
 
     <change-notes><![CDATA[
         <h2>Change Notes</h2>
+        <h3>1.0.13 - 2025-05-19</h3>
+        <ul>
+          <li><b>Added</b>
+            <ul>
+              <li><b>Mutation Testing Settings:</b>
+                <ul>
+                  <li>Added a new settings page under <b>Settings → TestCraft → Mutation Testing</b> that allows users to configure the default mutator group for mutation testing.</li>
+                  <li>Supported mutator groups: <code>DEFAULTS</code>, <code>STRONGER</code>, <code>STARTER_KIT</code>.</li>
+                  <li>The selected group is now used for all mutation test runs.</li>
+                </ul>
+              </li>
+              <li><b>Internationalization:</b>
+                <ul>
+                  <li>Added i18n keys for the new mutation testing settings.</li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li><b>Changed</b>
+            <ul>
+              <li><b>Pitest tool update:</b>
+                <ul>
+                  <li>Update the pitest tool to 1.17.4, the last version that supports JDK8 runtime.</li>
+                  <li>Based on 1.17.4 version, add the support to run mutation test on specific class method.</li>
+                  <li>Based on 1.17.4 version, add the new mutator group: <code>STARTER_KIT</code>, which is a set of mutators that are more likely to be useful for beginners.</li>
+                </ul>
+              </li>
+              <li><b>Mutation Test:</b>
+                <ul>
+                  <li>Now the mutation test will prompt the user to select the target class and method for the mutation test.</li>
+                </ul>
+              </li>
+              <li><b>Mutation Test Command:</b>
+                <ul>
+                  <li>The mutation test runner now uses the mutator group selected in the settings instead of a hardcoded value.</li>
+                </ul>
+              </li>
+              <li><b>Tool window:</b>
+                <ul>
+                  <li>Update the tool window to show the test case scan result on completion.</li>
+                  <li>Move all tool windows into one multi-tab tool window.</li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+
         <h3>1.0.12 - 2025-05-14</h3>
         <ul>
             <li>add plugin icon</li>
@@ -95,7 +142,7 @@
         </ul>
     ]]></change-notes>
 
-    <version>1.0.11</version>
+    <version>1.0.13</version>
 
     <vendor email="jaksonlin [at] gmail.com">Jason Lam</vendor>
     <id>com.github.jaksonlin.testcraftpro</id>
@@ -148,10 +195,17 @@
                 id="com.github.jaksonlin.testcraft.application.settings.ollama"
                 displayName="LLM Settings"/>
                 
+        <applicationConfigurable
+                parentId="com.github.jaksonlin.testcraft.application.settings"
+                instance="com.github.jaksonlin.testcraft.application.settings.MutationSettingsConfigurable"
+                id="com.github.jaksonlin.testcraft.application.settings.mutation"
+                displayName="Mutation Testing"/>
+                
         <!-- Services -->
         <applicationService serviceImplementation="com.github.jaksonlin.testcraft.infrastructure.services.config.AnnotationConfigService"/>
         <applicationService serviceImplementation="com.github.jaksonlin.testcraft.infrastructure.services.config.InvalidTestCaseConfigService"/>
         <applicationService serviceImplementation="com.github.jaksonlin.testcraft.infrastructure.services.config.LLMConfigService"/>
+        <applicationService serviceImplementation="com.github.jaksonlin.testcraft.application.settings.MutationSettings"/>
         <localInspection
             shortName="UnittestCaseAnnotationInspection"
             language="JAVA"

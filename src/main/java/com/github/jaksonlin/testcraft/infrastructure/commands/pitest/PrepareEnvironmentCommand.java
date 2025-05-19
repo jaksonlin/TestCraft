@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.github.jaksonlin.testcraft.infrastructure.services.system.I18nService;
+import com.github.jaksonlin.testcraft.infrastructure.services.config.MutationConfigService;
 
 public class PrepareEnvironmentCommand extends PitestCommand {
     private final JavaFileProcessor javaFileProcessor = new JavaFileProcessor();
@@ -44,6 +45,7 @@ public class PrepareEnvironmentCommand extends PitestCommand {
         collectSourceRoots();
         collectResourceDirectories();
         setWorkingDirectory();
+        collectMutatorGroup();
 
         if (getContext().getSourceRoots() != null) {
             collectTargetClassThatWeTest(getContext().getSourceRoots());
@@ -240,5 +242,9 @@ public class PrepareEnvironmentCommand extends PitestCommand {
             throw new IllegalStateException("Cannot find pitest dependencies");
         }
         getContext().setPitestDependencies(String.join(File.pathSeparator, dependencies));
+    }
+
+    private void collectMutatorGroup() {
+        getContext().setMutatorGroup(MutationConfigService.getInstance().getMutatorGroup());
     }
 }

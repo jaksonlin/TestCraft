@@ -29,6 +29,15 @@ public class PitestContext {
     private List<Mutation> mutationResults;
     private String workingDirectory;
     private String methodsToMutate;
+    private String mutatorGroup;
+
+    public String getMutatorGroup() {
+        return mutatorGroup;
+    }
+
+    public void setMutatorGroup(String mutatorGroup) {
+        this.mutatorGroup = mutatorGroup;
+    }
 
     public String getWorkingDirectory() {
         return workingDirectory;

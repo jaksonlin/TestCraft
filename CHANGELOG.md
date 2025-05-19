@@ -1,8 +1,9 @@
 <idea-plugin>
     <!-- Other configurations -->
 
-    <depends>com.intellij.modules.json</depends>
-</idea-plugin><!-- Keep a Changelog guide -> https://keepachangelog.com -->
+</idea-plugin>
+
+<!-- Keep a Changelog guide -> https://keepachangelog.com -->
 
 # TestCraft Pro Changelog
 
@@ -85,6 +86,22 @@
 - add i18n for testcase scan result
 - fix a bug that the testcase scan result is not shown in the toolwindow
 
-## 1.0.13 - 2025-05-16
-- update pitest to allow mutation on specific method on a class
-- update tool window to show test case scan result on completion
+## 1.0.13 - 2025-05-19
+
+### Added
+- Mutation Testing Settings:
+    - Added a new settings page under Settings → TestCraft → Mutation Testing that allows users to configure the default mutator group for mutation testing.
+    - Supported mutator groups: DEFAULTS, STRONGER, STARTER_KIT.
+    - The selected group is now used for all mutation test runs.
+- Internationalization:
+    - Added i18n keys for the new mutation testing settings.
+### Changed
+- Pitest tool update:
+    - Update the pitest tool to 1.17.4 the last version that support JDK8 runtime.
+    - Based on 1.17.4 version, add the support to run mutation test on specific class method.
+    - Based on 1.17.4 version, add the new mutator group: STARTER_KIT, which is a set of mutators that are more likely to be useful for beginners.
+- Mutation Test Command:
+    - The mutation test runner now uses the mutator group selected in the settings instead of a hardcoded value.
+- Tool window:
+    - Update the tool window to show the test case scan result on completion.
+    - Move all tool window into one multi-tab tool window.
