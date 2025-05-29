@@ -128,20 +128,46 @@ public class UnittestFileInspectorCommand extends UnittestCaseCheckCommand {
             // 1. iterate all the method call in the method body
             for (PsiMethodCallExpression methodCall : PsiTreeUtil.findChildrenOfType(method, PsiMethodCallExpression.class)) {
                 // 2. check if the method is assert statement
+                // 2.1 check the method body text to see if it contains assert statement string
+                String methodText = methodCall.getText().toLowerCase();
+                if (methodText.contains("assert")
+                        || methodText.contains("verify")
+                        || methodText.contains("fail")) {
+                    return Optional.of(method);
+                }
+
+                // 2.2 check the method name to see if it contains assert statement string
                 String methodName = methodCall.getMethodExpression().getReferenceName();
-                if (methodName != null && (methodName.toLowerCase().contains("assert")
+                if (methodName == null){
+                    continue;
+                }
+
+                if (methodName.toLowerCase().contains("assert")
                         || methodName.toLowerCase().contains("verify")
-                        || methodName.toLowerCase().contains("fail"))) {
+                        || methodName.toLowerCase().contains("fail")) {
                     // which means the method contains assert statement
                     return Optional.of(method);
-                } else {
-                    // 3. if not, push the child method to the stack
-                    // 3.1 convert the methodCall to a PsiMethod
-                    PsiMethod childMethod = methodCall.resolveMethod();
-                    if (childMethod != null) {
-                        stack.push(childMethod);
-                    }
                 }
+                // 2.3. method class name
+                PsiMethod childMethod = methodCall.resolveMethod();
+                if (childMethod != null) {
+                    // 3.1 check if the method class name is not null
+                    if (childMethod.getContainingClass() == null
+                            || childMethod.getContainingClass().getQualifiedName() == null
+                            || childMethod.getContainingClass().getQualifiedName().isEmpty()) {
+                        stack.push(childMethod);
+                        continue;
+                    }
+                    String className = childMethod.getContainingClass().getQualifiedName();
+                    if (className.toLowerCase().contains("assert")
+                            || className.toLowerCase().contains("verify")
+                            || className.toLowerCase().contains("fail")) {
+                        // which means the method contains assert statement
+                        return Optional.of(method);
+                    }
+                    stack.push(childMethod);
+                }
+
             }
             // 4. if the depth is greater than 3, return false
             if (depth > 3) {

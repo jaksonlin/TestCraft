@@ -49,6 +49,11 @@ public class BuildPitestCommandCommand extends PitestCommand {
             throw new IllegalStateException("Java home not set");
         }
 
+        String mutatorGroup = getContext().getMutatorGroup();
+        if (mutatorGroup == null) {
+            throw new IllegalStateException("Mutator group not set");
+        }
+
         String javaExe = javaHome + "/bin/java";
 
         List<String> command = new ArrayList<>();
@@ -77,8 +82,13 @@ public class BuildPitestCommandCommand extends PitestCommand {
         command.add("--timeoutFactor");
         command.add("2.0");
         command.add("--mutators");
-        command.add("STRONGER");
+        command.add(mutatorGroup);
         command.add("--skipFailingTests");
+
+        if (getContext().getMethodsToMutate() != null) {
+            command.add("--targetMethods");
+            command.add(getContext().getMethodsToMutate());
+        }
 
         getContext().setCommand(command);
     }

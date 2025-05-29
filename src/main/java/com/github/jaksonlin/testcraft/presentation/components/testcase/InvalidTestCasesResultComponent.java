@@ -29,6 +29,12 @@ public class InvalidTestCasesResultComponent {
                     summaryLabel.setText("Scanning for invalid test cases...");
                     break;
                 case InvalidTestScanEvent.INVALID_TEST_SCAN_END_EVENT:
+                    Object eventPayload = event.getPayload();
+                    if (eventPayload == null) {
+                        summaryLabel.setText(I18nService.getInstance().message("invalid.test.cases.result.no.invalid.test.cases.found"));
+                        resultList.setListData(new String[0]);
+                        return;
+                    }
                     List<InvalidTestCase> invalidTestCases = (List<InvalidTestCase>) event.getPayload();
                     ApplicationManager.getApplication().invokeLater(() -> setInvalidTestCases(invalidTestCases));
                     break;

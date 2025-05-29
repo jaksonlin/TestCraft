@@ -61,6 +61,7 @@ public class RunPitestAction extends AnAction {
 
         List<PitestCommand> commands = Arrays.asList(
                 new PrepareEnvironmentCommand(targetProject, context),
+                new MethodToMutateCommand(targetProject, context),
                 new BuildPitestCommandCommand(targetProject, context),
                 new RunPitestCommand(targetProject, context),
                 new HandlePitestResultCommand(targetProject, context),
