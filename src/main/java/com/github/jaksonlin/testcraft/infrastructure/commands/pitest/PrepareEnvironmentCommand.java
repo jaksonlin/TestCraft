@@ -16,10 +16,14 @@ import com.intellij.openapi.vfs.VirtualFile;
 
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.github.jaksonlin.testcraft.infrastructure.services.system.I18nService;
 import com.github.jaksonlin.testcraft.infrastructure.services.config.MutationConfigService;
@@ -40,11 +44,13 @@ public class PrepareEnvironmentCommand extends PitestCommand {
             throw new IllegalStateException("Cannot find test file");
         }
 
-        collectTargetTestClassName(getContext().getTestFilePath());
-        collectJavaInfo(testVirtualFile);
+
+        collectTargetTestClassInfo(getContext().getTestFilePath());
+        collectJavaHome(testVirtualFile);
         collectSourceRoots();
-        collectResourceDirectories();
+
         setWorkingDirectory();
+        collectResourceDirectories();
         collectMutatorGroup();
 
         if (getContext().getSourceRoots() != null) {
@@ -74,18 +80,23 @@ public class PrepareEnvironmentCommand extends PitestCommand {
         }
     }
 
-    private void collectTargetTestClassName(String targetTestClassFilePath) {
-        ClassFileInfo testClassInfo = javaFileProcessor.getFullyQualifiedName(targetTestClassFilePath);
+    private void collectTargetTestClassInfo(String targetTestClassFilePath) {
+        try {
+            Optional<ClassFileInfo> testClassInfo = javaFileProcessor.getFullyQualifiedName(targetTestClassFilePath);
 
-        if (testClassInfo == null) {
-            showError("Cannot get fully qualified name for target test class");
-            throw new IllegalStateException("Cannot get fully qualified name for target test class");
+            if (!testClassInfo.isPresent()) {
+                showError("Cannot get fully qualified name for target test class");
+                throw new IllegalStateException("Cannot get fully qualified name for target test class");
+            }
+            getContext().setFullyQualifiedTargetTestClassName(testClassInfo.get().getFullyQualifiedName());
+            getContext().setIsJunit5(testClassInfo.get().getImports().contains("org.junit.jupiter.api.Test"));
+        } catch (IOException e) {
+            showError("Error getting fully qualified name for target test class: " + e.getMessage());
+            throw new IllegalStateException("Error getting fully qualified name for target test class", e);
         }
-
-        getContext().setFullyQualifiedTargetTestClassName(testClassInfo.getFullyQualifiedName());
     }
 
-    private void collectJavaInfo(VirtualFile testVirtualFile) {
+    private void collectJavaHome(VirtualFile testVirtualFile) {
         ReadAction.run(() -> {
             Module projectModule = ProjectRootManager.getInstance(getProject()).getFileIndex().getModuleForFile(testVirtualFile);
             if (projectModule == null) {
@@ -96,6 +107,7 @@ public class PrepareEnvironmentCommand extends PitestCommand {
             ModuleRootManager moduleRootManager = ModuleRootManager.getInstance(projectModule);
             if (moduleRootManager.getSdk() != null) {
                 getContext().setJavaHome(moduleRootManager.getSdk().getHomePath());
+                getContext().setJavaVersion(moduleRootManager.getSdk().getVersionString());
             }
         });
         if (getContext().getJavaHome() == null || getContext().getJavaHome().isEmpty()) {
@@ -142,9 +154,31 @@ public class PrepareEnvironmentCommand extends PitestCommand {
         getContext().setWorkingDirectory(sourceRoot);
     }
 
+    private String findToolsJarForJDK8() {
+        String javaHome = getContext().getJavaHome();
+        File javaHomeFile = new File(javaHome);
+        File toolsJarFile = new File(javaHomeFile, "lib/tools.jar");
+        return toolsJarFile.getAbsolutePath();
+    }
+
     private void collectResourceDirectories() {
         List<String> resourceDirectories = ReadAction.compute(() -> GradleUtils.getResourceDirectories(getProject()));
-        getContext().setResourceDirectories(resourceDirectories);
+        String workingDirectory = getContext().getWorkingDirectory();
+        // the order of the resource directories is important, the first one should share the same parent directory as working dir
+        List<String> newResourceDirectories = new ArrayList<>();
+        if (!resourceDirectories.isEmpty()) {
+            for (String resourceDirectory : resourceDirectories) {
+                if (resourceDirectory.replace("\\", "/").startsWith(workingDirectory.replace("\\", "/"))) {
+                    newResourceDirectories.add(resourceDirectory);
+                }
+            }
+            for (String resourceDirectory : resourceDirectories) {
+                if (!newResourceDirectories.contains(resourceDirectory)) {
+                    newResourceDirectories.add(resourceDirectory);
+                }
+            }
+        }
+        getContext().setResourceDirectories(newResourceDirectories);
     }
 
     private void collectTargetClassThatWeTest(List<String> sourceRoots) {
@@ -161,17 +195,21 @@ public class PrepareEnvironmentCommand extends PitestCommand {
             showError("Cannot find target class file");
             throw new IllegalStateException("Cannot find target class file");
         }
-        ClassFileInfo classInfo = javaFileProcessor.getFullyQualifiedName(targetClassInfo.getFile().toString());
-
-        if (classInfo == null) {
-            showError("Cannot get fully qualified name for target class");
-            throw new IllegalStateException("Cannot get fully qualified name for target class");
+        try {
+            Optional<ClassFileInfo> classInfo = javaFileProcessor.getFullyQualifiedName(targetClassInfo.getFile().toString());
+            if (!classInfo.isPresent()) {
+                showError("Cannot get fully qualified name for target class");
+                throw new IllegalStateException("Cannot get fully qualified name for target class");
+            }
+            getContext().setTargetClassFullyQualifiedName(classInfo.get().getFullyQualifiedName());
+            getContext().setTargetClassPackageName(classInfo.get().getPackageName());
+            getContext().setTargetClassName(classInfo.get().getClassName());
+            getContext().setTargetClassSourceRoot(targetClassInfo.getSourceRoot().toString());
+            getContext().setTargetClassFilePath(targetClassInfo.getFile().normalize().toString().replace("\\", "/"));
+        } catch (IOException e) {
+            showError("Error getting fully qualified name for target class: " + e.getMessage());
+            throw new IllegalStateException("Error getting fully qualified name for target class", e);
         }
-        getContext().setTargetClassFullyQualifiedName(classInfo.getFullyQualifiedName());
-        getContext().setTargetClassPackageName(classInfo.getPackageName());
-        getContext().setTargetClassName(classInfo.getClassName());
-        getContext().setTargetClassSourceRoot(targetClassInfo.getSourceRoot().toString());
-        getContext().setTargetClassFilePath(targetClassInfo.getFile().normalize().toString().replace("\\", "/"));
     }
 
     private void prepareReportDirectory(VirtualFile testVirtualFile, String className) {
@@ -196,6 +234,68 @@ public class PrepareEnvironmentCommand extends PitestCommand {
         }
     }
 
+    private List<String> getJunit5PitestPluginJars(List<String> testDependencies) {
+        // use regex to match version string like "junit-jupiter-5.7.0.jar" or "junit-jupiter-5.8.1.jar"
+        Pattern pattern = Pattern.compile("(\\d+\\.\\d+\\.\\d+)\\.jar");
+        for (String dependency : testDependencies) {
+            if (!dependency.contains("junit-jupiter-")) {
+                continue;
+            }
+            String fileName = dependency.substring(dependency.lastIndexOf(File.separator) + 1);
+            Matcher matcher = pattern.matcher(fileName);
+            if (!matcher.find()) {
+                continue;
+            }
+            String version = matcher.group(1);
+            String[] versionParts = version.split("\\.");
+            if (versionParts.length < 3) {
+                continue;
+            }
+            int middleVersionInt = Integer.parseInt(versionParts[1]);
+            if (middleVersionInt >= 7 && middleVersionInt <= 11) {
+                return getPitestJunit5PluginFile("junit-platform-launcher-1.9.2.jar");
+            } else if (middleVersionInt == 12) {
+                return getPitestJunit5PluginFile("junit-platform-launcher-1.12.2.jar");
+            } else if (middleVersionInt == 13) {
+                return getPitestJunit5PluginFile("junit-platform-launcher-1.13.0.jar");
+            } else {
+                continue;
+            }
+            
+        }
+        throw new IllegalStateException("Cannot find JUnit 5 version in dependency: " + testDependencies);
+    }
+
+    private List<String> getPitestJunit5PluginFile(String junitPlatformLauncherJar) {
+        String pluginLibDir = ReadAction.compute(() -> PathManager.getPluginsPath() + "/TestCraft-Pro/lib");
+        
+        List<String> junit5PitestPluginJars = new ArrayList<>();
+        // check if the jar file exists in the plugin lib directory
+        File junitPlatformLauncherFile = new File(pluginLibDir, junitPlatformLauncherJar);
+        if (junitPlatformLauncherFile.exists()) {
+            junit5PitestPluginJars.add(junitPlatformLauncherFile.getAbsolutePath());
+            
+        } else {
+            showError("Cannot find JUnit Platform Launcher jar: " + junitPlatformLauncherJar);
+            throw new IllegalStateException("Cannot find JUnit Platform Launcher jar: " + junitPlatformLauncherJar);
+        }
+        File apiGuardianFile = new File(pluginLibDir, "apiguardian-api-1.1.2.jar");
+        if (apiGuardianFile.exists()) {
+            junit5PitestPluginJars.add(apiGuardianFile.getAbsolutePath());
+        } else {
+            showError("Cannot find API Guardian jar: " + "apiguardian-api-1.1.2.jar");
+            throw new IllegalStateException("Cannot find API Guardian jar: " + "apiguardian-api-1.1.2.jar");
+        }
+        File pitestJunit5PluginFile = new File(pluginLibDir, "pitest-junit5-plugin-1.2.2.jar");
+        if (pitestJunit5PluginFile.exists()) {
+            junit5PitestPluginJars.add(pitestJunit5PluginFile.getAbsolutePath());
+        } else {
+            showError("Cannot find PITest JUnit 5 plugin jar: " + "pitest-junit5-plugin-1.2.2.jar");
+            throw new IllegalStateException("Cannot find PITest JUnit 5 plugin jar: " + "pitest-junit5-plugin-1.2.2.jar");
+        }
+        return junit5PitestPluginJars;
+    }
+
     private void collectClassPathFileForPitest(String reportDirectory, String targetPackageName, List<String> resourceDirectories) {
         String classPathFileContent = ReadAction.compute(() -> {
             List<String> classpath = GradleUtils.getCompilationOutputPaths(getProject());
@@ -205,6 +305,12 @@ public class PrepareEnvironmentCommand extends PitestCommand {
                 allDependencies.addAll(resourceDirectories);
             }
             allDependencies.addAll(testDependencies);
+            if (getContext().getIsJunit5()) {
+                allDependencies.addAll(getJunit5PitestPluginJars(testDependencies));
+            }
+            if (getContext().getJavaVersion().contains("1.8.")) {
+                allDependencies.add(findToolsJarForJDK8());
+            }
             return String.join("\n", allDependencies);
         });
         showOutput("Classpath file content: " + classPathFileContent, "Classpath file content");
@@ -230,7 +336,11 @@ public class PrepareEnvironmentCommand extends PitestCommand {
         if (files != null) {
             for (File file : files) {
                 if (file.getName().endsWith(".jar")) {
-                    if (file.getName().startsWith("pitest") || file.getName().startsWith("commons")) {
+                    String fileName = file.getName();
+                    if (fileName.startsWith("pitest-command")
+                            || fileName.startsWith("pitest-entry")
+                            || fileName.startsWith("pitest-testcraft-pro")
+                            || file.getName().startsWith("commons")) {
                         dependencies.add(file.getAbsolutePath());
                     }
                 }

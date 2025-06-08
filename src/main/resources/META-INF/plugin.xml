@@ -31,6 +31,11 @@
 
     <change-notes><![CDATA[
         <h2>Change Notes</h2>
+        <h3>1.0.14 - 2025-06-08</h3>
+        <ul>
+            <li>remove the annoying inspector for unittest check during writing the unittest, reason: inspector is for something that can be fast fixed, but the unittest check is not, so remove it to avoid the confusion.</li>
+            <li>add the support to Junit 5 from version 5.7.0 to 5.13.0.</li>
+        </ul>
         <h3>1.0.13 - 2025-05-19</h3>
         <ul>
           <li><b>Added</b>
@@ -142,7 +147,7 @@
         </ul>
     ]]></change-notes>
 
-    <version>1.0.13</version>
+    <version>1.0.14</version>
 
     <vendor email="jaksonlin [at] gmail.com">Jason Lam</vendor>
     <id>com.github.jaksonlin.testcraftpro</id>
@@ -161,15 +166,6 @@
                    id="TestCraft" 
                    icon="/icons/testcraft.svg"
                    anchor="right"/>
-        <!-- <toolWindow factoryClass="com.github.jaksonlin.testcraft.presentation.toolWindow.MutationToolWindowFactory" 
-                   id="MutationTestHistory" 
-                   icon="/pitestHistoryWindowIcon.svg"/>
-        <toolWindow id="LLM Suggestions" 
-                    secondary="true"
-                    icon="/llm-suggestions.svg"
-                    anchor="right"
-                    factoryClass="com.github.jaksonlin.testcraft.presentation.toolWindow.LLMSuggestionsToolWindowFactory"/> -->
-
         <!-- Settings Group -->
         <applicationConfigurable
                 parentId="root"
@@ -205,22 +201,22 @@
         <applicationService serviceImplementation="com.github.jaksonlin.testcraft.infrastructure.services.config.AnnotationConfigService"/>
         <applicationService serviceImplementation="com.github.jaksonlin.testcraft.infrastructure.services.config.InvalidTestCaseConfigService"/>
         <applicationService serviceImplementation="com.github.jaksonlin.testcraft.infrastructure.services.config.LLMConfigService"/>
-        <applicationService serviceImplementation="com.github.jaksonlin.testcraft.application.settings.MutationSettings"/>
-        <localInspection
-            shortName="UnittestCaseAnnotationInspection"
-            language="JAVA"
-            implementationClass="com.github.jaksonlin.testcraft.application.inspectors.UnittestInspector"
-            displayName="Unit test case comment and assert check"
-            enabledByDefault="true"
-            groupName="Java"
-            order="LAST"
-        />
+        <applicationService serviceImplementation="com.github.jaksonlin.testcraft.infrastructure.services.config.MutationConfigService"/>
+<!--        <localInspection-->
+<!--            shortName="UnittestCaseAnnotationInspection"-->
+<!--            language="JAVA"-->
+<!--            implementationClass="com.github.jaksonlin.testcraft.application.inspectors.UnittestInspector"-->
+<!--            displayName="Unit test case comment and assert check"-->
+<!--            enabledByDefault="true"-->
+<!--            groupName="Java"-->
+<!--            order="LAST"-->
+<!--        />-->
         
         <completion.contributor
                 language="JAVA"
                 implementationClass="com.github.jaksonlin.testcraft.application.completions.AnnotationCompletionContributor"/>
                 
-        
+<!--        <vcs.checkinHandlerFactory implementation="com.github.jaksonlin.testcraft.application.actions.PreCommitValidationAction"/>-->
 
     </extensions>
 
@@ -261,5 +257,12 @@
                 text="$action.CheckInvalidTestCasesAction.text">
             <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
         </action>
+
+<!--        <action id="TestCraft.PreCommitValidation" -->
+<!--                class="com.github.jaksonlin.testcraft.application.actions.PreCommitValidationAction"-->
+<!--                text="Validate Test Cases Before Commit"-->
+<!--                description="Validates test cases before committing changes">-->
+<!--            <add-to-group group-id="Vcs.MessageActionGroup" anchor="first"/>-->
+<!--        </action>-->
     </actions>
 </idea-plugin>
