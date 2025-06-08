@@ -1,6 +1,7 @@
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
 
 plugins {
     id("java") // Java support
@@ -160,10 +161,22 @@ tasks {
     publishPlugin {
         dependsOn(patchChangelog)
     }
+
 }
 
 intellijPlatformTesting {
     runIde {
+        register("runIdeEn") {
+            task {
+                    jvmArgumentProviders += CommandLineArgumentProvider {
+                        listOf(
+                             "-Duser.language=en",
+                            "-Duser.country=US",
+                        )
+                    }
+                }
+        }
+
         register("runIdeForUiTests") {
             task {
                 jvmArgumentProviders += CommandLineArgumentProvider {
@@ -182,3 +195,4 @@ intellijPlatformTesting {
         }
     }
 }
+

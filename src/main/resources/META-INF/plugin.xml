@@ -227,7 +227,7 @@
     <!-- Add right-click entry to run Pitest on a JUnit test file -->
     <actions>
         <!-- First Level Menu -->
-        <group id="UnittestHelperToolMenu" text="Unittest Helpers" popup="true" description="Java unittest helper tool" icon="/icons/testcraft.svg">
+        <group id="UnittestHelperToolMenu" text="TestCraft Unittest Helpers" popup="true" description="Java unittest helper tool" icon="/icons/testcraft.svg">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
         </group>
 
