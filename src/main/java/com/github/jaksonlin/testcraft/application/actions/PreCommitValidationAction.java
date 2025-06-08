@@ -28,109 +28,113 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public class PreCommitValidationAction extends CheckinHandlerFactory {
-    private final InvalidTestCaseConfigService invalidTestCaseConfigService;
-    private final RunHistoryManagerService runHistoryManager;
-
-    public PreCommitValidationAction() {
-        this.invalidTestCaseConfigService = ApplicationManager.getApplication().getService(InvalidTestCaseConfigService.class);
-        this.runHistoryManager = RunHistoryManagerService.getInstance();
-    }
-
     @Override
     public @NotNull CheckinHandler createHandler(@NotNull CheckinProjectPanel checkinProjectPanel, @NotNull CommitContext commitContext) {
-
-        return new CheckinHandler() {
-            @Override
-            public ReturnResult beforeCheckin() {
-                try {
-                    if (!invalidTestCaseConfigService.isEnable()) {
-                        return ReturnResult.COMMIT;
-                    }
-
-                    Project project = checkinProjectPanel.getProject();
-                    if (project == null) {
-                        return ReturnResult.COMMIT;
-                    }
-
-                    Collection<VirtualFile> files = checkinProjectPanel.getVirtualFiles();
-                    if (files == null || files.isEmpty()) {
-                        return ReturnResult.COMMIT;
-                    }
-                    
-                    // Collect test files
-                    List<PsiFile> testFiles = new ArrayList<>();
-                    PsiManager psiManager = PsiManager.getInstance(project);
-                    for (VirtualFile file : files) {
-                        if (file.getName().endsWith("Test.java")) {
-                            PsiFile psiFile = psiManager.findFile(file);
-                            if (psiFile != null) {
-                                testFiles.add(psiFile);
-                            }
-                        }
-                    }
-
-                    if (!testFiles.isEmpty()) {
-                        // Create a simple data context for the action event
-                        DataContext dataContext = SimpleDataContext.getProjectContext(project);
-                        AnActionEvent actionEvent = AnActionEvent.createFromDataContext(
-                            "PreCommitValidation",
-                            null,
-                            dataContext
-                        );
-                        
-                        // Run validation on all test files
-                        UnittestFileBatchScanCommand scanCommand = new UnittestFileBatchScanCommand(project, actionEvent);
-                        
-                        // Create a CompletableFuture to handle the validation result
-                        CompletableFuture<Boolean> validationFuture = new CompletableFuture<>();
-                        
-                        // Add a listener to handle the validation result
-                        scanCommand.setOnValidationCompleteListener(hasInvalidTests -> {
-                            validationFuture.complete(hasInvalidTests);
-                        });
-                        
-                        // Execute the validation
-                        scanCommand.execute();
-                        
-                        try {
-                            // Wait for validation to complete with a timeout
-                            boolean hasInvalidTests = validationFuture.get(30, TimeUnit.SECONDS);
-                            
-                            if (hasInvalidTests) {
-                                // Show error message and block commit
-                                Messages.showErrorDialog(
-                                    project,
-                                    I18nService.getInstance().message("testscan.commit_blocked_message"),
-                                    I18nService.getInstance().message("testscan.test_case_validation_results")
-                                );
-                                
-                                return ReturnResult.CANCEL;
-                            }
-                        } catch (InterruptedException | ExecutionException | TimeoutException ex) {
-                            // Handle timeout or other errors
-                            Messages.showErrorDialog(
-                                project,
-                                I18nService.getInstance().message("testscan.validation_timeout_message"),
-                                I18nService.getInstance().message("testscan.test_case_validation_results")
-                            );
-                            return ReturnResult.CANCEL;
-                        }
-                    }
-                    
-                    return ReturnResult.COMMIT;
-                } catch (Exception e) {
-                    // Handle any unexpected errors
-                    Project project = checkinProjectPanel.getProject();
-                    if (project != null) {
-                        Messages.showErrorDialog(
-                            project,
-                            "An unexpected error occurred during pre-commit validation: " + e.getMessage(),
-                            "Pre-commit Validation Error"
-                        );
-                    }
-                    return ReturnResult.COMMIT;
-                }
-            }
-        };
+        return null;
     }
+//    private final InvalidTestCaseConfigService invalidTestCaseConfigService;
+//    private final RunHistoryManagerService runHistoryManager;
+//
+//    public PreCommitValidationAction() {
+//        this.invalidTestCaseConfigService = ApplicationManager.getApplication().getService(InvalidTestCaseConfigService.class);
+//        this.runHistoryManager = RunHistoryManagerService.getInstance();
+//    }
+//
+//    @Override
+//    public @NotNull CheckinHandler createHandler(@NotNull CheckinProjectPanel checkinProjectPanel, @NotNull CommitContext commitContext) {
+//
+//        return new CheckinHandler() {
+//            @Override
+//            public ReturnResult beforeCheckin() {
+//                try {
+//                    if (!invalidTestCaseConfigService.isEnable()) {
+//                        return ReturnResult.COMMIT;
+//                    }
+//
+//                    Project project = checkinProjectPanel.getProject();
+//                    if (project == null) {
+//                        return ReturnResult.COMMIT;
+//                    }
+//
+//                    Collection<VirtualFile> files = checkinProjectPanel.getVirtualFiles();
+//                    if (files == null || files.isEmpty()) {
+//                        return ReturnResult.COMMIT;
+//                    }
+//
+//                    // Collect test files
+//                    List<PsiFile> testFiles = new ArrayList<>();
+//                    PsiManager psiManager = PsiManager.getInstance(project);
+//                    for (VirtualFile file : files) {
+//                        if (file.getName().endsWith("Test.java")) {
+//                            PsiFile psiFile = psiManager.findFile(file);
+//                            if (psiFile != null) {
+//                                testFiles.add(psiFile);
+//                            }
+//                        }
+//                    }
+//
+//                    if (!testFiles.isEmpty()) {
+//                        // Create a simple data context for the action event
+//                        DataContext dataContext = SimpleDataContext.getProjectContext(project);
+//                        AnActionEvent actionEvent = AnActionEvent.createFromDataContext(
+//                            "PreCommitValidation",
+//                            null,
+//                            dataContext
+//                        );
+//
+//                        // Run validation on all test files
+//                        UnittestFileBatchScanCommand scanCommand = new UnittestFileBatchScanCommand(project, actionEvent);
+//
+//                        // Create a CompletableFuture to handle the validation result
+//                        CompletableFuture<Boolean> validationFuture = new CompletableFuture<>();
+//
+//                        // Add a listener to handle the validation result
+////                        scanCommand.setOnValidationCompleteListener(hasInvalidTests -> {
+////                            validationFuture.complete(hasInvalidTests);
+////                        });
+//
+//                        // Execute the validation
+//                        scanCommand.execute();
+//
+//                        try {
+//                            // Wait for validation to complete with a timeout
+//                            boolean hasInvalidTests = validationFuture.get(30, TimeUnit.SECONDS);
+//
+//                            if (hasInvalidTests) {
+//                                // Show error message and block commit
+//                                Messages.showErrorDialog(
+//                                    project,
+//                                    I18nService.getInstance().message("testscan.commit_blocked_message"),
+//                                    I18nService.getInstance().message("testscan.test_case_validation_results")
+//                                );
+//
+//                                return ReturnResult.CANCEL;
+//                            }
+//                        } catch (InterruptedException | ExecutionException | TimeoutException ex) {
+//                            // Handle timeout or other errors
+//                            Messages.showErrorDialog(
+//                                project,
+//                                I18nService.getInstance().message("testscan.validation_timeout_message"),
+//                                I18nService.getInstance().message("testscan.test_case_validation_results")
+//                            );
+//                            return ReturnResult.CANCEL;
+//                        }
+//                    }
+//
+//                    return ReturnResult.COMMIT;
+//                } catch (Exception e) {
+//                    // Handle any unexpected errors
+//                    Project project = checkinProjectPanel.getProject();
+//                    if (project != null) {
+//                        Messages.showErrorDialog(
+//                            project,
+//                            "An unexpected error occurred during pre-commit validation: " + e.getMessage(),
+//                            "Pre-commit Validation Error"
+//                        );
+//                    }
+//                    return ReturnResult.COMMIT;
+//                }
+//            }
+//        };
+//    }
 } 

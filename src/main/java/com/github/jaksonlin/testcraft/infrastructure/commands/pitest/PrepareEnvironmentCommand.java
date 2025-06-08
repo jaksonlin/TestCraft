@@ -44,11 +44,13 @@ public class PrepareEnvironmentCommand extends PitestCommand {
             throw new IllegalStateException("Cannot find test file");
         }
 
+
         collectTargetTestClassInfo(getContext().getTestFilePath());
         collectJavaHome(testVirtualFile);
         collectSourceRoots();
-        collectResourceDirectories();
+
         setWorkingDirectory();
+        collectResourceDirectories();
         collectMutatorGroup();
 
         if (getContext().getSourceRoots() != null) {
@@ -105,6 +107,7 @@ public class PrepareEnvironmentCommand extends PitestCommand {
             ModuleRootManager moduleRootManager = ModuleRootManager.getInstance(projectModule);
             if (moduleRootManager.getSdk() != null) {
                 getContext().setJavaHome(moduleRootManager.getSdk().getHomePath());
+                getContext().setJavaVersion(moduleRootManager.getSdk().getVersionString());
             }
         });
         if (getContext().getJavaHome() == null || getContext().getJavaHome().isEmpty()) {
@@ -151,9 +154,31 @@ public class PrepareEnvironmentCommand extends PitestCommand {
         getContext().setWorkingDirectory(sourceRoot);
     }
 
+    private String findToolsJarForJDK8() {
+        String javaHome = getContext().getJavaHome();
+        File javaHomeFile = new File(javaHome);
+        File toolsJarFile = new File(javaHomeFile, "lib/tools.jar");
+        return toolsJarFile.getAbsolutePath();
+    }
+
     private void collectResourceDirectories() {
         List<String> resourceDirectories = ReadAction.compute(() -> GradleUtils.getResourceDirectories(getProject()));
-        getContext().setResourceDirectories(resourceDirectories);
+        String workingDirectory = getContext().getWorkingDirectory();
+        // the order of the resource directories is important, the first one should share the same parent directory as working dir
+        List<String> newResourceDirectories = new ArrayList<>();
+        if (!resourceDirectories.isEmpty()) {
+            for (String resourceDirectory : resourceDirectories) {
+                if (resourceDirectory.replace("\\", "/").startsWith(workingDirectory.replace("\\", "/"))) {
+                    newResourceDirectories.add(resourceDirectory);
+                }
+            }
+            for (String resourceDirectory : resourceDirectories) {
+                if (!newResourceDirectories.contains(resourceDirectory)) {
+                    newResourceDirectories.add(resourceDirectory);
+                }
+            }
+        }
+        getContext().setResourceDirectories(newResourceDirectories);
     }
 
     private void collectTargetClassThatWeTest(List<String> sourceRoots) {
@@ -282,6 +307,9 @@ public class PrepareEnvironmentCommand extends PitestCommand {
             allDependencies.addAll(testDependencies);
             if (getContext().getIsJunit5()) {
                 allDependencies.addAll(getJunit5PitestPluginJars(testDependencies));
+            }
+            if (getContext().getJavaVersion().contains("1.8.")) {
+                allDependencies.add(findToolsJarForJDK8());
             }
             return String.join("\n", allDependencies);
         });

@@ -31,6 +31,15 @@ public class PitestContext {
     private String methodsToMutate;
     private String mutatorGroup;
     private Boolean isJunit5;
+    private String javaVersion;
+
+    public String getJavaVersion() {
+        return javaVersion;
+    }
+    
+    public void setJavaVersion(String javaVersion) {
+        this.javaVersion = javaVersion;
+    }
 
     public Boolean getIsJunit5() {
         return isJunit5;
