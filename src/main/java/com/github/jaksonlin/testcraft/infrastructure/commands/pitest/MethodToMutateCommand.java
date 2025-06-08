@@ -1,6 +1,8 @@
 package com.github.jaksonlin.testcraft.infrastructure.commands.pitest;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -28,21 +30,29 @@ public class MethodToMutateCommand extends PitestCommand {
     }
 
     private List<String> getTargetClassMethods() {
-        ClassFileInfo classFileInfo = javaFileProcessor.getFullyQualifiedName(getContext().getTargetClassFilePath());
-        List<String> methods = classFileInfo.getMethods();
-        ItemSelectionComponent<String> itemSelectionComponent = new ItemSelectionComponent<String>(getProject(), "Select the methods to mutate");
-        itemSelectionComponent.setItems(methods);
-        AtomicReference<List<String>> result = new AtomicReference<>();
-        ApplicationManager.getApplication().invokeAndWait(() -> {
-            itemSelectionComponent.showDialog();
-            result.set(itemSelectionComponent.getSelectedItems());
-        }, ModalityState.defaultModalityState());
-       
-       
-        // format into QualifiedClassName::methodName
-        return result.get().stream()
-            .map(method -> classFileInfo.getFullyQualifiedName() + "::" + method)
-            .collect(Collectors.toList());
+        try {
+            Optional<ClassFileInfo> classFileInfo = javaFileProcessor.getFullyQualifiedName(getContext().getTargetClassFilePath());
+            if (!classFileInfo.isPresent()) {
+                showError("Cannot get fully qualified name for target class");
+                throw new IllegalStateException("Cannot get fully qualified name for target class");
+            }
+            List<String> methods = classFileInfo.get().getMethods();
+            ItemSelectionComponent<String> itemSelectionComponent = new ItemSelectionComponent<String>(getProject(), "Select the methods to mutate");
+            itemSelectionComponent.setItems(methods);
+            AtomicReference<List<String>> result = new AtomicReference<>();
+            ApplicationManager.getApplication().invokeAndWait(() -> {
+                itemSelectionComponent.showDialog();
+                result.set(itemSelectionComponent.getSelectedItems());
+            }, ModalityState.defaultModalityState());
+            // format into QualifiedClassName::methodName
+            return result.get().stream()
+                .map(method -> classFileInfo.get().getFullyQualifiedName() + "::" + method)
+                .collect(Collectors.toList());
+        } catch(IOException ex){
+            showError("Error getting fully qualified name for target class: " + ex.getMessage());
+            throw new IllegalStateException("Error getting fully qualified name for target class", ex);
+        }
+        
     }
 
 }

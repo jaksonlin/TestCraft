@@ -10,7 +10,10 @@
 
 ## [Unreleased]
 ### Added
+NA
 
+### Changed
+- remove the annoying inspector for unittest check during writing the unittest, reason: inspector is for something that can be fast fixed, but the unittest check is not, so remove it to avoid the confusion.
 
 ## 1.0.0 - 2024-10-12
 ### Initial Release
@@ -105,3 +108,7 @@
 - Tool window:
     - Update the tool window to show the test case scan result on completion.
     - Move all tool window into one multi-tab tool window.
+
+## 1.0.14 - 2025-06-08
+- remove the annoying inspector for unittest check during writing the unittest, reason: inspector is for something that can be fast fixed, but the unittest check is not, so remove it to avoid the confusion.
+- add the support to Junit 5 from version 5.7.0 to 5.13.0.

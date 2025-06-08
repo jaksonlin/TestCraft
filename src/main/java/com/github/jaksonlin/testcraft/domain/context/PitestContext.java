@@ -30,6 +30,15 @@ public class PitestContext {
     private String workingDirectory;
     private String methodsToMutate;
     private String mutatorGroup;
+    private Boolean isJunit5;
+
+    public Boolean getIsJunit5() {
+        return isJunit5;
+    }
+
+    public void setIsJunit5(Boolean isJunit5) {
+        this.isJunit5 = isJunit5;
+    }
 
     public String getMutatorGroup() {
         return mutatorGroup;

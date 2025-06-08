@@ -11,8 +11,10 @@ import com.github.jaksonlin.testcraft.util.FileUtils;
 import com.github.jaksonlin.testcraft.util.TargetClassInfo;
 import com.github.jaksonlin.testcraft.util.JavaFileProcessor;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class MultiTargetClassCheckCommand extends PitestCommand {
@@ -47,15 +49,20 @@ public class MultiTargetClassCheckCommand extends PitestCommand {
             showError("Cannot find target class file");
             throw new IllegalStateException("Cannot find target class file");
         }
-        ClassFileInfo classInfo = javaFileProcessor.getFullyQualifiedName(targetClassInfo.getFile().toString());
+        try {
+            Optional<ClassFileInfo> classInfo = javaFileProcessor.getFullyQualifiedName(targetClassInfo.getFile().toString());
 
-        if (classInfo == null) {
-            showError("Cannot get fully qualified name for target class");
-            throw new IllegalStateException("Cannot get fully qualified name for target class");
+            if (!classInfo.isPresent()) {
+                showError("Cannot get fully qualified name for target class");
+                throw new IllegalStateException("Cannot get fully qualified name for target class");
+            }
+            List<String> fullyQualifiedNames = new ArrayList<>();
+            fullyQualifiedNames.add(classInfo.get().getFullyQualifiedName());
+            return fullyQualifiedNames;
+        } catch (IOException e) {
+            showError("Error getting fully qualified name for target class: " + e.getMessage());
+            throw new IllegalStateException("Error getting fully qualified name for target class", e);
         }
-        List<String> fullyQualifiedNames = new ArrayList<>();
-        fullyQualifiedNames.add(classInfo.getFullyQualifiedName());
-        return fullyQualifiedNames;
     }
 
     private String displayCandidateClass(String classCandidateName) {

@@ -6,12 +6,14 @@ public class ClassFileInfo {
     private final String className;
     private final String packageName;
     private final List<String> methods;
+    private final List<String> imports;
 
-    public ClassFileInfo(String fullyQualifiedName, String className, String packageName, List<String> methods) {
+    public ClassFileInfo(String fullyQualifiedName, String className, String packageName, List<String> methods, List<String> imports) {
         this.fullyQualifiedName = fullyQualifiedName;
         this.className = className;
         this.packageName = packageName;
         this.methods = methods;
+        this.imports = imports;
     }
 
     public String getFullyQualifiedName() {
@@ -28,5 +30,9 @@ public class ClassFileInfo {
 
     public List<String> getMethods() {
         return methods;
+    }
+
+    public List<String> getImports() {
+        return imports;
     }
 }
