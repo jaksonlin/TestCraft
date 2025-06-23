@@ -7,6 +7,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.application.ApplicationManager;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Service(Service.Level.APP)
@@ -23,6 +26,8 @@ public final class MutationConfigService implements PersistentStateComponent<Mut
 
     public static class State {
         public String mutatorGroup = "STARTER_KIT"; // Default value
+        public String dependencyDirectoriesOrder = "bos;biz;trd"; // The order of the dependency directories
+        public String firstLoadDependentJars = "mockito-*.jar"; // The first load dependent jars
 
         public State() {
         }
@@ -37,7 +42,7 @@ public final class MutationConfigService implements PersistentStateComponent<Mut
 
         @Override
         public int hashCode() {
-            return Objects.hash(mutatorGroup);
+            return Objects.hash(mutatorGroup, dependencyDirectoriesOrder, firstLoadDependentJars);
         }
     }
 
@@ -49,6 +54,33 @@ public final class MutationConfigService implements PersistentStateComponent<Mut
 
     public void setMutatorGroup(String mutatorGroup) {
         myState.mutatorGroup = mutatorGroup;
+    }
+
+    public String getDependencyDirectoriesOrder() {
+        return myState.dependencyDirectoriesOrder;
+    }
+
+    public void setDependencyDirectoriesOrder(String dependencyDirectoriesOrder) {
+        myState.dependencyDirectoriesOrder = dependencyDirectoriesOrder;
+    }
+
+    public String getFirstLoadDependentJars() {
+        return myState.firstLoadDependentJars;
+    }
+
+    public List<String> getFirstLoadDependentJarsPatterns() {
+        List<String> firstLoadDependentJarsArray = new ArrayList<>();
+        String[] patterns = myState.firstLoadDependentJars.split(";");
+        for (String pattern : patterns) {
+            // Convert wildcard to regex
+            String regex = pattern.replace(".", "\\.").replace("*", ".*");
+            firstLoadDependentJarsArray.add(regex);
+        }
+        return firstLoadDependentJarsArray;
+    }
+
+    public void setFirstLoadDependentJars(String firstLoadDependentJars) {
+        myState.firstLoadDependentJars = firstLoadDependentJars;
     }
 
     @Nullable

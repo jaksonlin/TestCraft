@@ -296,18 +296,74 @@ public class PrepareEnvironmentCommand extends PitestCommand {
         return junit5PitestPluginJars;
     }
 
+    private boolean matchesAnyPattern(String fileName, List<String> patterns) {
+        for (String pattern : patterns) {
+            // Convert wildcard to regex
+            if (fileName.matches(pattern)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    private void sortTestDependencies(List<String> testDependencies) {
+        // sort the test dependencies by the order of the dependencies
+        String dependencyDirectoriesOrder = MutationConfigService.getInstance().getDependencyDirectoriesOrder();
+        String[] dependencyDirectories = dependencyDirectoriesOrder.split(";");
+        List<String> firstLoadDependentJarsPatterns = MutationConfigService.getInstance().getFirstLoadDependentJarsPatterns();
+       
+        List<String> sortedDependencies = new ArrayList<>();
+        List<String> remainingDependencies = new ArrayList<>(testDependencies);
+
+        // 1. Add first-load dependencies
+        for (String dependency : new ArrayList<>(remainingDependencies)) {
+            String fileName = new File(dependency).getName();
+            if (matchesAnyPattern(fileName, firstLoadDependentJarsPatterns)) {
+                sortedDependencies.add(dependency);
+                remainingDependencies.remove(dependency);
+            }
+        }
+
+        // 2. Add dependencies in the order of the dependency directories
+        for (String dependencyDirectory : dependencyDirectories) {
+            for (String dependency : new ArrayList<>(remainingDependencies)) {
+                String dirName = new File(dependency).getParent();
+                if (dirName != null && dirName.endsWith(dependencyDirectory)) {
+                    // Check if the dependency is in the current directory
+                    // If so, add it to the sorted dependencies
+                    // and remove it from the remaining dependencies
+                    sortedDependencies.add(dependency);
+                    remainingDependencies.remove(dependency);
+                }
+            }
+        }
+        // 3. Add remaining dependencies
+        sortedDependencies.addAll(remainingDependencies);
+        // 4. update the test dependencies
+        testDependencies.clear();
+        testDependencies.addAll(sortedDependencies);
+    }
+
     private void collectClassPathFileForPitest(String reportDirectory, String targetPackageName, List<String> resourceDirectories) {
         String classPathFileContent = ReadAction.compute(() -> {
+            // class file output path
             List<String> classpath = GradleUtils.getCompilationOutputPaths(getProject());
+            // external jars
             List<String> testDependencies = GradleUtils.getTestRunDependencies(getProject());
+            // sort them by the orders
+            sortTestDependencies(testDependencies);
+            // 0. add the class file output path
             List<String> allDependencies = new ArrayList<>(classpath);
+            // 1. add the resource directories
             if (resourceDirectories != null) {
                 allDependencies.addAll(resourceDirectories);
             }
+            // 2. add the external jars
             allDependencies.addAll(testDependencies);
+            // 3. add the junit 5 pitest plugin jars
             if (getContext().getIsJunit5()) {
                 allDependencies.addAll(getJunit5PitestPluginJars(testDependencies));
             }
+            // 4. add the tools.jar for JDK 8
             if (getContext().getJavaVersion().contains("1.8.")) {
                 allDependencies.add(findToolsJarForJDK8());
             }

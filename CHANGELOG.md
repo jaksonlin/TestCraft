@@ -10,7 +10,8 @@
 
 ## [Unreleased]
 ### Added
-NA
+- add the support to sort the test dependencies by the order of the dependency directories
+- add the support to sort the test dependencies by the order of the first-load dependent jars
 
 ### Changed
 - remove the annoying inspector for unittest check during writing the unittest, reason: inspector is for something that can be fast fixed, but the unittest check is not, so remove it to avoid the confusion.
