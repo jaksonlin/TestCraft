@@ -10,7 +10,7 @@
 
 ## [Unreleased]
 ### Added
-NA
+N/A
 
 ### Changed
 - remove the annoying inspector for unittest check during writing the unittest, reason: inspector is for something that can be fast fixed, but the unittest check is not, so remove it to avoid the confusion.
@@ -112,3 +112,9 @@ NA
 ## 1.0.14 - 2025-06-08
 - remove the annoying inspector for unittest check during writing the unittest, reason: inspector is for something that can be fast fixed, but the unittest check is not, so remove it to avoid the confusion.
 - add the support to Junit 5 from version 5.7.0 to 5.13.0.
+
+## 1.0.15 - 2025-06-24
+- add the support to sort the test dependencies by the order of the dependency directories. (with this for large application, user can specify which set of dependency directories to be loaded first)
+- add the support to sort the test dependencies by the order of the first-load dependent jars. (with this when there are same class accross multiple jars, the class in the first-load dependent jars will be loaded first)
+- align the resource directory ordering in the classpath and cp arguments with the test case file's source root.
+- add the support to configure the default mutator group, dependency directories order, and first-load dependent jars.

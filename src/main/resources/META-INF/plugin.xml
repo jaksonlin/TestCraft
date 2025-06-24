@@ -31,6 +31,13 @@
 
     <change-notes><![CDATA[
         <h2>Change Notes</h2>
+        <h3>1.0.15 - 2025-06-24</h3>
+        <ul>
+            <li>add the support to sort the test dependencies by the order of the dependency directories. (with this for large application, user can specify which set of dependency directories to be loaded first)</li>
+            <li>add the support to sort the test dependencies by the order of the first-load dependent jars. (with this when there are same class accross multiple jars, the class in the first-load dependent jars will be loaded first)</li>
+            <li>align the resource directory ordering in the classpath and cp arguments with the test case file's source root.</li>
+            <li>add the support to configure the default mutator group, dependency directories order, and first-load dependent jars.</li>
+        </ul>
         <h3>1.0.14 - 2025-06-08</h3>
         <ul>
             <li>remove the annoying inspector for unittest check during writing the unittest, reason: inspector is for something that can be fast fixed, but the unittest check is not, so remove it to avoid the confusion.</li>
@@ -227,7 +234,7 @@
     <!-- Add right-click entry to run Pitest on a JUnit test file -->
     <actions>
         <!-- First Level Menu -->
-        <group id="UnittestHelperToolMenu" text="Unittest Helpers" popup="true" description="Java unittest helper tool" icon="/icons/testcraft.svg">
+        <group id="UnittestHelperToolMenu" text="TestCraft Unittest Helpers" popup="true" description="Java unittest helper tool" icon="/icons/testcraft.svg">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
         </group>
 
