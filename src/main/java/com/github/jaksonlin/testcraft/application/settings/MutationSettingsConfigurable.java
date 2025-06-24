@@ -29,16 +29,22 @@ public class MutationSettingsConfigurable implements Configurable {
 
     @Override
     public boolean isModified() {
-        return !mutationSettingsComponent.getSelectedMutatorGroup().equals(MutationConfigService.getInstance().getMutatorGroup());
+        return !mutationSettingsComponent.getSelectedMutatorGroup().equals(MutationConfigService.getInstance().getMutatorGroup())
+        || !mutationSettingsComponent.getDependencyDirectoriesOrder().equals(MutationConfigService.getInstance().getDependencyDirectoriesOrder())
+        || !mutationSettingsComponent.getFirstLoadDependentJars().equals(MutationConfigService.getInstance().getFirstLoadDependentJars());
     }
 
     @Override
     public void apply() throws ConfigurationException {
         MutationConfigService.getInstance().setMutatorGroup(mutationSettingsComponent.getSelectedMutatorGroup());
+        MutationConfigService.getInstance().setDependencyDirectoriesOrder(mutationSettingsComponent.getDependencyDirectoriesOrder());
+        MutationConfigService.getInstance().setFirstLoadDependentJars(mutationSettingsComponent.getFirstLoadDependentJars());
     }
 
     @Override
     public void reset() {
         mutationSettingsComponent.setSelectedMutatorGroup(MutationConfigService.getInstance().getMutatorGroup());
+        mutationSettingsComponent.setDependencyDirectoriesOrder(MutationConfigService.getInstance().getDependencyDirectoriesOrder());
+        mutationSettingsComponent.setFirstLoadDependentJars(MutationConfigService.getInstance().getFirstLoadDependentJars());
     }
 } 
